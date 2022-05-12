@@ -1,8 +1,6 @@
-import React, {createContext, useCallback, useReducer} from 'react';
+import React, {createContext, useReducer} from 'react';
 
-import {message} from 'antd';
-
-import ProjectReducer, {Project, initialState} from '../../state/anno/reducer'
+import ProjectReducer, {Project, initialState, UnPersistedProject} from '../../state/anno/reducer'
 import {createProject, getAllProjects, deleteProject, getSingleProject} from '../../service/annoService'
 import {buildGenericCreate, buildGenericFetchAll, buildGenericDeleteSingle, buildGenericFetchOne} from '../../util/presentation'
 import {GenericPayloadState} from '../../state/common/reducer'
@@ -11,13 +9,13 @@ type ProjectContextType = {
 	state: GenericPayloadState<Project>;
 	onFetchAll: () => void;
 	onFetchOne: (projectId: string) => void;
-	onCreate: (project: Partial<Project>) => void;
+	onCreate: (project: UnPersistedProject) => void;
 	onDelete: (projectId: string) => void;
 }
 
 const missingProviderError = (name: string) => {
 	return () => {
-		console.error('Context callback "${name}" is sad');
+		console.error(`Context callback ${name} is sad`);
 	}
 }
 

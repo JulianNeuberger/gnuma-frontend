@@ -11,7 +11,7 @@ import {Project} from '../../state/anno/reducer';
 import {ProjectContext} from '../../components/AnnoContextProvider/ProjectContextProvider'
 
 
-type ProjectColumn = 'name' | 'id' | 'actions';
+type ProjectColumn = 'name' | 'date' | 'creator' | 'actions';
 
 export type ProjectListProps = {
     showActions?: boolean;
@@ -26,7 +26,8 @@ export type ProjectListProps = {
 export default function ProjectList(props: ProjectListProps){
     const context = useContext(ProjectContext);
 
-    const visibleColumns = props.visibleColumns || ['name', 'id'];
+    const visibleColumns = props.visibleColumns || ['name', 'creator', 'date'];
+
     if (props.showActions) {
         visibleColumns.push('actions');
     }
@@ -36,11 +37,15 @@ export default function ProjectList(props: ProjectListProps){
     }, []);
 
     const columns: { [key: string]: TableColumnProps<Project>} = {
-        id: {
-            title: 'ID',
-            dataIndex: 'id'
+        date: {
+            title: 'Creation Date',
+            dataIndex: 'date'
         },
-        source: {
+        creator: {
+            title: 'Created by',
+            dataIndex: 'creator'
+        },
+        name: {
             title: 'Name',
             dataIndex: 'name'
         },
@@ -81,15 +86,15 @@ export default function ProjectList(props: ProjectListProps){
 
     const rowSelection = (): TableRowSelection<Project> | undefined => {
         if(!props.showSelection) {
-            return undefined
+            return undefined;
         }
 
         return {
             selectedRowKeys: props.selected,
             onChange: (_, selectedRows) => {
                 if (props.onSelectionChanged) {
-                    const documentIds = selectedRows.map(d => d.id);
-                    props.onSelectionChanged(documentIds);
+                    const projectIds = selectedRows.map(d => d.id);
+                    props.onSelectionChanged(projectIds);
                 }
             }
         }
@@ -97,13 +102,13 @@ export default function ProjectList(props: ProjectListProps){
 
     const projects = Object.values(context.state.elements);
 
-    return(
+    return (
         <Table
-            rowKey = {(r) => r.id}
-            columns = {visibleColumns.map((col) => columns[col])}
-            rowSelection = {rowSelection()}
-            dataSource = {projects}
-            loading = {context.state.loading}
+            rowKey={(r) => r.id}
+            columns={visibleColumns.map((col) => columns[col])}
+            rowSelection={rowSelection()}
+            dataSource={projects}
+            loading={context.state.loading}
         />
-        );
+    );
 }

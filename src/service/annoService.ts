@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import {apiUrlBuilder, checkResponse} from './common';
-import {Project} from '../state/anno/reducer';
+import {Project, UnPersistedProject} from '../state/anno/reducer';
 
 export const API_HOST = process.env.REACT_APP_ANNO_SERVICE_API_HOST;
 export const API_PORT = process.env.REACT_APP_ANNO_SERVICE_API_PORT;
@@ -28,20 +28,17 @@ export const getAllProjects = async (): Promise<Project[]> => {
     return await response.json();
 }
 
-export const createProject = async (project: Partial<Project>): Promise<Project> => {
+export const createProject = async (project: UnPersistedProject): Promise<Project> => {
     const endpoint = getApiUrl('projects');
-
-    const formData = new FormData();
-    formData.append('name', project.name!)
 
     const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: formData
+        body: JSON.stringify(project)
     });
-    checkResponse(response)
+    checkResponse(response);
 
     const data = await response.json();
     return await getSingleProject(data);
