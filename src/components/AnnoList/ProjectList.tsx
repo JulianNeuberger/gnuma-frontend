@@ -6,7 +6,7 @@ import {Button, Popconfirm, Table, TableColumnProps} from 'antd';
 import {TableRowSelection} from 'antd/es/table/interface';
 import {DeleteOutlined, EditOutlined} from '@ant-design/icons';
 
-import {Project} from '../../state/anno/reducer';
+import {Project} from '../../state/anno/projectReducer';
 
 import {ProjectContext} from '../../components/AnnoContextProvider/ProjectContextProvider'
 
