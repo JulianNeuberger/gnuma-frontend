@@ -28,7 +28,7 @@ type DatasetsContextType = {
     onCreate: (dataset: Partial<Dataset>) => void;
     onDelete: (datasetId: string) => void;
     onUpdate: (datasetId: string, changes: Partial<Dataset>) => void;
-    onAddDocuments: (dataset: Dataset, ...documentIds: string[]) => void;
+    onAddDocuments: (dataset: Dataset, toSplit: 'train' | 'test', ...documentIds: string[]) => void;
     onRemoveDocuments: (dataset: Dataset, ...documentIds: string[]) => void;
 }
 
@@ -80,11 +80,11 @@ const DatasetsContextProvider = (props: DatasetsContextProviderProps) => {
         }
     }, []);
 
-    const addDocuments = useCallback(async (dataset: Dataset, ...addedDocuments: string[]) => {
+    const addDocuments = useCallback(async (dataset: Dataset, toSplit: 'train' | 'test', ...addedDocuments: string[]) => {
         const messageKey = `add-documents-to-${dataset.id}`;
         try {
             message.loading({content: 'Updating dataset...', key: messageKey});
-            const updatedDataset = await addDocumentsToDataset(dataset, ...addedDocuments);
+            const updatedDataset = await addDocumentsToDataset(dataset, toSplit, ...addedDocuments);
             message.success({
                 content: `Successfully updated dataset with ${addedDocuments.length} documents!`,
                 key: messageKey

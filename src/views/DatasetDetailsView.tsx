@@ -1,8 +1,8 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React from 'react';
 
 import {useHistory, useParams} from 'react-router-dom';
 
-import {Button, Card, Input, Modal, PageHeader, Popconfirm, Skeleton, Space, Table, Typography} from 'antd';
+import {Button, Card, Input, Modal, PageHeader, Popconfirm, Select, Skeleton, Space, Table, Typography} from 'antd';
 import {DeleteOutlined, EditOutlined, FileAddOutlined, SaveOutlined} from '@ant-design/icons';
 
 import DocumentsList from '../components/DocumentList/DocumentsList';
@@ -11,27 +11,33 @@ import {DocumentsContext} from '../components/DocumentsContextProvider/Documents
 
 
 export default function DatasetDetailsView() {
-    const [showingDocumentList, setShowingDocumentList] = useState(false);
-    const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+    const [showingDocumentList, setShowingDocumentList] = React.useState(false);
+    const [selectedDocuments, setSelectedDocuments] = React.useState<string[]>([]);
+    const [selectedSplit, setSelectedSplit] = React.useState<'train' | 'test'>('train');
 
-    const [editingDescription, setEditingDescription] = useState(false);
-    const [description, setDescription] = useState<string>();
+    const [editingDescription, setEditingDescription] = React.useState(false);
+    const [description, setDescription] = React.useState<string>();
 
     const {id} = useParams<{ id: string }>();
     const history = useHistory();
-    const datasetContext = useContext(DatasetsContext);
-    const documentContext = useContext(DocumentsContext);
+    const datasetContext = React.useContext(DatasetsContext);
+    const documentContext = React.useContext(DocumentsContext);
 
-    useEffect(() => {
+    React.useEffect(() => {
         datasetContext.onFetchOne(id);
     }, [id]);
 
     const dataset = datasetContext.state.elements[id];
 
-    useEffect(() => {
+    React.useEffect(() => {
         setDescription(dataset?.description);
         if(dataset) {
-            documentContext.onFetchSome(dataset.documents);
+            if(dataset.data.train) {
+                documentContext.onFetchSome(dataset.data.train);
+            }
+            if(dataset.data.test) {
+                documentContext.onFetchSome(dataset.data.test);
+            }
         }
     }, [dataset]);
 
@@ -50,8 +56,8 @@ export default function DatasetDetailsView() {
         return <Skeleton active loading />
     }
 
-    const renderDocumentList = () => {
-        const documents: { id: string }[] = dataset?.documents.map(d => {
+    const renderDocumentList = (split: 'train' | 'test') => {
+        const documents: { id: string }[] = dataset?.data[split]?.map(d => {
             return {id: d};
         });
 
@@ -134,11 +140,15 @@ export default function DatasetDetailsView() {
                     setShowingDocumentList(false);
                 }}
                 onOk={() => {
-                    datasetContext.onAddDocuments(dataset, ...selectedDocuments);
+                    datasetContext.onAddDocuments(dataset, selectedSplit, ...selectedDocuments);
                     setSelectedDocuments([]);
                     setShowingDocumentList(false);
                 }}
             >
+                <Select value={selectedSplit} onChange={setSelectedSplit}>
+                    <Select.Option value={'train'}>Train</Select.Option>
+                    <Select.Option value={'test'}>Test</Select.Option>
+                </Select>
                 <DocumentsList
                     showSelection
                     onSelectionChanged={setSelectedDocuments}
@@ -169,7 +179,7 @@ export default function DatasetDetailsView() {
                 </Card>
 
                 <Card
-                    title={'Documents in this dataset'}
+                    title={'Training documents in this dataset'}
                     extra={
                         <Button
                             icon={<FileAddOutlined/>}
@@ -181,7 +191,24 @@ export default function DatasetDetailsView() {
                     }
                 >
                     {
-                        renderDocumentList()
+                        renderDocumentList('train')
+                    }
+                </Card>
+
+                <Card
+                    title={'Test documents in this dataset'}
+                    extra={
+                        <Button
+                            icon={<FileAddOutlined/>}
+                            type={'ghost'}
+                            onClick={() => setShowingDocumentList(true)}
+                        >
+                            Add more documents
+                        </Button>
+                    }
+                >
+                    {
+                        renderDocumentList('test')
                     }
                 </Card>
             </Space>

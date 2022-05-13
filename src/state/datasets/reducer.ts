@@ -13,6 +13,7 @@ export type Dataset = {
             train: string[];
             valid: string[];
         }[];
+        train: string[];
         test: string[];
     };
 }

@@ -74,9 +74,12 @@ export default function DatasetsView() {
                             render: (_, record) => <Link to={`/datasets/${record.id}`}>{record.name}</Link>
                         },
                         {
-                            title: 'Documents',
-                            dataIndex: '',
-                            render: (_, record) => record.documents.length
+                            title: 'Train Documents',
+                            dataIndex: 'data.train.length',
+                        },
+                        {
+                            title: 'Test Documents',
+                            dataIndex: 'data.test.length',
                         },
                         {
                             title: '',
