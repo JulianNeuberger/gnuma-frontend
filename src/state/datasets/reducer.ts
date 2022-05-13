@@ -8,7 +8,13 @@ export type Dataset = {
     name: string;
     description: string;
     id: string;
-    documents: string[];
+    data: {
+        folds: {
+            train: string[];
+            valid: string[];
+        }[];
+        test: string[];
+    };
 }
 
 export const initialState: GenericPayloadState<Dataset> = {
