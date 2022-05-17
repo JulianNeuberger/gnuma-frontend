@@ -23,4 +23,4 @@ type DocumentReducerType = Reducer<GenericPayloadState<Document>, GenericPayload
 
 const DocumentReducer: DocumentReducerType = genericPayloadReducer;
 
-export default DocumentsReducer;
+export default DocumentReducer;

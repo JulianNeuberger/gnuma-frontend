@@ -1,17 +1,17 @@
 import React, {createContext, useReducer} from 'react';
 
-import DocumentReducer, {Document, initialDocumentState, UnPersistedDocument} from '../../state/anno/documentReducer'
+import DocumentReducer, {Document, initialDocumentState, UnPersistedDocument} from '../../state/anno/annoDocumentReducer'
 import {uploadDocument, getAllDocuments, deleteDocument, getSingleDocument, updateDocument} from '../../service/annoService'
-import {buildGenericCreate, buildGenericFetchAll, buildGenericDeleteSingle, buildGenericFetchOne, buildGenericUpdate} from '../../util/presentation'
+import {buildGenericCreate, buildGenericFetchAll, buildGenericDeleteSingle, buildGenericFetchOne, buildGenericUpdate} from '../../util/AnnoUtil/annoDocumentPresentation'
 import {GenericPayloadState} from '../../state/common/reducer'
 
-type DocumentContextType = {
+type AnnoDocumentContextType = {
     state: GenericPayloadState<Document>;
     onFetchAll: (projectId: string) => void;
     onFetchOne: (projectId: string, docId: string) => void;
     onCreate: (projectId: string, document: UnPersistedDocument) => void;
     onDelete: (projectId: string, docId: string) => void;
-    onUpdate: (projectId: string, docId: string) => void;
+    onUpdate: (projectId: string, docId: string, changes: Partial<Document>) => void;
 }
 
 const missingProviderError = (name: string) => {
@@ -20,7 +20,7 @@ const missingProviderError = (name: string) => {
     }
 }
 
-export const DocumentContext = createContext<DocumentContextType>({
+export const AnnoDocumentContext = createContext<AnnoDocumentContextType>({
     state: initialDocumentState,
     onFetchAll: missingProviderError('onFetchAll'),
     onFetchOne: missingProviderError('onFetchOne'),
@@ -29,11 +29,11 @@ export const DocumentContext = createContext<DocumentContextType>({
     onUpdate: missingProviderError('onUpdate')
 })
 
-type DocumentContextProviderProps = {
+type AnnoDocumentContextProviderProps = {
     children: React.ReactChildren | React.ReactNode;
 }
 
-const DocumentContextProvider = (props: DocumentContextProviderProps) => {
+const AnnoDocumentContextProvider = (props: AnnoDocumentContextProviderProps) => {
     const [documents, dispatch] = useReducer(DocumentReducer, initialDocumentState);
 
     const fetchAll = buildGenericFetchAll(dispatch, getAllDocuments);
@@ -42,8 +42,8 @@ const DocumentContextProvider = (props: DocumentContextProviderProps) => {
     const deleteSingle = buildGenericDeleteSingle(dispatch, deleteDocument);
     const update = buildGenericUpdate(dispatch, updateDocument);
 
-    const context: DocumentContextType = {
-        state: documents,
+    const context: AnnoDocumentContextType = {
+        state: documents as GenericPayloadState<Document>,
         onFetchAll: fetchAll,
         onFetchOne: fetchOne,
         onCreate: create,
@@ -52,10 +52,10 @@ const DocumentContextProvider = (props: DocumentContextProviderProps) => {
     }
 
     return (
-        <DocumentContext.Provider value={context}>
+        <AnnoDocumentContext.Provider value={context}>
             {props.children}
-        </DocumentContext.Provider>
+        </AnnoDocumentContext.Provider>
         );
 } 
 
-export default DocumentContextProvider;
+export default AnnoDocumentContextProvider;

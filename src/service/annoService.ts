@@ -1,7 +1,8 @@
 import assert from 'assert';
 
 import {apiUrlBuilder, checkResponse} from './common';
-import {Project, UnPersistedProject, Document, UnPersistedDocument} from '../state/anno/reducer';
+import {Project, UnPersistedProject} from  '../state/anno/annoProjectReducer'
+import {Document, UnPersistedDocument} from '../state/anno/annoDocumentReducer';
 
 export const API_HOST = process.env.REACT_APP_ANNO_SERVICE_API_HOST;
 export const API_PORT = process.env.REACT_APP_ANNO_SERVICE_API_PORT;

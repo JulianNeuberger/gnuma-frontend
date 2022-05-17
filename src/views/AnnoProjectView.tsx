@@ -1,39 +1,53 @@
 import React from 'react';
 
 import {Button, Card, Modal, Steps, Divider, Form, Input} from 'antd';
-import {PlusOutlined} from '@ant-design/icons';
+import {PlusOutlined, UpOutlined} from '@ant-design/icons';
+
+import {useParams} from "react-router-dom";
 
 import {FieldData} from 'rc-field-form/lib/interface';
 
-import AnnoProjectList from '../components/AnnoList/AnnoProjectList'
+import AnnoDocumentList from '../components/AnnoList/AnnoDocumentList'
+import {AnnoDocumentContext} from '../components/AnnoContextProvider/AnnoDocumentContextProvider'
 import {AnnoProjectContext} from '../components/AnnoContextProvider/AnnoProjectContextProvider'
+
+import {Project} from '../state/anno/annoProjectReducer'
+
+import {Link} from 'react-router-dom';
+
 
 export type MetaData = {
     name: string;
     date: string;
-    creator: string;
     [key: string]: any;
 }
 
-export default function AnnoView(){
+type ProjectParams = {
+    projectId: string;
+}
+
+export default function AnnoProjectView(){
+    const {projectId} = useParams<ProjectParams>();
+
+    const dokumentContext = React.useContext(AnnoDocumentContext);
     const projectContext = React.useContext(AnnoProjectContext);
+
+    //const getProjectName = ['name'];
+
     const [modalVisible, setModalVisible] = React.useState(false);
     const [currentStep, setCurrentStep] = React.useState(0);
 
     //states
     const [name, setName] = React.useState<string>();
-    const [creator, setCreator] = React.useState<string>();
     const [metaData, setMetaData] = React.useState<MetaData>({
         name: '',
-        date: '',
-        creator: ''
+        date: ''
     });
 
     const cancelCreate= async () => {
         setModalVisible(false);
         setCurrentStep(0);
         setName('');
-        setCreator('');
     }
 
     const executeCreate = async() => {
@@ -44,7 +58,7 @@ export default function AnnoView(){
         newMetaData['date'] = date;
         setMetaData(newMetaData)
 
-        await projectContext.onCreate(newMetaData);
+        await dokumentContext.onCreate(projectId, newMetaData);
 
         cancelCreate();
     }
@@ -88,46 +102,54 @@ export default function AnnoView(){
         action: React.ReactNode;
     }[] = [
         {
-            title: 'Project Information',
+            title: 'Upload File',
             content: (
-                <Form id='metaForm' onFieldsChange = {onFieldsChanged}>
-                    <Form.Item
-                        label={'Project Name'}
-                        name={'name'}
-                    >
-                        <Input type='text' placeholder='Name od the project' onChange={(e) => setName(e.target.value)}/>
-                    </Form.Item>
-                    <Form.Item
-                        label={'Created by'}
-                        name={'creator'}
-                    >
-                        <Input type='text' placeholder='Your name' onChange={(e) => setCreator(e.target.value)}/>
-                    </Form.Item>
-                </Form>
+                <h6>todo</h6>
                 ),
-            action: (<Button onClick={nextStep} type={'primary'} disabled={!name && !creator}>Next</Button>)
+            action: (<Button onClick={nextStep} type={'primary'}>Next</Button>)
         },
         {
             title: 'Choose label set',
             content: (
-                <h6>TODO</h6>
+                <Form id='metaForm' onFieldsChange = {onFieldsChanged}>
+                    <Form.Item
+                        label={'Document Name'}
+                        name={'name'}
+                    >
+                        <Input type='text' placeholder='Name od the project' onChange={(e) => setName(e.target.value)}/>
+                    </Form.Item>
+                </Form>
                 ),
-            action: (<Button onClick={executeCreate}>Create</Button>)
+            action: (<Button onClick={executeCreate}  disabled={!name}>Create</Button>)
         }
     ]
 
     return (
-        <div key={'anno-view'}>
+        <div key={'anno-project-view'}>
             <Card
-                title = {'Annotation projects'}
+                title = {`${projectId} - Documents`}
                 extra = {
-                    <Button
-                        type = {'primary'}
-                        icon = {<PlusOutlined/>}
-                        onClick={() => setModalVisible(true)}
-                    >
-                        New 
-                    </Button>
+                    <span>
+                        <Button
+                            type = {'primary'}
+                            icon = {<PlusOutlined/>}
+                            onClick={() => setModalVisible(true)}
+                        >
+                            Upload 
+                        </Button>
+                        <Divider type={'vertical'}/>
+                        <Link
+                            to = {'/annotation/'}
+                            key = {'all-projects'}
+                        >
+                            <Button
+                                type = {'primary'}
+                                icon = {<UpOutlined/>}
+                            >
+                                All Projects
+                            </Button>
+                        </Link>
+                    </span>
                 }
             >
                 <Modal
@@ -151,7 +173,7 @@ export default function AnnoView(){
                         </div>
                     </div>
                 </Modal>
-                <AnnoProjectList showActions={true}/>
+                <AnnoDocumentList projectId={projectId} showActions={true}/>
             </Card>
         </div>
     );
