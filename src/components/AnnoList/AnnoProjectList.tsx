@@ -2,18 +2,20 @@ import React, {useContext, useEffect} from 'react';
 
 import {Link} from 'react-router-dom';
 
-import {Button, Popconfirm, Table, TableColumnProps, Modal, Form, Input} from 'antd';
+import {Button, Popconfirm, Table, Tag, TableColumnProps, Modal, Form, Input, Divider} from 'antd';
 import {TableRowSelection} from 'antd/es/table/interface';
 import {DeleteOutlined, EditOutlined} from '@ant-design/icons';
 
 import {Project} from '../../state/anno/annoProjectReducer';
+import {LabelSet} from '../../state/anno/annoLabelSetReducer';
 
 import {AnnoProjectContext} from '../../components/AnnoContextProvider/AnnoProjectContextProvider'
+import {AnnoLabelSetContext} from '../../components/AnnoContextProvider/AnnoLabelSetContextProvider'
 
 import {FieldData} from 'rc-field-form/lib/interface';
 
 
-type ProjectColumn = 'name' | 'date' | 'creator' | 'actions';
+type ProjectColumn = 'name' | 'date' | 'creator' | 'labelSet' | 'actions';
 
 export type MetaData = {
     name: string;
@@ -33,6 +35,7 @@ export type ProjectListProps = {
 
 export default function ProjectList(props: ProjectListProps){
     const projectContext = useContext(AnnoProjectContext);
+    const labelSetConext = useContext(AnnoLabelSetContext);
 
     const [modalVisible, setModalVisible] = React.useState(false);
     const [projectId, setProjectId] = React.useState<string>();
@@ -59,7 +62,7 @@ export default function ProjectList(props: ProjectListProps){
         setMetaData(newMetaData);
     }
 
-    const visibleColumns = props.visibleColumns || ['name', 'creator', 'date'];
+    const visibleColumns = props.visibleColumns || ['name', 'creator', 'date' , 'labelSet'];
 
     if (props.showActions) {
         visibleColumns.push('actions');
@@ -67,7 +70,10 @@ export default function ProjectList(props: ProjectListProps){
 
     useEffect(() => {
         projectContext.onFetchAll();
+        labelSetConext.onFetchAll();
     }, []);
+
+    const labelSets = Object.values(labelSetConext.state.elements)
 
     const columns: { [key: string]: TableColumnProps<Project>} = {
         date: {
@@ -79,6 +85,37 @@ export default function ProjectList(props: ProjectListProps){
             title: 'Created by',
             dataIndex: 'creator',
             key: 'creator'
+        },
+        labelSet: {
+            title: 'LabelSet',
+            dataIndex: '',
+            key: 'labelSet',
+            render: (_, record) => {
+                const labID = record.labelSetId;
+                for (let obj in labelSets){
+                    if (labelSets[obj].id == labID) {
+                        return (
+                            <>
+                                {labelSets[obj].name}
+                                <Divider type={'vertical'}/>
+                                {
+                                    labelSets[obj].labels.map(label => {
+                                        return (
+                                            <Tag color={label.color} key={label.name}>
+                                                {label.name.toUpperCase()}
+                                            </Tag>
+                                        );
+                                })}
+                            </>
+                        );
+                    }
+                }
+                return (
+                    <>
+                        {labID}
+                    </>
+                );
+            }
         },
         name: {
             title: 'Name',

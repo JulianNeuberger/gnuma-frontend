@@ -8,12 +8,14 @@ export type Project = {
     name: string;
     date: string;
     creator: string;
+    labelSetId: string;
 }
 
 export type UnPersistedProject = {
     name: string;
     date: string;
     creator: string;
+    labelSetId: string;
 }
 
 export const initialProjectState: GenericPayloadState<Project> = {

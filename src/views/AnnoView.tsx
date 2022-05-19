@@ -1,17 +1,19 @@
 import React from 'react';
 
-import {Button, Card, Modal, Steps, Divider, Form, Input} from 'antd';
+import {Button, Card, Modal, Steps, Row, Col, Divider, Form, Input, Switch} from 'antd';
 import {PlusOutlined} from '@ant-design/icons';
 
 import {FieldData} from 'rc-field-form/lib/interface';
 
 import AnnoProjectList from '../components/AnnoList/AnnoProjectList'
 import {AnnoProjectContext} from '../components/AnnoContextProvider/AnnoProjectContextProvider'
+import AnnoLabelSelection from '../components/AnnoLabelSet/AnnoLabelSelection'
 
 export type MetaData = {
     name: string;
     date: string;
     creator: string;
+    labelSetId: string;
     [key: string]: any;
 }
 
@@ -20,13 +22,18 @@ export default function AnnoView(){
     const [modalVisible, setModalVisible] = React.useState(false);
     const [currentStep, setCurrentStep] = React.useState(0);
 
+    const {Step} = Steps;
+
     //states
+    const [labelSetId, setLabelSetId] = React.useState<string>();
+    const [useExistingLabelSet, setUseExistingLabelSet] = React.useState<boolean>(true);
     const [name, setName] = React.useState<string>();
     const [creator, setCreator] = React.useState<string>();
     const [metaData, setMetaData] = React.useState<MetaData>({
         name: '',
         date: '',
-        creator: ''
+        creator: '',
+        labelSetId: ''
     });
 
     const cancelCreate= async () => {
@@ -34,6 +41,8 @@ export default function AnnoView(){
         setCurrentStep(0);
         setName('');
         setCreator('');
+        setLabelSetId('');
+        setUseExistingLabelSet(true)
     }
 
     const executeCreate = async() => {
@@ -95,7 +104,7 @@ export default function AnnoView(){
                         label={'Project Name'}
                         name={'name'}
                     >
-                        <Input type='text' placeholder='Name od the project' onChange={(e) => setName(e.target.value)}/>
+                        <Input type='text' placeholder='Name of the project' onChange={(e) => setName(e.target.value)}/>
                     </Form.Item>
                     <Form.Item
                         label={'Created by'}
@@ -105,14 +114,23 @@ export default function AnnoView(){
                     </Form.Item>
                 </Form>
                 ),
-            action: (<Button onClick={nextStep} type={'primary'} disabled={!name && !creator}>Next</Button>)
+            action: (<Button onClick={nextStep} type={'primary'} disabled={!name || !creator}>Next</Button>)
         },
         {
-            title: 'Choose label set',
+            title: 'Choose A Label Set',
             content: (
-                <h6>TODO</h6>
+                <AnnoLabelSelection 
+                    showSelection={true}
+                    onSelectionChanged={(id: string) => {
+                        setLabelSetId(id);
+
+                        let newMetaData = {...metaData};
+                        newMetaData['labelSetId'] = id;
+                        setMetaData(newMetaData);
+                    }}
+                />
                 ),
-            action: (<Button onClick={executeCreate}>Create</Button>)
+            action: (<Button onClick={executeCreate} disabled={!labelSetId}>Create</Button>)
         }
     ]
 
@@ -131,27 +149,27 @@ export default function AnnoView(){
                 }
             >
                 <Modal
-                    title={'Create project'}
+                    title={'Create A New Project'}
                     width={850}
                     visible={modalVisible}
                     onCancel={cancelCreate}
                     footer={renderButtons()}
                 >
+                <div>
                     <Steps current={currentStep}>
-                        {
-                            steps.map(() => <Steps.Step/>)
-                        }
+                        {steps.map(item => (
+                            <Step key={item.title} title={item.title} />
+                        ))}
                     </Steps>
                     <Divider type={'horizontal'}/>
-                    <div>
-                        <h3>{steps[currentStep].title}</h3>
-                        <Divider type={'horizontal'}/>
-                        <div style={{height: 'calc(40vh)', overflowY: 'auto'}}>
-                            {steps[currentStep].content}
-                        </div>
+                    <div style={{height: 'calc(40vh)', overflowY: 'auto'}}>
+                        {steps[currentStep].content}
                     </div>
+                </div>
                 </Modal>
-                <AnnoProjectList showActions={true}/>
+                <AnnoProjectList 
+                    showActions={true}
+                />
             </Card>
         </div>
     );

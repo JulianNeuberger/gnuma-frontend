@@ -1,8 +1,10 @@
 import assert from 'assert';
 
 import {apiUrlBuilder, checkResponse} from './common';
-import {Project, UnPersistedProject} from  '../state/anno/annoProjectReducer'
+import {Project, UnPersistedProject} from  '../state/anno/annoProjectReducer';
 import {Document, UnPersistedDocument} from '../state/anno/annoDocumentReducer';
+import {Paragraph} from '../state/anno/annoParagraphReducer';
+import {LabelSet, UnPersistedLabelSet} from '../state/anno/annoLabelSetReducer'
 
 export const API_HOST = process.env.REACT_APP_ANNO_SERVICE_API_HOST;
 export const API_PORT = process.env.REACT_APP_ANNO_SERVICE_API_PORT;
@@ -123,4 +125,26 @@ export const deleteDocument = async (projectId: string, docId: string): Promise<
     const endpoint = getApiUrl(`projects/${projectId}/docs/${docId}`)
     const response = await fetch(endpoint, {method: 'DELETE',});
     checkResponse(response)
+}
+
+// Get list of all paragraphs.
+export const getAllParagraphs = async (projectId: string, docId: string): Promise<Paragraph[]> => {
+    const response = await fetch(getApiUrl(`projects/${projectId}/docs/${docId}/paras`));
+    checkResponse(response);
+    return await response.json();
+}
+
+// Get list of all label sets.
+export const getAllLabelSets = async (): Promise<LabelSet[]> => {
+    const response = await fetch(getApiUrl('labels'));
+    checkResponse(response);
+    return await response.json();
+}
+
+// Get the metadata for a lable set.
+export const getSingleLabelSet = async (labelSetId: string): Promise<LabelSet> => {
+    const endpoint = getApiUrl(`labels/${labelSetId}`);
+    const response = await fetch(endpoint);
+    checkResponse(response);
+    return await response.json();
 }

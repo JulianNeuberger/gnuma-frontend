@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext, useEffect} from 'react';
 
 import {Button, Card, Modal, Steps, Divider, Form, Input} from 'antd';
 import {PlusOutlined, UpOutlined} from '@ant-design/icons';
@@ -8,8 +8,8 @@ import {useParams} from "react-router-dom";
 import {FieldData} from 'rc-field-form/lib/interface';
 
 import AnnoDocumentList from '../components/AnnoList/AnnoDocumentList'
-import {AnnoDocumentContext} from '../components/AnnoContextProvider/AnnoDocumentContextProvider'
 import {AnnoProjectContext} from '../components/AnnoContextProvider/AnnoProjectContextProvider'
+import {AnnoDocumentContext} from '../components/AnnoContextProvider/AnnoDocumentContextProvider'
 
 import {Project} from '../state/anno/annoProjectReducer'
 
@@ -29,10 +29,17 @@ type ProjectParams = {
 export default function AnnoProjectView(){
     const {projectId} = useParams<ProjectParams>();
 
-    const dokumentContext = React.useContext(AnnoDocumentContext);
     const projectContext = React.useContext(AnnoProjectContext);
+    const documentContext = React.useContext(AnnoDocumentContext)
 
-    //const getProjectName = ['name'];
+    const {Step} = Steps;
+
+    useEffect(() => {
+        projectContext.onFetchOne(projectId);
+    }, []);
+
+    // todo hacky?
+    const project = Object.values(projectContext.state.elements)[0]
 
     const [modalVisible, setModalVisible] = React.useState(false);
     const [currentStep, setCurrentStep] = React.useState(0);
@@ -58,7 +65,7 @@ export default function AnnoProjectView(){
         newMetaData['date'] = date;
         setMetaData(newMetaData)
 
-        await dokumentContext.onCreate(projectId, newMetaData);
+        await documentContext.onCreate(projectId, newMetaData);
 
         cancelCreate();
     }
@@ -127,7 +134,7 @@ export default function AnnoProjectView(){
     return (
         <div key={'anno-project-view'}>
             <Card
-                title = {`${projectId} - Documents`}
+                title = {`${project.name} - Documents`}
                 extra = {
                     <span>
                         <Button
@@ -160,14 +167,12 @@ export default function AnnoProjectView(){
                     footer={renderButtons()}
                 >
                     <Steps current={currentStep}>
-                        {
-                            steps.map(() => <Steps.Step/>)
-                        }
+                        {steps.map(item => (
+                            <Step key={item.title} title={item.title} />
+                        ))}
                     </Steps>
                     <Divider type={'horizontal'}/>
                     <div>
-                        <h3>{steps[currentStep].title}</h3>
-                        <Divider type={'horizontal'}/>
                         <div style={{height: 'calc(40vh)', overflowY: 'auto'}}>
                             {steps[currentStep].content}
                         </div>

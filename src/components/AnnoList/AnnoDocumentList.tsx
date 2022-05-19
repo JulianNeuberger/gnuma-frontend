@@ -81,7 +81,11 @@ export default function AnnoDocumentList(props: DocumentListProps){
             key: 'name',
             render: (_, record) => {
                 return (
+                    <Link
+                        to={`/annotation/${props.projectId}/${record.id}/`}
+                    >
                         <a>{record.name}</a>
+                    </Link>
                 )
             }
         },
