@@ -176,6 +176,7 @@ export default function AnnoDocumentList(props: DocumentListProps){
                         <Form.Item
                             label = {'Document Name'}
                             name = {'name'}
+                            required={true}
                         >
                             <Input
                                 type={'text'}

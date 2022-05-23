@@ -7,7 +7,8 @@ import {FieldData} from 'rc-field-form/lib/interface';
 
 import AnnoProjectList from '../components/AnnoList/AnnoProjectList'
 import {AnnoProjectContext} from '../components/AnnoContextProvider/AnnoProjectContextProvider'
-import AnnoLabelSelection from '../components/AnnoLabelSet/AnnoLabelSelection'
+import AnnoLabelSetSelection from '../components/AnnoLabelSet/AnnoLabelSetSelection'
+import AnnoLabelSetCreation from '../components/AnnoLabelSet/AnnoLabelSetCreation'
 
 export type MetaData = {
     name: string;
@@ -26,7 +27,6 @@ export default function AnnoView(){
 
     //states
     const [labelSetId, setLabelSetId] = React.useState<string>();
-    const [useExistingLabelSet, setUseExistingLabelSet] = React.useState<boolean>(true);
     const [name, setName] = React.useState<string>();
     const [creator, setCreator] = React.useState<string>();
     const [metaData, setMetaData] = React.useState<MetaData>({
@@ -36,13 +36,22 @@ export default function AnnoView(){
         labelSetId: ''
     });
 
+    const resetMetaData = () => {
+        setMetaData({
+            name: '',
+            date: '',
+            creator: '',
+            labelSetId: ''
+        })
+    }
+
     const cancelCreate= async () => {
         setModalVisible(false);
         setCurrentStep(0);
         setName('');
         setCreator('');
         setLabelSetId('');
-        setUseExistingLabelSet(true)
+        resetMetaData();
     }
 
     const executeCreate = async() => {
@@ -93,6 +102,7 @@ export default function AnnoView(){
 
     const steps: {
         title: string;
+        description?: string;
         content: React.ReactNode;
         action: React.ReactNode;
     }[] = [
@@ -103,23 +113,47 @@ export default function AnnoView(){
                     <Form.Item
                         label={'Project Name'}
                         name={'name'}
+                        required={true}
                     >
-                        <Input type='text' placeholder='Name of the project' onChange={(e) => setName(e.target.value)}/>
+                        <Input 
+                            type='text' 
+                            placeholder='Name of the project' 
+                            onChange={(e) => setName(e.target.value)}
+                            defaultValue={metaData['name']}
+                        />
                     </Form.Item>
                     <Form.Item
                         label={'Created by'}
                         name={'creator'}
+                        required={true}
                     >
-                        <Input type='text' placeholder='Your name' onChange={(e) => setCreator(e.target.value)}/>
+                        <Input 
+                            type='text' 
+                            placeholder='Your name' 
+                            onChange={(e) => setCreator(e.target.value)}
+                            defaultValue={metaData['creator']}
+                        />
                     </Form.Item>
                 </Form>
                 ),
             action: (<Button onClick={nextStep} type={'primary'} disabled={!name || !creator}>Next</Button>)
         },
         {
+            title: 'Create A New Label Set',
+            content: (
+                <AnnoLabelSetCreation/>
+                ),
+            action: (
+                <>
+                    <Button disabled={true}>Create New Label Set</Button>
+                    <Button onClick={nextStep} type={'primary'}>Skip</Button>
+                </>
+                )
+        },
+        {
             title: 'Choose A Label Set',
             content: (
-                <AnnoLabelSelection 
+                <AnnoLabelSetSelection 
                     showSelection={true}
                     onSelectionChanged={(id: string) => {
                         setLabelSetId(id);
@@ -128,6 +162,7 @@ export default function AnnoView(){
                         newMetaData['labelSetId'] = id;
                         setMetaData(newMetaData);
                     }}
+                    selected={[metaData['labelSetId']]}
                 />
                 ),
             action: (<Button onClick={executeCreate} disabled={!labelSetId}>Create</Button>)
@@ -158,7 +193,7 @@ export default function AnnoView(){
                 <div>
                     <Steps current={currentStep}>
                         {steps.map(item => (
-                            <Step key={item.title} title={item.title} />
+                            <Step key={item.title} title={item.title} description={item.description} />
                         ))}
                     </Steps>
                     <Divider type={'horizontal'}/>

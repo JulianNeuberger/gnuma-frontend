@@ -15,7 +15,7 @@ export type AnnoLabelSelectionProps = {
     onSelectionChanged?: (labelSetId: string) => void;
 }
 
-export default function AnnoLabelSelection(props: AnnoLabelSelectionProps){
+export default function AnnoLabelSetSelection(props: AnnoLabelSelectionProps){
 
     const labelSetConext = useContext(AnnoLabelSetContext)
 

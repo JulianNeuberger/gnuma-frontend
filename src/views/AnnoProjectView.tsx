@@ -45,16 +45,24 @@ export default function AnnoProjectView(){
     const [currentStep, setCurrentStep] = React.useState(0);
 
     //states
-    const [name, setName] = React.useState<string>();
+    const [name, setName] = React.useState<string>('')
     const [metaData, setMetaData] = React.useState<MetaData>({
         name: '',
         date: ''
     });
 
+    const resetMetaData = () => {
+        setMetaData({
+            name: '',
+            date: ''
+        })
+    }
+
     const cancelCreate= async () => {
         setModalVisible(false);
         setCurrentStep(0);
         setName('');
+        resetMetaData();
     }
 
     const executeCreate = async() => {
@@ -63,7 +71,6 @@ export default function AnnoProjectView(){
 
         let newMetaData = {...metaData};
         newMetaData['date'] = date;
-        setMetaData(newMetaData)
 
         await documentContext.onCreate(projectId, newMetaData);
 
@@ -122,8 +129,14 @@ export default function AnnoProjectView(){
                     <Form.Item
                         label={'Document Name'}
                         name={'name'}
+                        required={true}
                     >
-                        <Input type='text' placeholder='Name od the project' onChange={(e) => setName(e.target.value)}/>
+                        <Input 
+                            type='text' 
+                            placeholder='Name of the project' 
+                            onChange={(e) =>  setName(e.target.value)}
+                            defaultValue={metaData['name']}
+                        />
                     </Form.Item>
                 </Form>
                 ),

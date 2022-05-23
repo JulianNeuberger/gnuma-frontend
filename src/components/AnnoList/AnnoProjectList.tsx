@@ -220,6 +220,7 @@ export default function ProjectList(props: ProjectListProps){
                         <Form.Item
                             label = {'Project Name'}
                             name = {'name'}
+                            required ={true}
                         >
                             <Input
                                 type={'text'}
@@ -229,6 +230,7 @@ export default function ProjectList(props: ProjectListProps){
                         <Form.Item
                             label = {'Created by'}
                             name = {'creator'}
+                            required = {true}
                         >
                             <Input
                                 type={'text'}
