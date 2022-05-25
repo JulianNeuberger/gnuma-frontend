@@ -14,17 +14,15 @@ import DocumentsView from './views/DocumentsView';
 import DocumentDetailsView from './views/DocumentDetailsView';
 import AnnoView from './views/AnnoView';
 import AnnoProjectView from './views/AnnoProjectView';
-import AnnoDocumentView from './views/AnnoDocumentView';
 
 import 'antd/dist/antd.css';
 import './App.css';
 import HomeView from './views/HomeView';
 import DatasetsContextProvider from './components/DatasetsContextProvider/DatasetsContextProvider';
 import DocumentsContextProvider from './components/DocumentsContextProvider/DocumentsContextProvider';
-import AnnoProjectContextProvider from './components/AnnoContextProvider/AnnoProjectContextProvider';
-import AnnoDocumentContextProvider from './components/AnnoContextProvider/AnnoDocumentContextProvider';
-import AnnoParagraphContextProvider from './components/AnnoContextProvider/AnnoParagraphContextProvider';
-import AnnoLabelSetContextProvider from './components/AnnoContextProvider/AnnoLabelSetContextProvider'
+import AnnoProjectContextProvider from './components/AnnoProjectContextProvider/AnnoProjectContextProvider';
+import AnnoDocumentContextProvider from './components/AnnoDocumentContextProvider/AnnoDocumentContextProvider';
+import AnnoLabelSetContextProvider from './components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 import LogsContextProvider from './components/LogsContextProvider/LogsContextProvider';
 import DebugConfigView from './views/DebugConfigView';
 
@@ -105,9 +103,6 @@ function App() {
                         <Route exact path='/annotation/:projectId/'>
                             <AnnoProjectView key='anno-project-view'/>
                         </Route>
-                        <Route exact path='/annotation/:projectId/:docId/'>
-                            <AnnoDocumentView key='anno-document-view'/>
-                        </Route>
 
                         <Route exact path='/debug/configuration/'>
                             <DebugConfigView key='debug-configuration-view'/>
@@ -127,27 +122,25 @@ function App() {
             <DocumentsContextProvider>
                 <AnnoProjectContextProvider>
                     <AnnoDocumentContextProvider>
-                        <AnnoParagraphContextProvider>
-                            <AnnoLabelSetContextProvider>
-                                <LogsContextProvider>
-                                    <Layout style={{minHeight: '100vh'}}>
-                                        <Header style={{color: color.primary, fontSize: '1.25em'}}>
-                                            GNUMA
-                                        </Header>
-                                        <Layout>
-                                            <Sider>
-                                                {renderMenu()}
-                                            </Sider>
-                                            <Content
-                                                className={'gnuma-view'}
-                                            >
-                                                {renderContent()}
-                                            </Content>
-                                        </Layout>
+                        <AnnoLabelSetContextProvider>
+                            <LogsContextProvider>
+                                <Layout style={{minHeight: '100vh'}}>
+                                    <Header style={{color: color.primary, fontSize: '1.25em'}}>
+                                        GNUMA
+                                    </Header>
+                                    <Layout>
+                                        <Sider>
+                                            {renderMenu()}
+                                        </Sider>
+                                        <Content
+                                            className={'gnuma-view'}
+                                        >
+                                            {renderContent()}
+                                        </Content>
                                     </Layout>
-                                </LogsContextProvider>
-                            </AnnoLabelSetContextProvider>
-                        </AnnoParagraphContextProvider>
+                                </Layout>
+                            </LogsContextProvider>
+                        </AnnoLabelSetContextProvider>
                     </AnnoDocumentContextProvider>
                 </AnnoProjectContextProvider>
             </DocumentsContextProvider>

@@ -7,20 +7,15 @@ import {useParams} from "react-router-dom";
 
 import {FieldData} from 'rc-field-form/lib/interface';
 
-import AnnoDocumentList from '../components/AnnoList/AnnoDocumentList'
-import {AnnoProjectContext} from '../components/AnnoContextProvider/AnnoProjectContextProvider'
-import {AnnoDocumentContext} from '../components/AnnoContextProvider/AnnoDocumentContextProvider'
+import AnnoDocumentList from '../components/AnnoDocumentList/AnnoDocumentList'
+import DocumentsList from '../components/DocumentList/DocumentsList'
+
+import {AnnoProjectContext} from '../components/AnnoProjectContextProvider/AnnoProjectContextProvider'
+import {AnnoDocumentContext} from '../components/AnnoDocumentContextProvider/AnnoDocumentContextProvider'
 
 import {Project} from '../state/anno/annoProjectReducer'
 
 import {Link} from 'react-router-dom';
-
-
-export type MetaData = {
-    name: string;
-    date: string;
-    [key: string]: any;
-}
 
 type ProjectParams = {
     projectId: string;
@@ -32,8 +27,6 @@ export default function AnnoProjectView(){
     const projectContext = React.useContext(AnnoProjectContext);
     const documentContext = React.useContext(AnnoDocumentContext)
 
-    const {Step} = Steps;
-
     useEffect(() => {
         projectContext.onFetchOne(projectId);
     }, []);
@@ -42,107 +35,19 @@ export default function AnnoProjectView(){
     const project = Object.values(projectContext.state.elements)[0]
 
     const [modalVisible, setModalVisible] = React.useState(false);
-    const [currentStep, setCurrentStep] = React.useState(0);
+    const [documents, setDocuments] = React.useState<string[]>([]);
 
-    //states
-    const [name, setName] = React.useState<string>('')
-    const [metaData, setMetaData] = React.useState<MetaData>({
-        name: '',
-        date: ''
-    });
 
-    const resetMetaData = () => {
-        setMetaData({
-            name: '',
-            date: ''
-        })
-    }
-
-    const cancelCreate= async () => {
+    const cancelAdd= async () => {
         setModalVisible(false);
-        setCurrentStep(0);
-        setName('');
-        resetMetaData();
+        setDocuments([]);
     }
 
-    const executeCreate = async() => {
-        let today = new Date();
-        let date = today.getDate() + '.' + today.getMonth() + '.' + today.getFullYear();
+    const executeAdd = async() => {
+        await documentContext.onCreate(projectId, documents);
 
-        let newMetaData = {...metaData};
-        newMetaData['date'] = date;
-
-        await documentContext.onCreate(projectId, newMetaData);
-
-        cancelCreate();
+        cancelAdd();
     }
-
-    const nextStep = () => {
-        setCurrentStep(currentStep + 1);
-    }
-
-    const prevStep = () => {
-        setCurrentStep(currentStep - 1);
-    }
-
-    const onFieldsChanged = (changedFields: FieldData[], _: FieldData[]) => {
-        let newMetaData = {...metaData};
-        changedFields.forEach(field => {
-            if (Array.isArray(field.name)) {
-                field.name.forEach(n => {
-                    newMetaData[n] = field.value;
-                });
-            } else {
-                newMetaData[field.name] = field.value;
-            }
-        });
-        setMetaData(newMetaData);
-    }
-
-    const renderButtons= () => {
-        const buttons: React.ReactNode[] = [];
-        if (currentStep > 0) {
-            buttons.push((<Button onClick={prevStep}>Previous</Button>));
-        }
-        if (currentStep < steps.length) {
-            buttons.push(steps[currentStep].action);
-        }
-        return buttons;
-    }
-
-    const steps: {
-        title: string;
-        content: React.ReactNode;
-        action: React.ReactNode;
-    }[] = [
-        {
-            title: 'Upload File',
-            content: (
-                <h6>todo</h6>
-                ),
-            action: (<Button onClick={nextStep} type={'primary'}>Next</Button>)
-        },
-        {
-            title: 'Choose label set',
-            content: (
-                <Form id='metaForm' onFieldsChange = {onFieldsChanged}>
-                    <Form.Item
-                        label={'Document Name'}
-                        name={'name'}
-                        required={true}
-                    >
-                        <Input 
-                            type='text' 
-                            placeholder='Name of the project' 
-                            onChange={(e) =>  setName(e.target.value)}
-                            defaultValue={metaData['name']}
-                        />
-                    </Form.Item>
-                </Form>
-                ),
-            action: (<Button onClick={executeCreate}  disabled={!name}>Create</Button>)
-        }
-    ]
 
     return (
         <div key={'anno-project-view'}>
@@ -155,9 +60,11 @@ export default function AnnoProjectView(){
                             icon = {<PlusOutlined/>}
                             onClick={() => setModalVisible(true)}
                         >
-                            Upload 
+                            Add Documents 
                         </Button>
+
                         <Divider type={'vertical'}/>
+
                         <Link
                             to = {'/annotation/'}
                             key = {'all-projects'}
@@ -173,22 +80,31 @@ export default function AnnoProjectView(){
                 }
             >
                 <Modal
-                    title={'Create project'}
-                    width={850}
+                    title={'Add Documents To The Project'}
+                    width={900}
                     visible={modalVisible}
-                    onCancel={cancelCreate}
-                    footer={renderButtons()}
+                    onCancel={cancelAdd}
+                    footer={
+                        <Button
+                            disabled={documents.length === 0}
+                            type={'primary'}
+                            onClick={executeAdd}
+                        >
+                            Add
+                        </Button>
+                    }
                 >
-                    <Steps current={currentStep}>
-                        {steps.map(item => (
-                            <Step key={item.title} title={item.title} />
-                        ))}
-                    </Steps>
-                    <Divider type={'horizontal'}/>
                     <div>
-                        <div style={{height: 'calc(40vh)', overflowY: 'auto'}}>
-                            {steps[currentStep].content}
-                        </div>
+                        <DocumentsList
+                            showActions = {false}
+                            showSelection = {true}
+                            onSelectionChanged = {
+                                (docs: string[]) => {
+                                    setDocuments(docs);
+                                } 
+                            }
+                            visibleColumns = {['text', 'domain']}
+                        />
                     </div>
                 </Modal>
                 <AnnoDocumentList projectId={projectId} showActions={true}/>

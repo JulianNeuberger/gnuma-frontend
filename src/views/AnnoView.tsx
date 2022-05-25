@@ -5,10 +5,16 @@ import {PlusOutlined} from '@ant-design/icons';
 
 import {FieldData} from 'rc-field-form/lib/interface';
 
-import AnnoProjectList from '../components/AnnoList/AnnoProjectList'
-import {AnnoProjectContext} from '../components/AnnoContextProvider/AnnoProjectContextProvider'
-import AnnoLabelSetSelection from '../components/AnnoLabelSet/AnnoLabelSetSelection'
-import AnnoLabelSetCreation from '../components/AnnoLabelSet/AnnoLabelSetCreation'
+import AnnoProjectList from '../components/AnnoProjectList/AnnoProjectList'
+
+import {AnnoProjectContext} from '../components/AnnoProjectContextProvider/AnnoProjectContextProvider'
+import {AnnoLabelSetContext} from '../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
+
+import AnnoLabelSetSelection from '../components/AnnoLabelSetSelection/AnnoLabelSetSelection'
+import AnnoLabelSetCreation from '../components/AnnoLabelSetCreation/AnnoLabelSetCreation'
+
+import {Label} from '../state/anno/annoLabelSetReducer'
+
 
 export type MetaData = {
     name: string;
@@ -18,22 +24,34 @@ export type MetaData = {
     [key: string]: any;
 }
 
+export type LabelSetMetaData = {
+    name: string;
+    labelName: string;
+    labels: Label[];
+    colors: string[];
+}
+
 export default function AnnoView(){
     const projectContext = React.useContext(AnnoProjectContext);
+    const labelSetConext = React.useContext(AnnoLabelSetContext);
+
     const [modalVisible, setModalVisible] = React.useState(false);
+    const [labelSetCreationVisible, setLabelSetCreationVisible] = React.useState(false);
     const [currentStep, setCurrentStep] = React.useState(0);
 
     const {Step} = Steps;
 
-    //states
-    const [labelSetId, setLabelSetId] = React.useState<string>();
-    const [name, setName] = React.useState<string>();
-    const [creator, setCreator] = React.useState<string>();
     const [metaData, setMetaData] = React.useState<MetaData>({
         name: '',
         date: '',
         creator: '',
         labelSetId: ''
+    });
+    const [labelSetMetaData, setLabelSetMetaData] = React.useState<LabelSetMetaData>({
+        name: '',
+        labelName: '',
+        labels: [],
+        colors: ['red', 'green', 'blue', 'yellow', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano']
     });
 
     const resetMetaData = () => {
@@ -48,9 +66,6 @@ export default function AnnoView(){
     const cancelCreate= async () => {
         setModalVisible(false);
         setCurrentStep(0);
-        setName('');
-        setCreator('');
-        setLabelSetId('');
         resetMetaData();
     }
 
@@ -60,7 +75,6 @@ export default function AnnoView(){
 
         let newMetaData = {...metaData};
         newMetaData['date'] = date;
-        setMetaData(newMetaData)
 
         await projectContext.onCreate(newMetaData);
 
@@ -118,7 +132,7 @@ export default function AnnoView(){
                         <Input 
                             type='text' 
                             placeholder='Name of the project' 
-                            onChange={(e) => setName(e.target.value)}
+                            value={metaData['name']}
                             defaultValue={metaData['name']}
                         />
                     </Form.Item>
@@ -130,25 +144,13 @@ export default function AnnoView(){
                         <Input 
                             type='text' 
                             placeholder='Your name' 
-                            onChange={(e) => setCreator(e.target.value)}
-                            defaultValue={metaData['creator']}
+                            value={metaData['creator']}
+                            defaultValue={metaData['name']}
                         />
                     </Form.Item>
                 </Form>
                 ),
-            action: (<Button onClick={nextStep} type={'primary'} disabled={!name || !creator}>Next</Button>)
-        },
-        {
-            title: 'Create A New Label Set',
-            content: (
-                <AnnoLabelSetCreation/>
-                ),
-            action: (
-                <>
-                    <Button disabled={true}>Create New Label Set</Button>
-                    <Button onClick={nextStep} type={'primary'}>Skip</Button>
-                </>
-                )
+            action: (<Button onClick={nextStep} type={'primary'} disabled={!metaData['name'] || !metaData['creator']}>Next</Button>)
         },
         {
             title: 'Choose A Label Set',
@@ -156,8 +158,6 @@ export default function AnnoView(){
                 <AnnoLabelSetSelection 
                     showSelection={true}
                     onSelectionChanged={(id: string) => {
-                        setLabelSetId(id);
-
                         let newMetaData = {...metaData};
                         newMetaData['labelSetId'] = id;
                         setMetaData(newMetaData);
@@ -165,7 +165,11 @@ export default function AnnoView(){
                     selected={[metaData['labelSetId']]}
                 />
                 ),
-            action: (<Button onClick={executeCreate} disabled={!labelSetId}>Create</Button>)
+            action: (
+                <>
+                    <Button onClick={() => {setLabelSetCreationVisible(true)}}>New Label Set</Button>
+                    <Button onClick={executeCreate} disabled={!metaData['labelSetId']}>Create</Button> 
+                </>)
         }
     ]
 
@@ -190,18 +194,31 @@ export default function AnnoView(){
                     onCancel={cancelCreate}
                     footer={renderButtons()}
                 >
-                <div>
-                    <Steps current={currentStep}>
-                        {steps.map(item => (
-                            <Step key={item.title} title={item.title} description={item.description} />
-                        ))}
-                    </Steps>
-                    <Divider type={'horizontal'}/>
-                    <div style={{height: 'calc(40vh)', overflowY: 'auto'}}>
-                        {steps[currentStep].content}
+                    <div>
+                        <Steps current={currentStep}>
+                            {steps.map(item => (
+                                <Step key={item.title} title={item.title} description={item.description} />
+                            ))}
+                        </Steps>
+                        <Divider type={'horizontal'}/>
+                        <div style={{height: 'calc(40vh)', overflowY: 'auto'}}>
+                            {steps[currentStep].content}
+                        </div>
                     </div>
-                </div>
                 </Modal>
+
+                <AnnoLabelSetCreation 
+                    modalVisible={labelSetCreationVisible}
+                    setModalVisible={setLabelSetCreationVisible}
+                    onCreate={
+                        (labelSetId) => {
+                            let newMetaData = metaData;
+                            newMetaData['labelSetId'] = labelSetId;
+                            setMetaData(newMetaData);
+                        }
+                    }
+                />
+
                 <AnnoProjectList 
                     showActions={true}
                 />

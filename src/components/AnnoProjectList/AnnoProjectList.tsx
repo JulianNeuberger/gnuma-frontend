@@ -9,8 +9,8 @@ import {DeleteOutlined, EditOutlined} from '@ant-design/icons';
 import {Project} from '../../state/anno/annoProjectReducer';
 import {LabelSet} from '../../state/anno/annoLabelSetReducer';
 
-import {AnnoProjectContext} from '../../components/AnnoContextProvider/AnnoProjectContextProvider'
-import {AnnoLabelSetContext} from '../../components/AnnoContextProvider/AnnoLabelSetContextProvider'
+import {AnnoProjectContext} from '../../components/AnnoProjectContextProvider/AnnoProjectContextProvider'
+import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 
 import {FieldData} from 'rc-field-form/lib/interface';
 
@@ -73,8 +73,6 @@ export default function ProjectList(props: ProjectListProps){
         labelSetConext.onFetchAll();
     }, []);
 
-    const labelSets = Object.values(labelSetConext.state.elements)
-
     const columns: { [key: string]: TableColumnProps<Project>} = {
         date: {
             title: 'Creation Date',
@@ -92,14 +90,12 @@ export default function ProjectList(props: ProjectListProps){
             key: 'labelSet',
             render: (_, record) => {
                 const labID = record.labelSetId;
-                for (let obj in labelSets){
-                    if (labelSets[obj].id == labID) {
+                for (let obj in Object.values(labelSetConext.state.elements)){
+                    if (Object.values(labelSetConext.state.elements)[obj].id == labID) {
                         return (
                             <>
-                                {labelSets[obj].name}
-                                <Divider type={'vertical'}/>
                                 {
-                                    labelSets[obj].labels.map(label => {
+                                    Object.values(labelSetConext.state.elements)[obj].labels.map(label => {
                                         return (
                                             <Tag color={label.color} key={label.name}>
                                                 {label.name.toUpperCase()}
@@ -110,6 +106,7 @@ export default function ProjectList(props: ProjectListProps){
                         );
                     }
                 }
+                // incase of errors just show label set id 
                 return (
                     <>
                         {labID}
@@ -168,7 +165,7 @@ export default function ProjectList(props: ProjectListProps){
                             />
                         </Popconfirm>
                     </span>
-                    );
+                );
             }
         }
     }

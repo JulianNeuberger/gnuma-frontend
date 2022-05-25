@@ -1,6 +1,6 @@
 import React, {useContext, useEffect} from 'react';
 
-import {AnnoLabelSetContext} from '../../components/AnnoContextProvider/AnnoLabelSetContextProvider'
+import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 import {LabelSet} from '../../state/anno/annoLabelSetReducer'
 
 import {Table, Tag, TableColumnProps, Modal} from 'antd'

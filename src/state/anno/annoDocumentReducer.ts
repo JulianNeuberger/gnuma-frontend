@@ -5,13 +5,7 @@ import {GenericPayloadActions} from '../common/actions';
 
 export type Document = {
     id:string;
-    name: string;
-    date: string;
-}
-
-export type UnPersistedDocument = {
-    name: string;
-    date: string;
+    labeled: boolean;
 }
 
 export const initialDocumentState: GenericPayloadState<Document> = {
