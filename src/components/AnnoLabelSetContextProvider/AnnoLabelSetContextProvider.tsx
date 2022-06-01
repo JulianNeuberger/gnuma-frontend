@@ -1,15 +1,15 @@
 import React, {createContext, useReducer} from 'react';
 
-import LabelSetReducer, {LabelSet, initialLabelSetState, UnPersistedLabelSet} from '../../state/anno/annoLabelSetReducer'
-import {getAllLabelSets, getSingleLabelSet, createLabelSet} from '../../service/annoService'
+import AnnoLabelSetReducer, {AnnoLabelSet, initialAnnoLabelSetState, UnPersistedAnnoLabelSet} from '../../state/anno/annoLabelSetReducer'
+import {getAllAnnoLabelSets, getSingleAnnoLabelSet, createAnnoLabelSet} from '../../service/annoService'
 import {buildGenericFetchAll, buildGenericFetchOne, buildGenericCreate} from '../../util/presentation'
 import {GenericPayloadState} from '../../state/common/reducer'
 
 type AnnoLabelSetContextType = {
-	state: GenericPayloadState<LabelSet>;
+	state: GenericPayloadState<AnnoLabelSet>;
 	onFetchAll: () => void;
 	onFetchOne: (id: string) => void;
-	onCreate: (labelSet: UnPersistedLabelSet) => void;
+	onCreate: (labelSet: UnPersistedAnnoLabelSet) => void;
 }
 
 const missingProviderError = (name: string) => {
@@ -19,7 +19,7 @@ const missingProviderError = (name: string) => {
 }
 
 export const AnnoLabelSetContext = createContext<AnnoLabelSetContextType>({
-	state: initialLabelSetState,
+	state: initialAnnoLabelSetState,
 	onFetchAll: missingProviderError('onFetchAll'),
 	onFetchOne: missingProviderError('onFetchOne'),
 	onCreate: missingProviderError('onCreate')
@@ -30,11 +30,11 @@ type AnnoLabelSetContextProviderProps = {
 }
 
 const AnnoLabelSetContextProvider = (props: AnnoLabelSetContextProviderProps) => {
-	const [projects, dispatch] = useReducer(LabelSetReducer, initialLabelSetState);
+	const [projects, dispatch] = useReducer(AnnoLabelSetReducer, initialAnnoLabelSetState);
 
-	const fetchAll = buildGenericFetchAll(dispatch, getAllLabelSets);
-	const fetchOne = buildGenericFetchOne(dispatch, getSingleLabelSet);
-	const create = buildGenericCreate(dispatch, createLabelSet);
+	const fetchAll = buildGenericFetchAll(dispatch, getAllAnnoLabelSets);
+	const fetchOne = buildGenericFetchOne(dispatch, getSingleAnnoLabelSet);
+	const create = buildGenericCreate(dispatch, createAnnoLabelSet);
 
 	const context: AnnoLabelSetContextType = {
 		state: projects,

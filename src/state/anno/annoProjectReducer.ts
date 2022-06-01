@@ -3,7 +3,7 @@ import {Reducer} from 'react';
 import {genericPayloadReducer, GenericPayloadState} from '../common/reducer';
 import {GenericPayloadActions} from '../common/actions';
 
-export type Project = {
+export type AnnoProject = {
     id:string;
     name: string;
     date: string;
@@ -11,20 +11,20 @@ export type Project = {
     labelSetId: string;
 }
 
-export type UnPersistedProject = {
+export type UnPersistedAnnoProject = {
     name: string;
     date: string;
     creator: string;
     labelSetId: string;
 }
 
-export const initialProjectState: GenericPayloadState<Project> = {
+export const initialAnnoProjectState: GenericPayloadState<AnnoProject> = {
     elements: {},
     loading: false
 }
 
-type ProjectReducerType = Reducer<GenericPayloadState<Project>, GenericPayloadActions<Project>>;
+type AnnoProjectReducerType = Reducer<GenericPayloadState<AnnoProject>, GenericPayloadActions<AnnoProject>>;
 
-const ProjectReducer: ProjectReducerType = genericPayloadReducer;
+const AnnoProjectReducer: AnnoProjectReducerType = genericPayloadReducer;
 
-export default ProjectReducer;
+export default AnnoProjectReducer;

@@ -13,16 +13,16 @@ import DocumentsList from '../components/DocumentList/DocumentsList'
 import {AnnoProjectContext} from '../components/AnnoProjectContextProvider/AnnoProjectContextProvider'
 import {AnnoDocumentContext} from '../components/AnnoDocumentContextProvider/AnnoDocumentContextProvider'
 
-import {Project} from '../state/anno/annoProjectReducer'
+import {AnnoProject} from '../state/anno/annoProjectReducer'
 
 import {Link} from 'react-router-dom';
 
-type ProjectParams = {
+type AnnoProjectParams = {
     projectId: string;
 }
 
 export default function AnnoProjectView(){
-    const {projectId} = useParams<ProjectParams>();
+    const {projectId} = useParams<AnnoProjectParams>();
 
     const projectContext = React.useContext(AnnoProjectContext);
     const documentContext = React.useContext(AnnoDocumentContext)

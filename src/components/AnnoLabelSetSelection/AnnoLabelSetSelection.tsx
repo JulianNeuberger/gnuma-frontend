@@ -1,12 +1,12 @@
 import React, {useContext, useEffect} from 'react';
 
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
-import {LabelSet} from '../../state/anno/annoLabelSetReducer'
+import {AnnoLabelSet} from '../../state/anno/annoLabelSetReducer'
 
 import {Table, Tag, TableColumnProps, Modal} from 'antd'
 import {TableRowSelection} from 'antd/es/table/interface';
 
-type LabelSetColumn = 'name' | 'labels';
+type AnnoLabelSetColumn = 'name' | 'labels';
 
 export type AnnoLabelSelectionProps = {
     showSelection?: boolean;
@@ -17,15 +17,15 @@ export type AnnoLabelSelectionProps = {
 
 export default function AnnoLabelSetSelection(props: AnnoLabelSelectionProps){
 
-    const labelSetConext = useContext(AnnoLabelSetContext)
+    const labelSetConext = useContext(AnnoLabelSetContext);
 
-    const visibleColumns = ['name', 'labels']
+    const visibleColumns = ['name', 'labels'];
 
     useEffect(() => {
         labelSetConext.onFetchAll();
     }, []);
 
-    const columns: {[key: string]: TableColumnProps<LabelSet>} = {
+    const columns: {[key: string]: TableColumnProps<AnnoLabelSet>} = {
         name: {
             title: 'Name',
             dataIndex: 'name',
@@ -50,7 +50,7 @@ export default function AnnoLabelSetSelection(props: AnnoLabelSelectionProps){
         }
     }
 
-    const rowSelection = (): TableRowSelection<LabelSet> | undefined => {
+    const rowSelection = (): TableRowSelection<AnnoLabelSet> | undefined => {
         if(!props.showSelection) {
             return undefined;
         }

@@ -1,7 +1,7 @@
 import React from 'react'
 
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
-import {UnPersistedLabelSet, Label} from '../../state/anno/annoLabelSetReducer'
+import {UnPersistedAnnoLabelSet, AnnoLabel} from '../../state/anno/annoLabelSetReducer'
 
 import {Form, Input, Divider, Button, Tag, Modal} from 'antd'
 
@@ -22,7 +22,7 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
     const [name, setName] = React.useState<string>('');
     const [state, setState] = React.useState<any>();
     const [labelName, setLabelName] = React.useState<string>('');
-    const [labels, setLabels] = React.useState<Label[]>([]);
+    const [labels, setLabels] = React.useState<AnnoLabel[]>([]);
     const [colors, setColors] = React.useState<string[]>(['red', 'green', 'blue', 'yellow', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano']);
 
     const addLabel = () => {
@@ -48,7 +48,7 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
     }
 
     const executeCreate = async() => {
-        let out: UnPersistedLabelSet;
+        let out: UnPersistedAnnoLabelSet;
         out = {'name': name, 'labels': labels};
 
         let labelSet = await labelSetConext.onCreate(out);

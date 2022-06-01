@@ -6,16 +6,17 @@ import {Button, Popconfirm, Table, Tag, TableColumnProps, Modal, Form, Input, Di
 import {TableRowSelection} from 'antd/es/table/interface';
 import {DeleteOutlined, EditOutlined} from '@ant-design/icons';
 
-import {Project} from '../../state/anno/annoProjectReducer';
-import {LabelSet} from '../../state/anno/annoLabelSetReducer';
+import {AnnoProject} from '../../state/anno/annoProjectReducer';
+import {AnnoLabelSet} from '../../state/anno/annoLabelSetReducer';
+
+import AnnoLabelSetTags from '../../components/AnnoLabelSetTags/AnnoLabelSetTags';
 
 import {AnnoProjectContext} from '../../components/AnnoProjectContextProvider/AnnoProjectContextProvider'
-import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 
 import {FieldData} from 'rc-field-form/lib/interface';
 
 
-type ProjectColumn = 'name' | 'date' | 'creator' | 'labelSet' | 'actions';
+type AnnoProjectColumn = 'name' | 'date' | 'creator' | 'labelSet' | 'actions';
 
 export type MetaData = {
     name: string;
@@ -23,22 +24,26 @@ export type MetaData = {
     [key: string]: any;
 }
 
-export type ProjectListProps = {
+export type LabelSetDict = {
+    [key: string]: AnnoLabelSet;
+}
+
+export type AnnoProjectListProps = {
     showActions?: boolean;
     showSelection?: boolean;
-    visibleColumns?: ProjectColumn[];
+    visibleColumns?: AnnoProjectColumn[];
 
     selected?: string[];
 
     onSelectionChanged?: (projects: string[]) => void;
 }
 
-export default function ProjectList(props: ProjectListProps){
+export default function AnnoProjectList(props: AnnoProjectListProps){
     const projectContext = useContext(AnnoProjectContext);
-    const labelSetConext = useContext(AnnoLabelSetContext);
 
     const [modalVisible, setModalVisible] = React.useState(false);
     const [projectId, setProjectId] = React.useState<string>();
+    const [labelSetDict, setLabelSetDict] = React.useState<LabelSetDict>({})
     const [metaData, setMetaData] = React.useState<MetaData>({
         name: '',
         creator: ''
@@ -70,10 +75,9 @@ export default function ProjectList(props: ProjectListProps){
 
     useEffect(() => {
         projectContext.onFetchAll();
-        labelSetConext.onFetchAll();
     }, []);
 
-    const columns: { [key: string]: TableColumnProps<Project>} = {
+    const columns: { [key: string]: TableColumnProps<AnnoProject>} = {
         date: {
             title: 'Creation Date',
             dataIndex: 'date',
@@ -89,28 +93,8 @@ export default function ProjectList(props: ProjectListProps){
             dataIndex: '',
             key: 'labelSet',
             render: (_, record) => {
-                const labID = record.labelSetId;
-                for (let obj in Object.values(labelSetConext.state.elements)){
-                    if (Object.values(labelSetConext.state.elements)[obj].id == labID) {
-                        return (
-                            <>
-                                {
-                                    Object.values(labelSetConext.state.elements)[obj].labels.map(label => {
-                                        return (
-                                            <Tag color={label.color} key={label.name}>
-                                                {label.name.toUpperCase()}
-                                            </Tag>
-                                        );
-                                })}
-                            </>
-                        );
-                    }
-                }
-                // incase of errors just show label set id 
-                return (
-                    <>
-                        {labID}
-                    </>
+                return(
+                    <AnnoLabelSetTags id={record.labelSetId}/>
                 );
             }
         },
@@ -170,7 +154,7 @@ export default function ProjectList(props: ProjectListProps){
         }
     }
 
-    const rowSelection = (): TableRowSelection<Project> | undefined => {
+    const rowSelection = (): TableRowSelection<AnnoProject> | undefined => {
         if(!props.showSelection) {
             return undefined;
         }

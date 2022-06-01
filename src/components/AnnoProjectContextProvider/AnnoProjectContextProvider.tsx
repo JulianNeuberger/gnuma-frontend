@@ -1,17 +1,17 @@
 import React, {createContext, useReducer} from 'react';
 
-import ProjectReducer, {Project, initialProjectState, UnPersistedProject} from '../../state/anno/annoProjectReducer'
-import {createProject, getAllProjects, deleteProject, getSingleProject, updateProject} from '../../service/annoService'
+import AnnoProjectReducer, {AnnoProject, initialAnnoProjectState, UnPersistedAnnoProject} from '../../state/anno/annoProjectReducer'
+import {createAnnoProject, getAllAnnoProjects, deleteAnnoProject, getSingleAnnoProject, updateAnnoProject} from '../../service/annoService'
 import {buildGenericCreate, buildGenericFetchAll, buildGenericDeleteSingle, buildGenericFetchOne, buildGenericUpdate} from '../../util/presentation'
 import {GenericPayloadState} from '../../state/common/reducer'
 
 type AnnoProjectContextType = {
-	state: GenericPayloadState<Project>;
+	state: GenericPayloadState<AnnoProject>;
 	onFetchAll: () => void;
 	onFetchOne: (projectId: string) => void;
-	onCreate: (project: UnPersistedProject) => void;
+	onCreate: (project: UnPersistedAnnoProject) => void;
 	onDelete: (projectId: string) => void;
-	onUpdate: (projectId: string, changes: Partial<Project>) => void;
+	onUpdate: (projectId: string, changes: Partial<AnnoProject>) => void;
 }
 
 const missingProviderError = (name: string) => {
@@ -21,7 +21,7 @@ const missingProviderError = (name: string) => {
 }
 
 export const AnnoProjectContext = createContext<AnnoProjectContextType>({
-	state: initialProjectState,
+	state: initialAnnoProjectState,
 	onFetchAll: missingProviderError('onFetchAll'),
 	onFetchOne: missingProviderError('onFetchOne'),
 	onCreate: missingProviderError('onCreate'),
@@ -34,13 +34,13 @@ type AnnoProjectContextProviderProps = {
 }
 
 const AnnoProjectContextProvider = (props: AnnoProjectContextProviderProps) => {
-	const [projects, dispatch] = useReducer(ProjectReducer, initialProjectState);
+	const [projects, dispatch] = useReducer(AnnoProjectReducer, initialAnnoProjectState);
 
-	const fetchAll = buildGenericFetchAll(dispatch, getAllProjects);
-	const fetchOne = buildGenericFetchOne(dispatch, getSingleProject);
-	const create = buildGenericCreate(dispatch, createProject);
-	const deleteSingle = buildGenericDeleteSingle(dispatch, deleteProject);
-	const update = buildGenericUpdate(dispatch, updateProject);
+	const fetchAll = buildGenericFetchAll(dispatch, getAllAnnoProjects);
+	const fetchOne = buildGenericFetchOne(dispatch, getSingleAnnoProject);
+	const create = buildGenericCreate(dispatch, createAnnoProject);
+	const deleteSingle = buildGenericDeleteSingle(dispatch, deleteAnnoProject);
+	const update = buildGenericUpdate(dispatch, updateAnnoProject);
 
 	const context: AnnoProjectContextType = {
 		state: projects,

@@ -3,29 +3,29 @@ import {Reducer} from 'react';
 import {genericPayloadReducer, GenericPayloadState} from '../common/reducer';
 import {GenericPayloadActions} from '../common/actions';
 
-export type Label = {
+export type AnnoLabel = {
     name: string;
     color: string;
 }
 
-export type LabelSet = {
+export type AnnoLabelSet = {
     id:string;
     name: string;
-    labels: Label[];
+    labels: AnnoLabel[];
 }
 
-export type UnPersistedLabelSet = {
+export type UnPersistedAnnoLabelSet = {
     name: string;
-    labels: Label[];
+    labels: AnnoLabel[];
 }
 
-export const initialLabelSetState: GenericPayloadState<LabelSet> = {
+export const initialAnnoLabelSetState: GenericPayloadState<AnnoLabelSet> = {
     elements: {},
     loading: false
 }
 
-type LabelSetReducerType = Reducer<GenericPayloadState<LabelSet>, GenericPayloadActions<LabelSet>>;
+type AnnoLabelSetReducerType = Reducer<GenericPayloadState<AnnoLabelSet>, GenericPayloadActions<AnnoLabelSet>>;
 
-const LabelSetReducer: LabelSetReducerType = genericPayloadReducer;
+const AnnoLabelSetReducer: AnnoLabelSetReducerType = genericPayloadReducer;
 
-export default LabelSetReducer;
+export default AnnoLabelSetReducer;

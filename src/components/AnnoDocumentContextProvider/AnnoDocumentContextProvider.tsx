@@ -1,12 +1,12 @@
 import React, {createContext, useReducer} from 'react';
 
-import DocumentReducer, {Document, initialDocumentState} from '../../state/anno/annoDocumentReducer'
-import {getAllDocuments, addDocuments} from '../../service/annoService'
+import DocumentReducer, {AnnoDocument, initialAnnoDocumentState} from '../../state/anno/annoDocumentReducer'
+import {getAllAnnoDocuments, addAnnoDocuments} from '../../service/annoService'
 import {buildGenericFetchAll, buildGenericCreate} from '../../util/AnnoUtil/annoDocumentPresentation'
 import {GenericPayloadState} from '../../state/common/reducer'
 
 type AnnoDocumentContextType = {
-    state: GenericPayloadState<Document>;
+    state: GenericPayloadState<AnnoDocument>;
     onFetchAll: (projectId: string) => void;
     onCreate: (projectId: string, documents: string[]) => void;
 }
@@ -18,7 +18,7 @@ const missingProviderError = (name: string) => {
 }
 
 export const AnnoDocumentContext = createContext<AnnoDocumentContextType>({
-    state: initialDocumentState,
+    state: initialAnnoDocumentState,
     onFetchAll: missingProviderError('onFetchAll'),
     onCreate: missingProviderError('onCreate')
 })
@@ -28,13 +28,13 @@ type AnnoDocumentContextProviderProps = {
 }
 
 const AnnoDocumentContextProvider = (props: AnnoDocumentContextProviderProps) => {
-    const [documents, dispatch] = useReducer(DocumentReducer, initialDocumentState);
+    const [documents, dispatch] = useReducer(DocumentReducer, initialAnnoDocumentState);
 
-    const fetchAll = buildGenericFetchAll(dispatch, getAllDocuments);
-    const create = buildGenericCreate(dispatch, addDocuments);
+    const fetchAll = buildGenericFetchAll(dispatch, getAllAnnoDocuments);
+    const create = buildGenericCreate(dispatch, addAnnoDocuments);
 
     const context: AnnoDocumentContextType = {
-        state: documents as GenericPayloadState<Document>,
+        state: documents as GenericPayloadState<AnnoDocument>,
         onFetchAll: fetchAll,
         onCreate: create
     }

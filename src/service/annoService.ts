@@ -1,9 +1,9 @@
 import assert from 'assert';
 
 import {apiUrlBuilder, checkResponse} from './common';
-import {Project, UnPersistedProject} from  '../state/anno/annoProjectReducer';
-import {Document} from '../state/anno/annoDocumentReducer';
-import {LabelSet, UnPersistedLabelSet} from '../state/anno/annoLabelSetReducer'
+import {AnnoProject, UnPersistedAnnoProject} from  '../state/anno/annoProjectReducer';
+import {AnnoDocument} from '../state/anno/annoDocumentReducer';
+import {AnnoLabelSet, UnPersistedAnnoLabelSet} from '../state/anno/annoLabelSetReducer'
 
 export const API_HOST = process.env.REACT_APP_ANNO_SERVICE_API_HOST;
 export const API_PORT = process.env.REACT_APP_ANNO_SERVICE_API_PORT;
@@ -18,7 +18,7 @@ assert(API_VERSION);
 const getApiUrl = apiUrlBuilder(API_HOST, API_PORT, API_BASE, API_VERSION);
 
 // Get project metadata.
-export const getSingleProject = async (projectId: string): Promise<Project> => {
+export const getSingleAnnoProject = async (projectId: string): Promise<AnnoProject> => {
     const endpoint = getApiUrl(`projects/${projectId}`);
     const response = await fetch(endpoint);
     checkResponse(response);
@@ -27,7 +27,7 @@ export const getSingleProject = async (projectId: string): Promise<Project> => {
 
 // Update project meta data.
 // Update the metadata for a document.
-export const updateProject = async (projectId: string, project: Partial<Project>): Promise<Project> => {
+export const updateAnnoProject = async (projectId: string, project: Partial<AnnoProject>): Promise<AnnoProject> => {
     const endpoint = getApiUrl(`projects/${projectId}`);
     const response = await fetch(endpoint, {
         method: 'PATCH',
@@ -38,18 +38,18 @@ export const updateProject = async (projectId: string, project: Partial<Project>
     });
     checkResponse(response);
 
-    return await getSingleProject(projectId);
+    return await getSingleAnnoProject(projectId);
 }
 
 // Get a list of all projects.
-export const getAllProjects = async (): Promise<Project[]> => {
+export const getAllAnnoProjects = async (): Promise<AnnoProject[]> => {
     const response = await fetch(getApiUrl('projects'));
     checkResponse(response);
     return await response.json();
 }
 
 // Create a new project.
-export const createProject = async (project: UnPersistedProject): Promise<Project> => {
+export const createAnnoProject = async (project: UnPersistedAnnoProject): Promise<AnnoProject> => {
     const endpoint = getApiUrl('projects');
 
     const response = await fetch(endpoint, {
@@ -62,25 +62,25 @@ export const createProject = async (project: UnPersistedProject): Promise<Projec
     checkResponse(response);
 
     const data = await response.json();
-    return await getSingleProject(data);
+    return await getSingleAnnoProject(data);
 }
 
 // Delete a project.
-export const deleteProject = async (projectId: string): Promise<void> => {
+export const deleteAnnoProject = async (projectId: string): Promise<void> => {
     const endpoint = getApiUrl(`projects/${projectId}`)
     const response = await fetch(endpoint, {method: 'DELETE',});
     checkResponse(response)
 }
 
 // Get all documents for a project
-export const getAllDocuments = async (projectId: string): Promise<Document[]> => {
+export const getAllAnnoDocuments = async (projectId: string): Promise<AnnoDocument[]> => {
     const response = await fetch(getApiUrl(`projects/${projectId}/docs`));
     checkResponse(response);
     return await response.json();
 }
 
 // Add documents to the project.
-export const addDocuments = async (projectId: string, documents: string[]): Promise<Document> => {
+export const addAnnoDocuments = async (projectId: string, documents: string[]): Promise<AnnoDocument> => {
     const endpoint = getApiUrl(`projects/${projectId}/docs`);
     const response = await fetch(endpoint, {
         method: 'POST',
@@ -95,21 +95,21 @@ export const addDocuments = async (projectId: string, documents: string[]): Prom
 }
 
 // Delete a document.
-export const deleteDocument = async (projectId: string, docId: string): Promise<void> => {
+export const deleteAnnoDocument = async (projectId: string, docId: string): Promise<void> => {
     const endpoint = getApiUrl(`projects/${projectId}/docs/${docId}`)
     const response = await fetch(endpoint, {method: 'DELETE',});
     checkResponse(response)
 }
 
 // Get list of all label sets.
-export const getAllLabelSets = async (): Promise<LabelSet[]> => {
+export const getAllAnnoLabelSets = async (): Promise<AnnoLabelSet[]> => {
     const response = await fetch(getApiUrl('labels'));
     checkResponse(response);
     return await response.json();
 }
 
 // Create a new label set.
-export const createLabelSet = async (labelSet: UnPersistedLabelSet): Promise<LabelSet> => {
+export const createAnnoLabelSet = async (labelSet: UnPersistedAnnoLabelSet): Promise<AnnoLabelSet> => {
     const endpoint = getApiUrl('labels');
     const response = await fetch(endpoint, {
         method: 'POST',
@@ -121,11 +121,11 @@ export const createLabelSet = async (labelSet: UnPersistedLabelSet): Promise<Lab
     checkResponse(response);
 
     const data = await response.json();
-    return getSingleLabelSet(data);
+    return getSingleAnnoLabelSet(data);
 }
 
 // Get the metadata for a lable set.
-export const getSingleLabelSet = async (labelSetId: string): Promise<LabelSet> => {
+export const getSingleAnnoLabelSet = async (labelSetId: string): Promise<AnnoLabelSet> => {
     const endpoint = getApiUrl(`labels/${labelSetId}`);
     const response = await fetch(endpoint);
     checkResponse(response);

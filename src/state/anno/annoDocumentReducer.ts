@@ -3,18 +3,18 @@ import {Reducer} from 'react';
 import {genericPayloadReducer, GenericPayloadState} from '../common/reducer';
 import {GenericPayloadActions} from '../common/actions';
 
-export type Document = {
+export type AnnoDocument = {
     id:string;
     labeled: boolean;
 }
 
-export const initialDocumentState: GenericPayloadState<Document> = {
+export const initialAnnoDocumentState: GenericPayloadState<AnnoDocument> = {
     elements: {},
     loading: false
 }
 
-type DocumentReducerType = Reducer<GenericPayloadState<Document>, GenericPayloadActions<Document>>;
+type AnnoDocumentReducerType = Reducer<GenericPayloadState<AnnoDocument>, GenericPayloadActions<AnnoDocument>>;
 
-const DocumentReducer: DocumentReducerType = genericPayloadReducer;
+const AnnoDocumentReducer: AnnoDocumentReducerType = genericPayloadReducer;
 
-export default DocumentReducer;
+export default AnnoDocumentReducer;

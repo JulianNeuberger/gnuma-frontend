@@ -13,7 +13,7 @@ import {AnnoLabelSetContext} from '../components/AnnoLabelSetContextProvider/Ann
 import AnnoLabelSetSelection from '../components/AnnoLabelSetSelection/AnnoLabelSetSelection'
 import AnnoLabelSetCreation from '../components/AnnoLabelSetCreation/AnnoLabelSetCreation'
 
-import {Label} from '../state/anno/annoLabelSetReducer'
+import {AnnoLabel} from '../state/anno/annoLabelSetReducer'
 
 
 export type MetaData = {
@@ -27,7 +27,7 @@ export type MetaData = {
 export type LabelSetMetaData = {
     name: string;
     labelName: string;
-    labels: Label[];
+    labels: AnnoLabel[];
     colors: string[];
 }
 

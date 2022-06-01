@@ -4,19 +4,19 @@ import {Button, Popconfirm, Table, TableColumnProps} from 'antd';
 import {TableRowSelection} from 'antd/es/table/interface';
 import {DeleteOutlined, CheckCircleFilled, CloseCircleFilled} from '@ant-design/icons';
 
-import {Document} from '../../state/anno/annoDocumentReducer';
+import {AnnoDocument} from '../../state/anno/annoDocumentReducer';
 import {DocumentsContext} from '../DocumentsContextProvider/DocumentsContextProvider';
 
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
-type DocumentColumn = 'id' | 'labeled' | 'actions';
+type AnnoDocumentColumn = 'id' | 'labeled' | 'actions';
 
 export type AnnoDocumentListProps = {
     projectId: string;
 
     showActions?: boolean;
     showSelection?: boolean;
-    visibleColumns?: DocumentColumn[];
+    visibleColumns?: AnnoDocumentColumn[];
 
     selected?: string[];
 
@@ -25,7 +25,7 @@ export type AnnoDocumentListProps = {
 
 export default function AnnoDocumentList(props: AnnoDocumentListProps) {
     const documentContext = React.useContext(DocumentsContext);
-    const annoDocumentContext = React.useContext(AnnoDocumentContext);
+    const annoAnnoDocumentContext = React.useContext(AnnoDocumentContext);
 
     const visibleColumns = props.visibleColumns || ['id', 'labeled'];
     if (props.showActions) {
@@ -33,10 +33,10 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
     }
 
     React.useEffect(() => {
-        annoDocumentContext.onFetchAll(props.projectId);
+        annoAnnoDocumentContext.onFetchAll(props.projectId);
     }, []);
 
-    const columns: { [key: string]: TableColumnProps<Document>} = {
+    const columns: { [key: string]: TableColumnProps<AnnoDocument>} = {
         id: {
             title: 'ID',
             dataIndex: 'id',
@@ -79,7 +79,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
         }
     }
 
-    const rowSelection = (): TableRowSelection<Document> | undefined => {
+    const rowSelection = (): TableRowSelection<AnnoDocument> | undefined => {
         if(!props.showSelection) {
             return undefined;
         }
@@ -95,7 +95,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
         }
     }
 
-    const documents = Object.values(annoDocumentContext.state.elements);
+    const documents = Object.values(annoAnnoDocumentContext.state.elements);
 
     return (
         <Table
@@ -103,7 +103,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
             columns={visibleColumns.map((col) => columns[col])}
             rowSelection={rowSelection()}
             dataSource={documents}
-            loading={annoDocumentContext.state.loading}
+            loading={annoAnnoDocumentContext.state.loading}
         />
     );
 }
