@@ -16,10 +16,18 @@ export default function AnnoLabelSetTags(props: AnnoLabelSetTagsProps){
         labelSetContext.onFetchOne(props.id);
     }, []);
 
+    if (!labelSetContext.state.elements[props.id]) {
+        return(
+            <>
+                {props.id}        
+            </>
+        );
+    }
+
     return(
         <>
             {
-                (labelSetContext.state.elements)[props.id].labels.map(label => {
+                labelSetContext.state.elements[props.id].labels.map(label => {
                     return (
                         <Tag color={label.color} key={label.name}>
                             {label.name.toUpperCase()}

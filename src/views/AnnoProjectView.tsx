@@ -1,9 +1,7 @@
 import React, {useContext, useEffect} from 'react';
 
-import {Button, Card, Modal, Steps, Divider, Form, Input} from 'antd';
+import {Button, Card, Modal, Steps, Space, Divider, Form, Input} from 'antd';
 import {PlusOutlined, UpOutlined} from '@ant-design/icons';
-
-import {useParams} from "react-router-dom";
 
 import {FieldData} from 'rc-field-form/lib/interface';
 
@@ -15,7 +13,7 @@ import {AnnoDocumentContext} from '../components/AnnoDocumentContextProvider/Ann
 
 import {AnnoProject} from '../state/anno/annoProjectReducer'
 
-import {Link} from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 
 type AnnoProjectParams = {
     projectId: string;
@@ -31,8 +29,7 @@ export default function AnnoProjectView(){
         projectContext.onFetchOne(projectId);
     }, []);
 
-    // todo hacky?
-    const project = Object.values(projectContext.state.elements)[0]
+    const title = projectContext.state.elements[projectId]['name'] || projectId;
 
     const [modalVisible, setModalVisible] = React.useState(false);
     const [documents, setDocuments] = React.useState<string[]>([]);
@@ -52,9 +49,9 @@ export default function AnnoProjectView(){
     return (
         <div key={'anno-project-view'}>
             <Card
-                title = {`${project.name} - Documents`}
+                title = {`${title} - Documents`}
                 extra = {
-                    <span>
+                    <Space>
                         <Button
                             type = {'primary'}
                             icon = {<PlusOutlined/>}
@@ -62,8 +59,6 @@ export default function AnnoProjectView(){
                         >
                             Add Documents 
                         </Button>
-
-                        <Divider type={'vertical'}/>
 
                         <Link
                             to = {'/annotation/'}
@@ -76,7 +71,7 @@ export default function AnnoProjectView(){
                                 All Projects
                             </Button>
                         </Link>
-                    </span>
+                    </Space>
                 }
             >
                 <Modal

@@ -93,8 +93,9 @@ export default function AnnoProjectList(props: AnnoProjectListProps){
             dataIndex: '',
             key: 'labelSet',
             render: (_, record) => {
+                //return(<>Sadge</>);
                 return(
-                    <AnnoLabelSetTags id={record.labelSetId}/>
+                        <AnnoLabelSetTags id={record.labelSetId}/>
                 );
             }
         },

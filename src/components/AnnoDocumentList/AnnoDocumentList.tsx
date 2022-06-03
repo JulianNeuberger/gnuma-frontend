@@ -1,5 +1,7 @@
 import React from 'react';
 
+import {Link} from 'react-router-dom';
+
 import {Button, Popconfirm, Table, TableColumnProps} from 'antd';
 import {TableRowSelection} from 'antd/es/table/interface';
 import {DeleteOutlined, CheckCircleFilled, CloseCircleFilled} from '@ant-design/icons';
@@ -7,9 +9,11 @@ import {DeleteOutlined, CheckCircleFilled, CloseCircleFilled} from '@ant-design/
 import {AnnoDocument} from '../../state/anno/annoDocumentReducer';
 import {DocumentsContext} from '../DocumentsContextProvider/DocumentsContextProvider';
 
+import {Document} from '../../state/documents/reducer'
+
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
-type AnnoDocumentColumn = 'id' | 'labeled' | 'actions';
+type AnnoDocumentColumn = 'name' | 'labeled' | 'actions';
 
 export type AnnoDocumentListProps = {
     projectId: string;
@@ -23,24 +27,47 @@ export type AnnoDocumentListProps = {
     onSelectionChanged?: (documents: string[]) => void;
 }
 
+type DocDict = {
+    [key: string]: Document;
+}
+
 export default function AnnoDocumentList(props: AnnoDocumentListProps) {
     const documentContext = React.useContext(DocumentsContext);
-    const annoAnnoDocumentContext = React.useContext(AnnoDocumentContext);
+    const annoDocumentContext = React.useContext(AnnoDocumentContext);
 
-    const visibleColumns = props.visibleColumns || ['id', 'labeled'];
+    const [docDict, setDocDict] = React.useState<DocDict>({});
+
+    const visibleColumns = props.visibleColumns || ['name', 'labeled'];
     if (props.showActions) {
         visibleColumns.push('actions');
     }
 
     React.useEffect(() => {
-        annoAnnoDocumentContext.onFetchAll(props.projectId);
+        annoDocumentContext.onFetchAll(props.projectId);
+        documentContext.onFetchAll();
     }, []);
 
     const columns: { [key: string]: TableColumnProps<AnnoDocument>} = {
-        id: {
-            title: 'ID',
-            dataIndex: 'id',
-            key: 'id'
+        name: {
+            title: 'name',
+            dataIndex: '',
+            key: 'name',
+            render: (_, record) => {
+                if (!documentContext.state.elements[record.id]) {
+                    return (
+                        <>
+                            {record.id}
+                        </>
+                    );
+                }
+                return(
+                    <Link
+                        to={`/annotation/${props.projectId}/${record.id}/`}
+                    >
+                        <a>{documentContext.state.elements[record.id]['name']}</a>
+                    </Link>
+                )
+            }
         },
         labeled: {
             title: 'Labeled',
@@ -95,7 +122,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
         }
     }
 
-    const documents = Object.values(annoAnnoDocumentContext.state.elements);
+    const documents = Object.values(annoDocumentContext.state.elements);
 
     return (
         <Table
@@ -103,7 +130,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
             columns={visibleColumns.map((col) => columns[col])}
             rowSelection={rowSelection()}
             dataSource={documents}
-            loading={annoAnnoDocumentContext.state.loading}
+            loading={annoDocumentContext.state.loading}
         />
     );
 }

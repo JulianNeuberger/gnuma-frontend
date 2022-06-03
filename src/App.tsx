@@ -14,6 +14,7 @@ import DocumentsView from './views/DocumentsView';
 import DocumentDetailsView from './views/DocumentDetailsView';
 import AnnoView from './views/AnnoView';
 import AnnoProjectView from './views/AnnoProjectView';
+import AnnoDetailsView from './views/AnnoDetailsView';
 
 import 'antd/dist/antd.css';
 import './App.css';
@@ -102,6 +103,9 @@ function App() {
                         </Route>
                         <Route exact path='/annotation/:projectId/'>
                             <AnnoProjectView key='anno-project-view'/>
+                        </Route>
+                        <Route exact path='/annotation/:projectId/:docId/'>
+                            <AnnoDetailsView key='anno-details-view'/>
                         </Route>
 
                         <Route exact path='/debug/configuration/'>
