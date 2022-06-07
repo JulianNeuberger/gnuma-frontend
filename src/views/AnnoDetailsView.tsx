@@ -1,9 +1,12 @@
 import React from 'react';
 
-import {DocumentsContext} from '../components/DocumentsContextProvider/DocumentsContextProvider'
-import {AnnoProjectContext} from '../components/AnnoProjectContextProvider/AnnoProjectContextProvider'
+import {DocumentsContext} from '../components/DocumentsContextProvider/DocumentsContextProvider';
+import {AnnoProjectContext} from '../components/AnnoProjectContextProvider/AnnoProjectContextProvider';
 
 import AnnoLabelSetTags from '../components/AnnoLabelSetTags/AnnoLabelSetTags';
+
+import AnnoDisplayText from '../components/AnnoDisplayText/AnnoDisplayText';
+
 import {Button, Space, Card, Layout} from 'antd';
 import {UpOutlined} from '@ant-design/icons';
 
@@ -62,12 +65,14 @@ export default function AnnoDetailsView(){
                 <Layout>
                     <Layout>
                         <Layout.Header
-                            style={{backgroundColor: 'LightGrey'}}
+                            style={{backgroundColor: 'White'}}
                         >
                             <AnnoLabelSetTags id={project.labelSetId}/>    
                         </Layout.Header>
                         <Layout.Content>
-                            :)
+                            {
+                                <AnnoDisplayText docId={docId} labelSetId={project.labelSetId}/>
+                            }
                         </Layout.Content>
                     </Layout>
                     <Layout.Sider
