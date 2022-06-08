@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {Text} from 'react-native';
-import { red } from '@ant-design/colors';
+import {presetPalettes} from '@ant-design/colors';
 
 import {DocumentsContext} from '../../components/DocumentsContextProvider/DocumentsContextProvider'
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
@@ -9,10 +9,6 @@ import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/
 type AnnoDisplayTextProps = {
     docId: string;
     labelSetId: string;
-}
-
-type Label = {
-    [name: string]: string;
 }
 
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
@@ -35,10 +31,22 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         if (tag == 'O') {
             return ({});
         }
+
+        let col = '';
+        labelSetContext.state.elements[props.labelSetId].labels.map(label => {
+            if (('B-' + label.name) === tag) {
+                col = label.color;
+            }
+        })
+
+        if (col == '') {
+            return ({});
+        }
+
         return ({
-            'color': red[7],
-            'background': red[1],
-            'borderColor': red[3],
+            'color': presetPalettes[col][7],
+            'background': presetPalettes[col][1],
+            'borderColor': presetPalettes[col][3],
             'borderWidth': 1,
             'borderRadius': 3
         });
@@ -48,26 +56,41 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         <div>
             {
                 doc.sentences.map(sentence => {
+                    let prevTxt = '';
+                    let prevStyle = {};
                     return (
                         <Text style={{'fontSize': 16, 'lineHeight': 30}}>
                         {
                             sentence.tokens.map(token => {
-                                let style = getStyle(token.nerTag);
-                                if (['-', '.', ',', '?', '!'].includes(token.token)) {
+                                if (token.nerTag === 'O') {
+                                    let txt = token.token;
+                                    if (!['-', '.', ',', '?', '!'].includes(token.token)) {
+                                        txt = ' ' + txt;
+                                    }
+                                    if (!prevTxt) {
+                                        return (txt);
+                                    }
+                                    let halp = prevTxt;
+                                    prevTxt = '';
                                     return (
-                                        <Text style={style}>
-                                            {token.token}
-                                        </Text>
+                                        <>
+                                            <Text> </Text>
+                                            <Text style={prevStyle}>
+                                                {' ' + halp + ' '}
+                                            </Text>
+                                            <Text>
+                                                {txt}
+                                            </Text>
+                                        </>
                                     );
                                 }
-                                return (
-                                    <>
-                                        <Text> </Text>
-                                        <Text style={style}>
-                                            {token.token}
-                                        </Text>
-                                    </>
-                                    );
+                                if (token.nerTag.charAt(0) === 'B') {
+                                    prevTxt = token.token;
+                                    prevStyle = getStyle(token.nerTag);
+                                }
+                                if (token.nerTag.charAt(0) === 'I') {
+                                    prevTxt = prevTxt + ' ' + token.token;
+                                }
                             })
                         }
                         </Text>
