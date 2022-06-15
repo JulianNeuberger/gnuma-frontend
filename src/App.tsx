@@ -5,7 +5,7 @@ import {Link, Route, Switch, useLocation} from 'react-router-dom';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
 
 import {Layout, Menu} from 'antd';
-import {CopyOutlined, FileTextOutlined, HomeOutlined, QuestionCircleOutlined, SettingOutlined} from '@ant-design/icons';
+import {CopyOutlined, FileTextOutlined, HomeOutlined, QuestionCircleOutlined, SettingOutlined, SwapOutlined} from '@ant-design/icons';
 import {volcano as color} from '@ant-design/colors';
 
 import DatasetsView from './views/DatasetsView';
@@ -55,7 +55,7 @@ function App() {
                 >
                     <Link to='/debug/configuration/'>Configuration Tests</Link>
                 </Menu.Item>
-                <Menu.Item key={'/converter/'} icon={<QuestionCircleOutlined />}>
+                <Menu.Item key={'/converter/'} icon={<SwapOutlined />}>
                     <Link to='converter'>NLP Format Converter</Link>
                 </Menu.Item>
             </Menu>

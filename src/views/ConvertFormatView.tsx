@@ -1,9 +1,11 @@
+//Author: Alicja Kiluk
 import React from 'react';
 import {Component} from 'react';
 import axios from 'axios';
 
 interface ConvertFormatViewProps {}
 interface ConvertFormatViewState{
+    //selected file can be of type File or null
     selectedFile : File | null
 }
 
