@@ -5,7 +5,7 @@ import {Link, Route, Switch, useLocation} from 'react-router-dom';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
 
 import {Layout, Menu} from 'antd';
-import {CopyOutlined, FileTextOutlined, HomeOutlined, SettingOutlined} from '@ant-design/icons';
+import {CopyOutlined, FileTextOutlined, HomeOutlined, QuestionCircleOutlined, SettingOutlined} from '@ant-design/icons';
 import {volcano as color} from '@ant-design/colors';
 
 import DatasetsView from './views/DatasetsView';
@@ -20,6 +20,7 @@ import DatasetsContextProvider from './components/DatasetsContextProvider/Datase
 import DocumentsContextProvider from './components/DocumentsContextProvider/DocumentsContextProvider';
 import LogsContextProvider from './components/LogsContextProvider/LogsContextProvider';
 import DebugConfigView from './views/DebugConfigView';
+import ConvertFormatView from './views/ConvertFormatView';
 
 
 function App() {
@@ -53,6 +54,9 @@ function App() {
                     icon={<SettingOutlined/>}
                 >
                     <Link to='/debug/configuration/'>Configuration Tests</Link>
+                </Menu.Item>
+                <Menu.Item key={'/converter/'} icon={<QuestionCircleOutlined />}>
+                    <Link to='converter'>NLP Format Converter</Link>
                 </Menu.Item>
             </Menu>
         );
@@ -90,6 +94,10 @@ function App() {
 
                         <Route exact path='/'>
                             <HomeView key='home-view'/>
+                        </Route>
+
+                        <Route exact path='/converter'>
+                            <ConvertFormatView />
                         </Route>
                     </Switch>
                 </CSSTransition>

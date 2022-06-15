@@ -13,6 +13,7 @@
     "@types/react-dom": "^17.0.0",
     "antd": "^4.16.13",
     "aphrodite": "^2.4.0",
+    "axios": "^0.27.2",
     "env-cmd": "^10.1.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
