@@ -13,15 +13,17 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
 
     constructor(props : ConvertFormatViewProps) {
         super(props);
+        //at the beginning, no file is uploaded
         this.state = {
             selectedFile : null
         }
     };
-
+//on file change
     onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         let uploadedFile : File | null;
         if (event.target.files)
         {
+            //file = first object from the files list
             uploadedFile = event.target.files[0];
         }
         else
@@ -30,7 +32,7 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
         }
         this.setState({selectedFile: uploadedFile});
     };
-
+//on file upload
     onFileUpload = () => {
         const formData = new FormData();
         if (this.state.selectedFile)
@@ -42,9 +44,10 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
             );
         }
         console.log(this.state.selectedFile);
+        //post data as binary to server
         axios.post("api/uploadfile", formData);
     };
-
+//displaying information about the uploaded file
     fileData = () => {
         if (this.state.selectedFile)
         {
