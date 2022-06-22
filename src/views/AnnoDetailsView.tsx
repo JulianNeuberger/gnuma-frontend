@@ -63,20 +63,7 @@ export default function AnnoDetailsView(){
                 }
             >
                 <Layout>
-                    <Layout>
-                        <Layout.Header
-                            style={{backgroundColor: 'White'}}
-                        >
-                            <AnnoLabelSetTags id={project.labelSetId}/>    
-                        </Layout.Header>
-                        <Layout.Content
-                            style={{backgroundColor: 'White'}}
-                        >
-                            {
-                                <AnnoDisplayText docId={docId} labelSetId={project.labelSetId}/>
-                            }
-                        </Layout.Content>
-                    </Layout>
+                    <AnnoDisplayText docId={docId} labelSetId={project.labelSetId} projectId={projectId}/>
                     <Layout.Sider
                         style={{backgroundColor: 'white', color: 'black'}}
                     >

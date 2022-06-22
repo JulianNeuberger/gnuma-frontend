@@ -6,6 +6,7 @@ import {GenericPayloadActions} from '../common/actions';
 export type AnnoDocument = {
     id:string;
     labeled: boolean;
+    text: string;
 }
 
 export const initialAnnoDocumentState: GenericPayloadState<AnnoDocument> = {

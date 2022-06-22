@@ -79,6 +79,14 @@ export const getAllAnnoDocuments = async (projectId: string): Promise<AnnoDocume
     return await response.json();
 }
 
+// Get single document.
+export const getSingleAnnoDocument = async (projectId: string, docId: string): Promise<AnnoDocument> => {
+    const endpoint = getApiUrl(`projects/${projectId}/docs/${docId}`);
+    const response = await fetch(endpoint);
+    checkResponse(response);
+    return await response.json();
+}
+
 // Add documents to the project.
 export const addAnnoDocuments = async (projectId: string, documents: string[]): Promise<AnnoDocument> => {
     const endpoint = getApiUrl(`projects/${projectId}/docs`);
@@ -91,7 +99,7 @@ export const addAnnoDocuments = async (projectId: string, documents: string[]): 
     });
     checkResponse(response);
 
-    return {'id': 'asdf', 'labeled': false}
+    return {'id': 'asdf', 'labeled': false, 'text': ''}
 }
 
 // Delete a document.

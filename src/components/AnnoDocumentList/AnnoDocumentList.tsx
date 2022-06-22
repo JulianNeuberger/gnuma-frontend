@@ -64,7 +64,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
                     <Link
                         to={`/annotation/${props.projectId}/${record.id}/`}
                     >
-                        <a>{documentContext.state.elements[record.id]['name']}</a>
+                        <a>{record.id}</a>
                     </Link>
                 )
             }
