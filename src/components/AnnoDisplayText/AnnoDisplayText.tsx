@@ -3,9 +3,9 @@ import React from 'react';
 import {Layout, Button, Space} from 'antd';
 import {presetPalettes} from '@ant-design/colors';
 
-import {AnnoDocumentContext} from '../../components/AnnoDocumentContextProvider/AnnoDocumentContextProvider'
+import {DocumentsContext} from '../../components/DocumentsContextProvider/DocumentsContextProvider'
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
-import AnnoLabelSetTags from '../../components/AnnoLabelSetTags/AnnoLabelSetTags';
+import AnnoToken from '../../components/AnnoToken/AnnoToken'
 
 type AnnoDisplayTextProps = {
     projectId: string;
@@ -19,23 +19,14 @@ type Label = {
     end: number;
 }
 
-type StyledText = {
-    text: string;
-    style: React.CSSProperties;
-}
-
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     const [labels, setLabels] = React.useState<Label[]>([]);
-    const [styledText, setStyledText] = React.useState<StyledText[]>([]);
 
-    //todo remove this
-    const [sel, setSel] = React.useState<any>();
-
-    const documentContext = React.useContext(AnnoDocumentContext);
+    const documentContext = React.useContext(DocumentsContext);
     const labelSetContext = React.useContext(AnnoLabelSetContext);
 
     React.useEffect(() => {
-        documentContext.onFetchOne(props.projectId, props.docId);
+        documentContext.onFetchOne(props.docId);
         labelSetContext.onFetchOne(props.labelSetId);
     }, []);
 
@@ -71,52 +62,26 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         });
     }
 
-    const updateStyledText = () => {
-        let newStyledText: StyledText[] = [];
-        let text = doc.text;
-
-        // todo sort labels or sorted from beginning
-        let lab = labels
-        lab.sort((a,b) => (a.start < b.start) ? -1 : 1);
-
-        if (!labels.length) {
-            newStyledText.push({'text': text, 'style': {}});
-            setStyledText(newStyledText);
-        }
-
-        let current = 0;
-        labels.forEach( (lab) => {
-            newStyledText.push({'text': text.substring(current, lab.start), 'style': {}});
-            newStyledText.push({'text': text.substring(lab.start, lab.end), 'style': getStyle(lab.tag)});
-            current = lab.end;
-        });
-
-        newStyledText.push({'text': text.substring(current, text.length), 'style': {}});
-
-        setStyledText(newStyledText);
-    }
-
     const display = (labels: Label[]) => {
-        if (!styledText.length) {
-            return(
-                <span>
-                    {doc.text}
-                </span>
-            )
-        }
         return(
-            <span>
+            <Space>
                 {
-                    (styledText.map( (ele) => {
-                        return(
-                            <span style={ele.style}>
-                                {ele.text}
-                            </span>
+                    doc.sentences.map((sentence, x) => {
+                        return (
+                            <div>
+                                {
+                                    sentence.tokens.map((token, y) => {
+                                        return (
+                                            <AnnoToken token={token.token} sentenceId={x} tokenId={y}/>
+                                        );
+                                    })
+                                }
+                            </div>
                         )
-                    }))
+                    })
                 }
-            </span>
-        )
+            </Space>
+        );
     }
 
     return (
@@ -135,25 +100,6 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                         'borderColor': presetPalettes[label.color][3]
                                     }} 
                                     key={label.name}
-                                    onClick={ () => {
-                                        let sel = window.getSelection();                                       
-                                        if (sel && !sel.isCollapsed) {
-                                            let offset = 0;
-                                            setSel(sel.anchorNode);
-                                            if (sel.anchorNode && sel.anchorNode.previousSibling){
-                                                console.log('OwO')
-                                            }
-                                            let newLabels = labels;
-                                            newLabels.push({
-                                                'tag': label.name,
-                                                'start': sel.anchorOffset,
-                                                'end': sel.focusOffset
-                                            })
-                                            setLabels(newLabels);
-                                            sel.collapseToEnd();
-                                            updateStyledText();
-                                        }
-                                    }}
                                 >
                                     {label.name.toUpperCase()}
                                 </Button>
@@ -166,11 +112,11 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             <Layout.Content
                 style={{backgroundColor: 'White'}}
             >
-                <p
+                <div
                     style={{'fontSize': '15px', 'lineHeight': 1.5}}
                 >
                     {display(labels)}
-                </p>
+                </div>
             </Layout.Content>
         </Layout>
     );
