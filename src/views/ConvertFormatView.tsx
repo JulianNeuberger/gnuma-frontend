@@ -2,16 +2,20 @@
 import React from 'react';
 import {Component} from 'react';
 import axios from 'axios';
-import { Button, Card, Upload } from 'antd';
+import { Button, Card, Dropdown, Menu, Select, Upload } from 'antd';
 import { RcFile } from 'antd/lib/upload';
 import { UploadChangeParam, UploadFile } from 'antd/lib/upload/interface';
-import {UploadOutlined} from '@ant-design/icons';
+import {UploadOutlined, DownOutlined} from '@ant-design/icons';
+import { SelectValue } from 'antd/lib/select';
 
 interface ConvertFormatViewProps {}
 interface ConvertFormatViewState{
     //selected file can be of type File or null
     selectedFile : File | null
+    //list of uploaded files
     fileList : UploadFile[]
+    conversionFrom : string | null
+    conversionTo : string | null
 }
 
 class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatViewState> {
@@ -22,6 +26,8 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
         this.state = {
             selectedFile : null,
             fileList : Array<UploadFile>(),
+            conversionFrom : null,
+            conversionTo : null,
         }
     };
 //on file change
@@ -46,22 +52,56 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
         return false;
     };
 
+    //update file list
     handleChange = (info: UploadChangeParam<UploadFile<any>>) => {
         let newFileList = [...info.fileList];
+        //restrict upload to only 1 file
         newFileList = newFileList.slice(-1);
         this.setState({...this.state, fileList : newFileList});
+    };
+
+    selectOriginFormat =(value: SelectValue) => {
+        if(value)
+        {
+            this.setState({...this.state, conversionFrom : value?.toString()});
+        }
+    };
+
+    selectConversionFormat =(value: SelectValue) => {
+        if(value)
+        {
+            this.setState({...this.state, conversionTo : value?.toString()});
+        }
     };
 
     render() {
         return (
             <div key={'converter-view'}>
                 <Card title={'NLP format converter'}>
-                    <h3>Upload your file</h3>
                     <div>
                         <Upload beforeUpload={this.onFileChange} fileList={this.state.fileList} onChange={this.handleChange}>
                             <Button icon={<UploadOutlined />}>Upload file</Button>
                         </Upload>
                         <br/>
+                        <span>Select the format of your file: </span>
+                        <Select defaultValue="auto" style={{width: '20%'}} onChange={this.selectOriginFormat}>
+                            <Select.Option value="auto">Automatically detect format</Select.Option>
+                            <Select.Option value="conll">ConLL</Select.Option>
+                            <Select.Option value="brat">BRAT</Select.Option>
+                            <Select.Option value="muc">MUC</Select.Option>
+                            <Select.Option value="gmb">GMB</Select.Option>
+                        </Select>
+                        <br />
+                        <br />
+                        <span>Select the format you wish to convert to: </span>
+                        <Select defaultValue="conll" style={{width: '20%'}} onChange={this.selectConversionFormat}>
+                            <Select.Option value="conll">ConLL</Select.Option>
+                            <Select.Option value="brat">BRAT</Select.Option>
+                            <Select.Option value="muc">MUC</Select.Option>
+                            <Select.Option value="gmb">GMB</Select.Option>
+                        </Select>
+                        <br />
+                        <br />
                         <button type="button" className="ant-btn ant-btn-primary" onClick={this.onFileUpload}>Convert file</button>
                     </div>
                 </Card> 
