@@ -2,6 +2,7 @@
 import React from 'react';
 import {Component} from 'react';
 import axios from 'axios';
+import { Card } from 'antd';
 
 interface ConvertFormatViewProps {}
 interface ConvertFormatViewState{
@@ -72,13 +73,15 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
 
     render() {
         return (
-            <div>
-                <h3>Upload your file</h3>
-                <div>
-                    <input type="file" onChange={this.onFileChange} />
-                    <button onClick={this.onFileUpload}>Upload file</button>
-                </div>
-                {this.fileData()}
+            <div key={'converter-view'}>
+                <Card title={'NLP format converter'}>
+                    <h3>Upload your file</h3>
+                    <div>
+                        <input type="file" onChange={this.onFileChange} />
+                        <button type="button" className="ant-btn ant-btn-primary" onClick={this.onFileUpload}>Upload file</button>
+                    </div>
+                    {this.fileData()}
+                </Card> 
             </div>
         );
     }
