@@ -2,12 +2,16 @@
 import React from 'react';
 import {Component} from 'react';
 import axios from 'axios';
-import { Card } from 'antd';
+import { Button, Card, Upload } from 'antd';
+import { RcFile } from 'antd/lib/upload';
+import { UploadChangeParam, UploadFile } from 'antd/lib/upload/interface';
+import {UploadOutlined} from '@ant-design/icons';
 
 interface ConvertFormatViewProps {}
 interface ConvertFormatViewState{
     //selected file can be of type File or null
     selectedFile : File | null
+    fileList : UploadFile[]
 }
 
 class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatViewState> {
@@ -16,22 +20,14 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
         super(props);
         //at the beginning, no file is uploaded
         this.state = {
-            selectedFile : null
+            selectedFile : null,
+            fileList : Array<UploadFile>(),
         }
     };
 //on file change
-    onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        let uploadedFile : File | null;
-        if (event.target.files)
-        {
-            //file = first object from the files list
-            uploadedFile = event.target.files[0];
-        }
-        else
-        {
-            uploadedFile = null;
-        }
-        this.setState({selectedFile: uploadedFile});
+    onFileChange = (file:RcFile) => {
+        this.setState({...this.state, selectedFile: file});
+        return false;
     };
 //on file upload
     onFileUpload = () => {
@@ -47,28 +43,13 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
         console.log(this.state.selectedFile);
         //post data as binary to server
         axios.post("api/uploadfile", formData);
+        return false;
     };
-//displaying information about the uploaded file
-    fileData = () => {
-        if (this.state.selectedFile)
-        {
-            return (
-                <div>
-                    <h2>File Details:</h2>
-                    <p>File Name: {this.state.selectedFile.name}</p>
-                    <p>File Type: {this.state.selectedFile.type}</p>
-                </div>
-            );
-        }
-        else
-        {
-            return (
-                <div>
-                    <br />
-                    <h4>Please choose a file before pressing the upload button</h4>
-                </div>
-            );
-        }
+
+    handleChange = (info: UploadChangeParam<UploadFile<any>>) => {
+        let newFileList = [...info.fileList];
+        newFileList = newFileList.slice(-1);
+        this.setState({...this.state, fileList : newFileList});
     };
 
     render() {
@@ -77,10 +58,12 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
                 <Card title={'NLP format converter'}>
                     <h3>Upload your file</h3>
                     <div>
-                        <input type="file" onChange={this.onFileChange} />
-                        <button type="button" className="ant-btn ant-btn-primary" onClick={this.onFileUpload}>Upload file</button>
+                        <Upload beforeUpload={this.onFileChange} fileList={this.state.fileList} onChange={this.handleChange}>
+                            <Button icon={<UploadOutlined />}>Upload file</Button>
+                        </Upload>
+                        <br/>
+                        <button type="button" className="ant-btn ant-btn-primary" onClick={this.onFileUpload}>Convert file</button>
                     </div>
-                    {this.fileData()}
                 </Card> 
             </div>
         );
