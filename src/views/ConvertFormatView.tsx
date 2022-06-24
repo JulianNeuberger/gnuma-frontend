@@ -14,7 +14,9 @@ interface ConvertFormatViewState{
     selectedFile : File | null
     //list of uploaded files
     fileList : UploadFile[]
+    //format of the uploaded file
     conversionFrom : string | null
+    //format one wishes to convert to
     conversionTo : string | null
 }
 
@@ -22,12 +24,13 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
 
     constructor(props : ConvertFormatViewProps) {
         super(props);
-        //at the beginning, no file is uploaded
         this.state = {
+            //at the beginning, no file is uploaded
             selectedFile : null,
             fileList : Array<UploadFile>(),
-            conversionFrom : null,
-            conversionTo : null,
+            //formats selected by default
+            conversionFrom : "auto",
+            conversionTo : "conll",
         }
     };
 //on file change
@@ -36,6 +39,7 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
         return false;
     };
 //on file upload
+//TODO: pass selected formats to the server
     onFileUpload = () => {
         const formData = new FormData();
         if (this.state.selectedFile)
@@ -60,6 +64,7 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
         this.setState({...this.state, fileList : newFileList});
     };
 
+    //select format of uploaded file
     selectOriginFormat =(value: SelectValue) => {
         if(value)
         {
@@ -67,6 +72,7 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
         }
     };
 
+    //select format for conversion
     selectConversionFormat =(value: SelectValue) => {
         if(value)
         {
