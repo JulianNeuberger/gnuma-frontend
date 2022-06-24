@@ -15,9 +15,9 @@ interface ConvertFormatViewState{
     //list of uploaded files
     fileList : UploadFile[]
     //format of the uploaded file
-    conversionFrom : string | null
+    conversionFrom : string
     //format one wishes to convert to
-    conversionTo : string | null
+    conversionTo : string
 }
 
 class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatViewState> {
@@ -39,18 +39,34 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
         return false;
     };
 //on file upload
-//TODO: pass selected formats to the server
     onFileUpload = () => {
         const formData = new FormData();
         if (this.state.selectedFile)
         {
             formData.append(
-                "myFile",
-                this.state.selectedFile,
+                "filename",
                 this.state.selectedFile.name
+            );
+            formData.append(
+                "source_format",
+                this.state.conversionFrom
+            );
+            formData.append(
+                "target_format",
+                this.state.conversionTo
+            );
+            formData.append(
+                "file",
+                this.state.selectedFile
             );
         }
         console.log(this.state.selectedFile);
+        /*
+        for (let entries of formData.entries())
+        {
+            console.log(entries[0] + ", " + entries[1]);
+        }
+        */
         //post data as binary to server
         axios.post("api/uploadfile", formData);
         return false;
