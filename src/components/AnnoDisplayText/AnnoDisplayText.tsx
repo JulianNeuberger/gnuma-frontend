@@ -78,6 +78,18 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         sentences[sentenceId][tokenId].selected = true;
     }
 
+    const ctrlSelect = (sentenceId: number, tokenId: number) => {
+        sentences[sentenceId][tokenId].selected = true;
+
+        let newSelection = selection;
+        newSelection.push({'sentenceId': sentenceId, 'tokenId': tokenId})
+        setSelection(newSelection);
+    }
+
+    const shftSelect = (sentenceId: number, tokenId: number) => {
+        //todo
+    }
+
     const resetSelection = () => {
         selection.forEach ((ele) => {
             sentences[ele.sentenceId][ele.tokenId].selected = false;
@@ -136,11 +148,13 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 tokenId={y} 
                 style={getStyle(tag, selected)} 
                 select={select}
+                ctrlSelect={ctrlSelect}
+                shftSelect={shftSelect}
             />
         );
     }
 
-    const display = (sents: TokenInfo[][]) => {
+    const display = (sents: TokenInfo[][], sel: TokenIndex[]) => {
         return(
             <div style={{'fontSize': 16}}>
                 {
@@ -166,6 +180,22 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 style={{backgroundColor: 'White'}}
             >
                 <Space>
+                    <Button 
+                        style={{
+                            'color': presetPalettes['grey'][7],
+                            'background': presetPalettes['grey'][1],
+                            'borderColor': presetPalettes['grey'][3]
+                        }} 
+                        key={'RESET'}
+                        onClick={ () => {
+                            selection.forEach ((ele) => {
+                                sentences[ele.sentenceId][ele.tokenId].tag = 'O';
+                            });
+                            resetSelection();
+                        }}
+                    >
+                        {'RESET'}
+                    </Button>
                     {
                         labelSet.labels.map(label => {
                             return (
@@ -197,7 +227,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 <div
                     style={{'fontSize': '15px', 'lineHeight': 1.5, 'userSelect': 'none'}}
                 >
-                    {display(sentences)}
+                    {display(sentences, selection)}
                 </div>
             </Layout.Content>
         </Layout>

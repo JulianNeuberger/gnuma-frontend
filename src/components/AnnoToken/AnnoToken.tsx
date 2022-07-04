@@ -8,6 +8,8 @@ type AnnoTokenProps = {
     token: string;
     style: React.CSSProperties;
     select: (sentenceId: number, tokenId: number) => void;
+    ctrlSelect: (sentenceId: number, tokenId: number) => void;
+    shftSelect: (sentenceId: number, tokenId: number) => void;
 } 
 
 export default function AnnoToken(props: AnnoTokenProps){
@@ -23,8 +25,14 @@ export default function AnnoToken(props: AnnoTokenProps){
                 'borderRadius': 3,
                 'padding': '1px'
             }}
-            onClick={ () => {
-                props.select(props.sentenceId, props.tokenId)
+            onClick={ (e) => {
+                if (e.ctrlKey) {
+                    props.ctrlSelect(props.sentenceId, props.tokenId);
+                } else if (e.shiftKey) {
+                    props.shftSelect(props.sentenceId, props.tokenId);
+                } else {
+                    props.select(props.sentenceId, props.tokenId);
+                }
             }}
         >
             {props.token}
