@@ -1,41 +1,37 @@
 import React from 'react';
 
-import {Text} from 'react-native';
 import {presetPalettes} from '@ant-design/colors';
 
 type AnnoTokenProps = {
     sentenceId: number;
     tokenId: number;
     token: string;
-    color?: string;
-    borderColor?: string;
-    background?: string;
+    style: React.CSSProperties;
+    setSelection: (selection: TokenIndex) => void;
+}
+
+export type TokenIndex = {
+    sentenceId: number;
+    tokenId: number;
 }
 
 export default function AnnoToken(props: AnnoTokenProps){
 
-    const [color, setColor] = React.useState<string>(props.color || 'black');
-    const [background, setBackground] = React.useState<string>(props.background || 'white');
-    const [borderColor, setBorderColor] = React.useState<string>(props.borderColor || 'white');
+
     const [borderWidth, setBorderWidth] = React.useState<number>(1);
 
     return (
-        <Text
+        <span
             style={{
-                'color': color,
-                'borderColor': borderColor,
-                'backgroundColor': background,
-                'borderWidth': borderWidth,
+                ...props.style,
+                'borderWidth': 2,
                 'borderRadius': 3
             }}
-            onPress={
-                () => {
-                    setBorderWidth(3);
-                    setBorderColor('black');
-                }
-            }
+            onClick={ () => {
+                props.setSelection({'sentenceId': props.sentenceId, 'tokenId': props.tokenId})
+            }}
         >
             {props.token}
-        </Text>
+        </span>
     );
 }
