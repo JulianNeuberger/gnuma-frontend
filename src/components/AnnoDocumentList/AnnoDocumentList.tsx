@@ -47,6 +47,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
         documentContext.onFetchAll();
     }, []);
 
+
     const columns: { [key: string]: TableColumnProps<AnnoDocument>} = {
         name: {
             title: 'name',

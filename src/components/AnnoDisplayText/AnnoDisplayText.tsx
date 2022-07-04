@@ -156,21 +156,21 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
     const display = (sents: TokenInfo[][], sel: TokenIndex[]) => {
         return(
-            <div style={{'fontSize': 16}}>
+            <span>
                 {
                     sents.map((sentence, x) => {
                         return (
-                            <div>
+                            <span>
                                 {
                                     sentence.map((token, y) => {
                                         return (getSpaceAnnoToken(x, y,token.token, token.tag, token.selected));
                                     })
                                 }
-                            </div>
+                            </span>
                         )
                     })
                 }
-            </div>
+            </span>
         );
     }
 
@@ -225,7 +225,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 style={{backgroundColor: 'White'}}
             >
                 <div
-                    style={{'fontSize': '15px', 'lineHeight': 1.5, 'userSelect': 'none'}}
+                    style={{'fontSize': 17, 'lineHeight': 1.5, 'userSelect': 'none'}}
                 >
                     {display(sentences, selection)}
                 </div>

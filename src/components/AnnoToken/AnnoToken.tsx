@@ -23,7 +23,7 @@ export default function AnnoToken(props: AnnoTokenProps){
                 ...props.style,
                 'borderWidth': '5px',
                 'borderRadius': 3,
-                'padding': '1px'
+                'padding': '0.2px'
             }}
             onClick={ (e) => {
                 if (e.ctrlKey) {
