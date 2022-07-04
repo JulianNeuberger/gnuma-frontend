@@ -7,13 +7,8 @@ type AnnoTokenProps = {
     tokenId: number;
     token: string;
     style: React.CSSProperties;
-    setSelection: (selection: TokenIndex) => void;
-}
-
-export type TokenIndex = {
-    sentenceId: number;
-    tokenId: number;
-}
+    select: (sentenceId: number, tokenId: number) => void;
+} 
 
 export default function AnnoToken(props: AnnoTokenProps){
 
@@ -24,11 +19,12 @@ export default function AnnoToken(props: AnnoTokenProps){
         <span
             style={{
                 ...props.style,
-                'borderWidth': 2,
-                'borderRadius': 3
+                'borderWidth': '5px',
+                'borderRadius': 3,
+                'padding': '1px'
             }}
             onClick={ () => {
-                props.setSelection({'sentenceId': props.sentenceId, 'tokenId': props.tokenId})
+                props.select(props.sentenceId, props.tokenId)
             }}
         >
             {props.token}

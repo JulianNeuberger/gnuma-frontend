@@ -5,7 +5,7 @@ import {presetPalettes} from '@ant-design/colors';
 
 import {DocumentsContext} from '../../components/DocumentsContextProvider/DocumentsContextProvider'
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
-import AnnoToken, {TokenIndex} from '../../components/AnnoToken/AnnoToken'
+import AnnoToken from '../../components/AnnoToken/AnnoToken'
 
 type AnnoDisplayTextProps = {
     projectId: string;
@@ -13,15 +13,25 @@ type AnnoDisplayTextProps = {
     labelSetId: string;
 }
 
-type Label = {
+type TokenInfo = {
+    token: string;
     tag: string;
-    start: number;
-    end: number;
+    selected: boolean;
+}
+
+type LabelColorDict = {
+    [label: string]: string;
+}
+
+type TokenIndex = {
+    sentenceId: number;
+    tokenId: number;
 }
 
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
-    const [labels, setLabels] = React.useState<Label[]>([]);
-    const [selection, setSelection] = React.useState<TokenIndex>();
+    const [sentences, setSentences] = React.useState<TokenInfo[][]>([]);
+    const [selection, setSelection] = React.useState<TokenIndex[]>([]);
+    const [labelColorDict, setLabelColorDict] = React.useState<LabelColorDict>({});
 
     const documentContext = React.useContext(DocumentsContext);
     const labelSetContext = React.useContext(AnnoLabelSetContext);
@@ -38,78 +48,108 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     const doc = documentContext.state.elements[props.docId];
     const labelSet = labelSetContext.state.elements[props.labelSetId];
 
-    const getStyle = (tag: string, selected: boolean) => {
-        if (tag == 'O') {
-            if (selected == true) {
-                return ({
-                    'color': presetPalettes['grey'][7],
-                    'background': presetPalettes['grey'][1],
-                    'borderColor': presetPalettes['grey'][2]
-                });
-            }
-            return ({
-                'color': 'black',
-                'background': 'white',
-                'borderColor': 'white'
-            });
-        }
+    if (Object.keys(labelColorDict).length === 0) {
+        let newLabelColorDict: LabelColorDict = {};
+        labelSet.labels.forEach( (ele) => {
+            newLabelColorDict[ele.name] = ele.color
+        });
 
-        let col = '';
-        labelSetContext.state.elements[props.labelSetId].labels.map(label => {
-            if (label.name === tag) {
-                col = label.color;
-            }
+        setLabelColorDict(newLabelColorDict);
+    }
+
+    if (sentences.length != doc.sentences.length) {
+        let newSentences: TokenInfo[][] = [];
+
+        doc.sentences.forEach((sen) => {
+            let newSen: TokenInfo[] = [];
+            sen.tokens.forEach((tok) => {
+                newSen.push({'token': tok.token, 'tag': 'O', 'selected': false})
+            })
+            newSentences.push(newSen);
         })
 
-        if (selected == true) {
+        setSentences(newSentences);
+    }
+
+    const select = (sentenceId: number, tokenId: number) => {
+        resetSelection();
+
+        setSelection([{'sentenceId': sentenceId, 'tokenId': tokenId}]);
+        sentences[sentenceId][tokenId].selected = true;
+    }
+
+    const resetSelection = () => {
+        selection.forEach ((ele) => {
+            sentences[ele.sentenceId][ele.tokenId].selected = false;
+        });
+        setSelection([])
+    }
+
+    const getStyle = (tag: string, selected: boolean) => {
+        if (tag in labelColorDict){
+            let col = labelColorDict[tag]
+            if (selected == true) {
                 return ({
                     'color': presetPalettes[col][1],
                     'background': presetPalettes[col][7],
                     'borderColor': presetPalettes[col][3]
                 });
             }
+            return ({
+                'color': presetPalettes[col][7],
+                'background': presetPalettes[col][1],
+                'borderColor': presetPalettes[col][3]
+            });
+        }
 
+        if (selected == true) {
+            return ({
+                'color': presetPalettes['grey'][8],
+                'background': presetPalettes['grey'][1],
+                'borderColor': presetPalettes['grey'][2]
+            });
+        }
         return ({
-            'color': presetPalettes[col][7],
-            'background': presetPalettes[col][1],
-            'borderColor': presetPalettes[col][3]
+            'color': 'black',
+            'background': 'white',
+            'borderColor': 'white'
         });
     }
 
-    const getSpaceAnnoToken = (x: number, y: number, text: string) => {
+    const getSpaceAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean) => {
         if(['.', ',', '!', '?'].includes(text)){
-            return (getAnnoToken(x, y, text));
+            return (getAnnoToken(x, y, text, tag, selected));
         }
         return(
             <>
                 <span> </span>
-                {getAnnoToken(x,y, text)}
+                {getAnnoToken(x, y, text, tag, selected)}
             </>
         );
     }
 
-    const getAnnoToken = (x: number, y: number, text: string) => {
-        let selected = false;
-
-        if (selection && selection.sentenceId === x && selection.tokenId === y){
-            selected = true
-        }
-
+    const getAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean) => {
         return (
-            <AnnoToken token={text} sentenceId={x} tokenId={y} style={getStyle('1', selected)} setSelection={setSelection}/>
+            <AnnoToken 
+                token={text} 
+                sentenceId={x} 
+                tokenId={y} 
+                style={getStyle(tag, selected)} 
+                select={select}
+            />
         );
     }
 
-    const display = (labels: Label[]) => {
+    const display = (sents: TokenInfo[][]) => {
         return(
             <div style={{'fontSize': 16}}>
                 {
-                    doc.sentences.map((sentence, x) => {
+                    sents.map((sentence, x) => {
                         return (
                             <div>
                                 {
-                                    sentence.tokens.map((token, y) => {
-                                        return (getSpaceAnnoToken(x, y,token.token));
+                                    sentence.map((token, y) => {
+                                        return (getSpaceAnnoToken(x, y,token.token, token.tag, token.selected));
                                     })
                                 }
                             </div>
@@ -136,6 +176,12 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                         'borderColor': presetPalettes[label.color][3]
                                     }} 
                                     key={label.name}
+                                    onClick={ () => {
+                                        selection.forEach ((ele) => {
+                                            sentences[ele.sentenceId][ele.tokenId].tag = label.name;
+                                        });
+                                        resetSelection();
+                                    }}
                                 >
                                     {label.name.toUpperCase()}
                                 </Button>
@@ -151,7 +197,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 <div
                     style={{'fontSize': '15px', 'lineHeight': 1.5, 'userSelect': 'none'}}
                 >
-                    {display(labels)}
+                    {display(sentences)}
                 </div>
             </Layout.Content>
         </Layout>
