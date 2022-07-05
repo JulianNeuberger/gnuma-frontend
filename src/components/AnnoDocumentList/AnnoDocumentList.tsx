@@ -54,20 +54,22 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
             dataIndex: '',
             key: 'name',
             render: (_, record) => {
-                if (!documentContext.state.elements[record.id]) {
-                    return (
-                        <>
-                            {record.id}
-                        </>
-                    );
+                if (documentContext.state.elements[record.id]) {
+                    return(
+                        <Link
+                            to={`/annotation/${props.projectId}/${record.id}/`}
+                        >
+                            <a>{documentContext.state.elements[record.id].name}</a>
+                        </Link>
+                    )
                 }
                 return(
-                    <Link
-                        to={`/annotation/${props.projectId}/${record.id}/`}
-                    >
-                        <a>{record.id}</a>
-                    </Link>
-                )
+                        <Link
+                            to={`/annotation/${props.projectId}/${record.id}/`}
+                        >
+                            <a>{record.id}</a>
+                        </Link>
+                    )
             }
         },
         labeled: {
@@ -91,7 +93,9 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
                     <span key = {`project-actions-${record.id}`}>
                         <Popconfirm
                             title = {'Remove document from project? This can\'t be undone.'}
-                            onConfirm = {() => {console.log('todo')}}
+                            onConfirm = {() => {
+                                annoDocumentContext.onDelete(props.projectId, record.id)
+                            }}
                             key = {`delete-document-${record.id}`}
                         >
                             <Button

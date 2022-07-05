@@ -14,14 +14,11 @@ type AnnoTokenProps = {
 
 export default function AnnoToken(props: AnnoTokenProps){
 
-
-    const [borderWidth, setBorderWidth] = React.useState<number>(1);
-
     return (
         <span
             style={{
                 ...props.style,
-                'borderWidth': '5px',
+                'border': '5px',
                 'borderRadius': 3,
                 'padding': '0.2px'
             }}

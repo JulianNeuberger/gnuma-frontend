@@ -8,7 +8,7 @@ import AnnoLabelSetTags from '../components/AnnoLabelSetTags/AnnoLabelSetTags';
 import AnnoDisplayText from '../components/AnnoDisplayText/AnnoDisplayText';
 
 import {Button, Space, Card, Layout} from 'antd';
-import {UpOutlined} from '@ant-design/icons';
+import {UpOutlined, CheckOutlined} from '@ant-design/icons';
 
 import {Link, useParams} from 'react-router-dom';
 
@@ -44,8 +44,9 @@ export default function AnnoDetailsView(){
                         <Button
                             type = {'primary'}
                             onClick={() => console.log('todo')}
+                            icon= {<CheckOutlined/>}
                         >
-                            Accept Labels
+                            Mark as labeled
                         </Button>
 
                         <Link

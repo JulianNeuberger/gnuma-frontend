@@ -25,15 +25,16 @@ export default function AnnoProjectView(){
     const projectContext = React.useContext(AnnoProjectContext);
     const documentContext = React.useContext(AnnoDocumentContext)
 
+    const [modalVisible, setModalVisible] = React.useState(false);
+    const [documents, setDocuments] = React.useState<string[]>([]);
+
     useEffect(() => {
         projectContext.onFetchOne(projectId);
     }, []);
 
-    const title = projectContext.state.elements[projectId]['name'] || projectId;
-
-    const [modalVisible, setModalVisible] = React.useState(false);
-    const [documents, setDocuments] = React.useState<string[]>([]);
-
+    if (!projectContext.state.elements[projectId]) {
+        return (<>loading...</>);
+    }
 
     const cancelAdd= async () => {
         setModalVisible(false);
@@ -41,7 +42,9 @@ export default function AnnoProjectView(){
     }
 
     const executeAdd = async() => {
-        await documentContext.onCreate(projectId, documents);
+        for (const ele of documents) {
+            await documentContext.onCreate(projectId, ele);
+        }
 
         cancelAdd();
     }
@@ -49,7 +52,7 @@ export default function AnnoProjectView(){
     return (
         <div key={'anno-project-view'}>
             <Card
-                title = {`${title} - Documents`}
+                title = {`${projectContext.state.elements[projectId]['name']} - Documents`}
                 extra = {
                     <Space>
                         <Button

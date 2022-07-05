@@ -6,17 +6,12 @@ import {presetPalettes} from '@ant-design/colors';
 import {DocumentsContext} from '../../components/DocumentsContextProvider/DocumentsContextProvider'
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 import AnnoToken from '../../components/AnnoToken/AnnoToken'
+import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
 type AnnoDisplayTextProps = {
     projectId: string;
     docId: string;
     labelSetId: string;
-}
-
-type TokenInfo = {
-    token: string;
-    tag: string;
-    selected: boolean;
 }
 
 type LabelColorDict = {
@@ -29,19 +24,22 @@ type TokenIndex = {
 }
 
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
-    const [sentences, setSentences] = React.useState<TokenInfo[][]>([]);
+    const [labels, setLabels] = React.useState<string[][]>([]);
+    const [selected, setSelected] = React.useState<boolean[][]>([]);
     const [selection, setSelection] = React.useState<TokenIndex[]>([]);
     const [labelColorDict, setLabelColorDict] = React.useState<LabelColorDict>({});
 
     const documentContext = React.useContext(DocumentsContext);
     const labelSetContext = React.useContext(AnnoLabelSetContext);
+    const annoDocumentContext = React.useContext(AnnoDocumentContext);
 
     React.useEffect(() => {
         documentContext.onFetchOne(props.docId);
         labelSetContext.onFetchOne(props.labelSetId);
+        annoDocumentContext.onFetchOne(props.projectId, props.docId);
     }, []);
 
-    if(!documentContext.state.elements[props.docId]  || !labelSetContext.state.elements[props.labelSetId]){
+    if(!documentContext.state.elements[props.docId]  || !labelSetContext.state.elements[props.labelSetId] || !annoDocumentContext.state.elements[props.docId].labels){
         return (<>loading...</>);
     }
 
@@ -57,29 +55,57 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         setLabelColorDict(newLabelColorDict);
     }
 
-    if (sentences.length != doc.sentences.length) {
-        let newSentences: TokenInfo[][] = [];
+    if (labels.length === 0) {
+
+        if(annoDocumentContext.state.elements[props.docId].labels.length != 0){
+            setLabels(annoDocumentContext.state.elements[props.docId].labels);
+        } else {
+            let newLabels: string[][] = [];
+
+            doc.sentences.forEach((sen) => {
+                let lab: string[] = [];
+                sen.tokens.forEach((tok) => {
+                    lab.push('O')
+                })
+                newLabels.push(lab);
+            })
+
+            setLabels(newLabels);
+        }
+    }
+
+    if (selected.length === 0) {
+        let newSelected: boolean[][] = [];
 
         doc.sentences.forEach((sen) => {
-            let newSen: TokenInfo[] = [];
+            let sel: boolean[] = [];
             sen.tokens.forEach((tok) => {
-                newSen.push({'token': tok.token, 'tag': 'O', 'selected': false})
+                sel.push(false)
             })
-            newSentences.push(newSen);
+            newSelected.push(sel);
         })
 
-        setSentences(newSentences);
+        setSelected(newSelected);
+    }
+
+    if (labels.length === 0 || selected.length === 0){
+        return(<>loading...</>)
     }
 
     const select = (sentenceId: number, tokenId: number) => {
         resetSelection();
 
         setSelection([{'sentenceId': sentenceId, 'tokenId': tokenId}]);
-        sentences[sentenceId][tokenId].selected = true;
+
+        let newSelected = selected;
+        newSelected[sentenceId][tokenId] = true;
+        setSelected(newSelected);
     }
 
     const ctrlSelect = (sentenceId: number, tokenId: number) => {
-        sentences[sentenceId][tokenId].selected = true;
+        let newSelected = selected;
+        newSelected[sentenceId][tokenId] = true;
+        setSelected(newSelected);
 
         let newSelection = selection;
         newSelection.push({'sentenceId': sentenceId, 'tokenId': tokenId})
@@ -91,10 +117,12 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     }
 
     const resetSelection = () => {
+        let newSelected = selected;
         selection.forEach ((ele) => {
-            sentences[ele.sentenceId][ele.tokenId].selected = false;
+            selected[ele.sentenceId][ele.tokenId] = false;
         });
-        setSelection([])
+        setSelected(newSelected);
+        setSelection([]);
     }
 
     const getStyle = (tag: string, selected: boolean) => {
@@ -154,16 +182,16 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         );
     }
 
-    const display = (sents: TokenInfo[][], sel: TokenIndex[]) => {
+    const display = (labs: string[][], sels: boolean[][]) => {
         return(
             <span>
                 {
-                    sents.map((sentence, x) => {
+                    doc.sentences.map((sentence, x) => {
                         return (
                             <span>
                                 {
-                                    sentence.map((token, y) => {
-                                        return (getSpaceAnnoToken(x, y,token.token, token.tag, token.selected));
+                                    sentence.tokens.map((token, y) => {
+                                        return (getSpaceAnnoToken(x, y, token.token, labels[x][y], selected[x][y]));
                                     })
                                 }
                             </span>
@@ -172,6 +200,17 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 }
             </span>
         );
+    }
+
+    const updateLabels = (label: string) => {
+        let newLabels = labels;
+        selection.forEach ((ele) => {
+            labels[ele.sentenceId][ele.tokenId] = label;
+        });
+        setLabels(newLabels);
+        resetSelection();
+
+        annoDocumentContext.onUpdate(props.projectId, props.docId, {'labels': labels, 'relations': [], 'userId': 'HelmKondom'})
     }
 
     return (
@@ -188,10 +227,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                         }} 
                         key={'RESET'}
                         onClick={ () => {
-                            selection.forEach ((ele) => {
-                                sentences[ele.sentenceId][ele.tokenId].tag = 'O';
-                            });
-                            resetSelection();
+                            updateLabels('O');
                         }}
                     >
                         {'RESET'}
@@ -207,10 +243,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                     }} 
                                     key={label.name}
                                     onClick={ () => {
-                                        selection.forEach ((ele) => {
-                                            sentences[ele.sentenceId][ele.tokenId].tag = label.name;
-                                        });
-                                        resetSelection();
+                                        updateLabels(label.name);
                                     }}
                                 >
                                     {label.name.toUpperCase()}
@@ -227,7 +260,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 <div
                     style={{'fontSize': 17, 'lineHeight': 1.5, 'userSelect': 'none'}}
                 >
-                    {display(sentences, selection)}
+                    {display(labels, selected)}
                 </div>
             </Layout.Content>
         </Layout>
