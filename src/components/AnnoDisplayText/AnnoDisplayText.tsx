@@ -93,23 +93,34 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     }
 
     const select = (sentenceId: number, tokenId: number) => {
-        resetSelection();
+        if (selected[sentenceId][tokenId]){
+            resetSelection();
+        }
+        else {
+            resetSelection();
+            addToRemoveFromSelection(sentenceId, tokenId);
+        }
+    }
 
-        setSelection([{'sentenceId': sentenceId, 'tokenId': tokenId}]);
+    const addToRemoveFromSelection = (sentenceId: number, tokenId: number) => {
+        if (selected[sentenceId][tokenId]) {
+            let newSelection = selection.filter((sel) => {
+                return (sel.sentenceId === sentenceId && sel.tokenId === tokenId);
+            })
+            setSelection(newSelection);
+        } else {
+            let newSelection = selection;
+            newSelection.push({'sentenceId': sentenceId, 'tokenId': tokenId})
+            setSelection(newSelection);
+        }
 
-        let newSelected = selected;
-        newSelected[sentenceId][tokenId] = true;
+        let newSelected = selected.slice();
+        newSelected[sentenceId][tokenId] = !selected[sentenceId][tokenId];
         setSelected(newSelected);
     }
 
     const ctrlSelect = (sentenceId: number, tokenId: number) => {
-        let newSelected = selected;
-        newSelected[sentenceId][tokenId] = true;
-        setSelected(newSelected);
-
-        let newSelection = selection;
-        newSelection.push({'sentenceId': sentenceId, 'tokenId': tokenId})
-        setSelection(newSelection);
+        addToRemoveFromSelection(sentenceId, tokenId);
     }
 
     const shftSelect = (sentenceId: number, tokenId: number) => {
@@ -203,14 +214,16 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     }
 
     const updateLabels = (label: string) => {
-        let newLabels = labels;
-        selection.forEach ((ele) => {
-            labels[ele.sentenceId][ele.tokenId] = label;
-        });
-        setLabels(newLabels);
-        resetSelection();
+        if (selection.length > 0) {
+            let newLabels = labels;
+            selection.forEach ((ele) => {
+                labels[ele.sentenceId][ele.tokenId] = label;
+            });
+            setLabels(newLabels);
+            resetSelection();
 
-        annoDocumentContext.onUpdate(props.projectId, props.docId, {'labels': labels, 'relations': [], 'userId': 'HelmKondom'})
+            annoDocumentContext.onUpdate(props.projectId, props.docId, {'labels': labels, 'relations': [], 'userId': 'HelmKondom'})
+        }
     }
 
     return (
