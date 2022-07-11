@@ -1,4 +1,4 @@
-//Author: Alicja Kiluk
+// Author: Alicja Kiluk
 import React from 'react';
 import {Component} from 'react';
 import axios from 'axios';
@@ -10,13 +10,13 @@ import { SelectValue } from 'antd/lib/select';
 
 interface ConvertFormatViewProps {}
 interface ConvertFormatViewState{
-    //selected file can be of type File or null
+    // Selected file can be of type File or null
     selectedFile : File | null
-    //list of uploaded files
+    // List of uploaded files
     fileList : UploadFile[]
-    //format of the uploaded file
+    // Format of the uploaded file
     conversionFrom : string
-    //format one wishes to convert to
+    // Format one wishes to convert to
     conversionTo : string
 }
 
@@ -25,20 +25,20 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
     constructor(props : ConvertFormatViewProps) {
         super(props);
         this.state = {
-            //at the beginning, no file is uploaded
+            // At the beginning, no file is uploaded
             selectedFile : null,
             fileList : Array<UploadFile>(),
-            //formats selected by default
+            // Formats selected by default
             conversionFrom : "auto",
             conversionTo : "conll",
         }
     };
-//on file change
+// On file change
     onFileChange = (file:RcFile) => {
         this.setState({...this.state, selectedFile: file});
         return false;
     };
-//on file upload
+// On file upload
     onFileUpload = () => {
         const formData = new FormData();
         if (this.state.selectedFile)
@@ -67,12 +67,12 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
             console.log(entries[0] + ", " + entries[1]);
         }
         */
-        //post data as binary to server
+        // Post data as binary to server
         axios.post("api/uploadfile", formData);
         return false;
     };
 
-    //update file list
+    // Update file list
     handleChange = (info: UploadChangeParam<UploadFile<any>>) => {
         let newFileList = [...info.fileList];
         //restrict upload to only 1 file
@@ -80,7 +80,7 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
         this.setState({...this.state, fileList : newFileList});
     };
 
-    //select format of uploaded file
+    // Select format of uploaded file
     selectOriginFormat =(value: SelectValue) => {
         if(value)
         {
@@ -88,7 +88,7 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
         }
     };
 
-    //select format for conversion
+    // Select format for conversion
     selectConversionFormat =(value: SelectValue) => {
         if(value)
         {
