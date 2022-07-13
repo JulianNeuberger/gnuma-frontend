@@ -3,6 +3,7 @@ import {Reducer} from 'react';
 import {genericPayloadReducer, GenericPayloadState} from '../common/reducer';
 import {GenericPayloadActions} from '../common/actions';
 
+import {Relation} from '../../views/AnnoDetailsView'
 
 
 export type AnnoDocument = {
@@ -10,7 +11,7 @@ export type AnnoDocument = {
     labeled: boolean;
     userId: string;
     labels: string[][];
-    relations: string[][];
+    relations: Relation[];
 }
 
 export const initialAnnoDocumentState: GenericPayloadState<AnnoDocument> = {

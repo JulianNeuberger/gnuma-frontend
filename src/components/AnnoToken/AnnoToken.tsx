@@ -16,9 +16,9 @@ export default function AnnoToken(props: AnnoTokenProps){
 
     return (
         <span
+            id = {props.sentenceId + '_' + props.tokenId}
             style={{
                 ...props.style,
-                'border': '5px',
                 'borderRadius': 3,
                 'padding': '0.2px'
             }}
