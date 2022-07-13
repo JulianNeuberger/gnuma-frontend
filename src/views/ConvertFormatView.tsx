@@ -35,9 +35,9 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
     };
 // On file change
     onFileChange = (file:RcFile) => {
-        const fileListNew = this.state.selectedFiles;
+        let fileListNew = this.state.selectedFiles;
         fileListNew?.push(file);
-        fileListNew?.slice(-2);
+        fileListNew = fileListNew.slice(-2);
         this.setState({...this.state, selectedFiles: fileListNew});
         return false;
     };
@@ -50,13 +50,13 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
             filenames.push(sentFile.name);
         });
         formData.append(
-            "filename",
+            "filenames",
             JSON.stringify(filenames)
         );
-        this.state.selectedFiles.forEach(function(sentFile)
+        this.state.selectedFiles.forEach(function(sentFile, id)
         {
             formData.append(
-                "file",
+                "file_" + id,
                 sentFile
             );
         });
