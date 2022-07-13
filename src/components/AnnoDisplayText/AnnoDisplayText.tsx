@@ -228,7 +228,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         if (relSelected) {
             style = {
                 ...style,
-                'border': '1px solid black'
+                'border': '2px solid black'
             }
         }
 

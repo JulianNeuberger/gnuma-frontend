@@ -23,9 +23,9 @@ export type Relation = {
     elements: RelationElement[];
 }
 
-
 export default function AnnoDetailsView(){
     const [selection, setSelection] = React.useState<TokenIndex[]>([]);
+    const [selectedRelation, setSelectedRelation] = React.useState<Relation>();
 
     const [onlyRelations, setOnlyRelations] = React.useState<boolean>(false);
     const [relationElements, setRelationElements] = React.useState<RelationElement[]>([]);
@@ -71,8 +71,33 @@ export default function AnnoDetailsView(){
         sendUpdate();
     }
 
+    const selectRelation = (rel: Relation) => {
+        let newSentences = sentences.slice()
+        if (selectedRelation) {
+            selectedRelation.elements.forEach((ele) => {
+                newSentences[ele.sentenceId][ele.tokenId].relSelected = false;
+            });
+        }
+        rel.elements.forEach((ele) => {
+            newSentences[ele.sentenceId][ele.tokenId].relSelected = true;
+        });
+        setSentences(newSentences);
+        setSelectedRelation(rel);
+    }
+
+    const unselectRelation = () => {
+        if (selectedRelation) {
+            let newSentences = sentences.slice()
+            selectedRelation.elements.forEach((ele) => {
+                newSentences[ele.sentenceId][ele.tokenId].relSelected = false;
+            });
+            setSentences(newSentences);
+            setSelectedRelation(undefined);
+        }
+    }
+
     return(
-        <div key={'anno-details-view'}>
+        <div key={'anno-details-view'}  style = {{'userSelect': 'none'}}>
             <Card
                 title = {`${project.name} - ${doc.name}`}
                 extra = {
@@ -147,27 +172,25 @@ export default function AnnoDetailsView(){
                                 </Space>
                             }
                         >
-                            <div>
+                            <div style = {{'userSelect': 'none'}}>
                                 {
                                     relations.map((rel) => {
                                         return(
                                             <AnnoRelation
-                                                name={rel.predicate}
-                                                content={
-                                                    rel.elements.map((ele) => {
-                                                        return (ele.token);
-                                                    })
-                                                }
-                                                highlighted={
-                                                    !onlyRelations && selection.every((sel) => {
+                                                rel = {rel}
+                                                elementSelected={
+                                                    (selection.length > 0) && selection.every((sel) => {
                                                          return (rel.elements.some((rel) => {
                                                             return (sel.sentenceId === rel.sentenceId && sel.tokenId === rel.tokenId);
                                                         }));
                                                     })
                                                 }
+                                                selected={selectedRelation !== undefined && selectedRelation === rel}
                                                 updateRelation={
                                                     (a: string, b: string[]) => {}
                                                 }
+                                                selectRelation={selectRelation}
+                                                unselectRelation={unselectRelation}
                                             />
                                         );
                                     })
