@@ -61,12 +61,6 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
             );
         }
         console.log(this.state.selectedFile);
-        /*
-        for (let entries of formData.entries())
-        {
-            console.log(entries[0] + ", " + entries[1]);
-        }
-        */
         // Post data as binary to server
         axios.post("api/uploadfile", formData);
         return false;
@@ -75,8 +69,8 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
     // Update file list
     handleChange = (info: UploadChangeParam<UploadFile<any>>) => {
         let newFileList = [...info.fileList];
-        //restrict upload to only 1 file
-        newFileList = newFileList.slice(-1);
+        //restrict upload to 2 files (ConLL, GMB and MUC need 1 file, BRAT needs 2)
+        newFileList = newFileList.slice(-2);
         this.setState({...this.state, fileList : newFileList});
     };
 
