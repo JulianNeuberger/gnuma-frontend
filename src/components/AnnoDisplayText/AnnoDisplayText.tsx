@@ -19,13 +19,19 @@ export type TokenIndex = {
     tokenId: number;
 }
 
+export type TokenInfo = {
+    label: string;
+    selected: boolean;
+    relSelected: boolean;
+}
+
 type AnnoDisplayTextProps = {
     projectId: string;
     docId: string;
     labelSetId: string;
 
-    labels: string[][];
-    setLabels: (s: string[][]) => void;
+    sentences: TokenInfo[][];
+    setSentences: (s: TokenInfo[][]) => void;
 
     selection: TokenIndex[];
     setSelection: (t: TokenIndex[]) => void;
@@ -41,7 +47,6 @@ type LabelColorDict = {
 }
 
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
-    const [selected, setSelected] = React.useState<boolean[][]>([]);
     const [labelColorDict, setLabelColorDict] = React.useState<LabelColorDict>({});
 
     const documentContext = React.useContext(DocumentsContext);
@@ -70,60 +75,65 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         setLabelColorDict(newLabelColorDict);
     }
 
-    if (props.labels.length === 0) {
+    if (props.sentences.length === 0) {
 
         if(annoDocumentContext.state.elements[props.docId].labels.length !== 0){
-            props.setLabels(annoDocumentContext.state.elements[props.docId].labels);
-        } else {
-            let newLabels: string[][] = [];
+            let newSentences: TokenInfo[][] = [];
 
-            doc.sentences.forEach((sen) => {
-                let lab: string[] = [];
-                sen.tokens.forEach((tok) => {
-                    lab.push('O')
+            doc.sentences.forEach((sen, x) => {
+                let infos: TokenInfo[] = [];
+                sen.tokens.forEach((tok, y) => {
+                    infos.push({
+                        'label': annoDocumentContext.state.elements[props.docId].labels[x][y],
+                        'selected': false,
+                        'relSelected': false
+                    });
                 })
-                newLabels.push(lab);
+                newSentences.push(infos);
             })
 
-            props.setLabels(newLabels);
+            props.setSentences(newSentences);
+        } else {
+            let newSentences: TokenInfo[][] = [];
+
+            doc.sentences.forEach((sen) => {
+                let infos: TokenInfo[] = [];
+                sen.tokens.forEach((tok) => {
+                    infos.push({
+                        'label': 'O',
+                        'selected': false,
+                        'relSelected': false
+                    });
+                })
+                newSentences.push(infos);
+            })
+
+            props.setSentences(newSentences);
         }
     }
 
-    if (selected.length === 0) {
-        let newSelected: boolean[][] = [];
-
-        doc.sentences.forEach((sen) => {
-            let sel: boolean[] = [];
-            sen.tokens.forEach((tok) => {
-                sel.push(false)
-            })
-            newSelected.push(sel);
-        })
-
-        setSelected(newSelected);
-    }
-
-    if (props.labels.length === 0 || selected.length === 0){
+    // why is react like this :(
+    if (props.sentences.length === 0){
         return(<>loading...</>)
     }
 
     const select = (sentenceId: number, tokenId: number) => {
-        let b = selected[sentenceId][tokenId];
+        let b = props.sentences[sentenceId][tokenId].selected;
         
         resetSelection();
         
         //cant use the arr remove method cause react states are stupid
         // and selection would not be cleared.
         if (!b) {
-            let newSelected = selected.slice();
-            newSelected[sentenceId][tokenId] = true;
-            setSelected(newSelected);
+            let newSentences = props.sentences.slice();
+            newSentences[sentenceId][tokenId].selected = true;
+            props.setSentences(newSentences);
             props.setSelection([{'sentenceId': sentenceId, 'tokenId': tokenId}]);
         }
     }
 
     const addToRemoveFromSelection = (sentenceId: number, tokenId: number) => {
-        if (selected[sentenceId][tokenId]) {
+        if (props.sentences[sentenceId][tokenId].selected) {
             let newSelection = props.selection.filter((sel) => {
                 return (sel.sentenceId === sentenceId && sel.tokenId === tokenId);
             })
@@ -134,25 +144,22 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             props.setSelection(newSelection);
         }
 
-        let newSelected = selected.slice();
-        newSelected[sentenceId][tokenId] = !selected[sentenceId][tokenId];
-        setSelected(newSelected);
+        let newSentences = props.sentences.slice();
+        newSentences[sentenceId][tokenId].selected = !newSentences[sentenceId][tokenId].selected;
+        props.setSentences(newSentences);
     }
 
     const ctrlSelect = (sentenceId: number, tokenId: number) => {
         addToRemoveFromSelection(sentenceId, tokenId);
         
-        
         let b = true;
         let rels: RelationElement[] = [];
-
-        console.log(props.selection.length);
         
         if (props.selection.length > 1) {
             props.selection.forEach((ele) => {
                 //check if not labeled and if selected cause selection length is not consistent.
-                if (selected[ele.sentenceId][ele.tokenId] === true) {
-                    if(props.labels[ele.sentenceId][ele.tokenId] === 'O'){
+                if (props.sentences[ele.sentenceId][ele.tokenId].selected === true) {
+                    if (props.sentences[ele.sentenceId][ele.tokenId].label === 'O') {
                         b = false;
                     } else {
                         //fill element contatining relations
@@ -173,66 +180,80 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     }
 
     const resetSelection = () => {
-        let newSelected = selected;
+        let newSentences = props.sentences.slice();
         props.selection.forEach ((ele) => {
-            selected[ele.sentenceId][ele.tokenId] = false;
+            newSentences[ele.sentenceId][ele.tokenId].selected = false;
         });
-        setSelected(newSelected);
+        props.setSentences(newSentences);
         props.setSelection([]);
         props.setOnlyRelations(false);
         props.setRelations([]);
     }
 
-    const getStyle = (tag: string, selected: boolean) => {
+    const getStyle = (tag: string, selected: boolean, relSelected: boolean) => {
+        //default
+        let style: React.CSSProperties = {
+            'color': 'black',
+            'background': 'white'
+        };
+
+        //selected
+        if (selected === true) {
+            style = {
+                'color': presetPalettes['grey'][8],
+                'background': presetPalettes['grey'][1]
+            };
+        }
+
+        // Has label
         if (tag in labelColorDict){
             let col = labelColorDict[tag]
-            if (selected === true) {
-                return ({
-                    'color': presetPalettes[col][1],
-                    'background': presetPalettes[col][7],
-                    'borderColor': presetPalettes[col][3]
-                });
-            }
-            return ({
+
+            // default label style
+            style = {
                 'color': presetPalettes[col][7],
-                'background': presetPalettes[col][1],
-                'borderColor': presetPalettes[col][3]
-            });
+                'background': presetPalettes[col][1]
+            };
+
+            //colored label style
+            if (selected === true) {
+                style = {
+                    'color': presetPalettes[col][1],
+                    'background': presetPalettes[col][7]
+                };
+            }
         }
 
-        if (selected === true) {
-            return ({
-                'color': presetPalettes['grey'][8],
-                'background': presetPalettes['grey'][1],
-                'borderColor': presetPalettes['grey'][2]
-            });
+        // add border if relSelected
+        if (relSelected) {
+            style = {
+                ...style,
+                'border': '1px solid black'
+            }
         }
-        return ({
-            'color': 'black',
-            'background': 'white',
-            'borderColor': 'white'
-        });
+
+        return style;
     }
 
-    const getSpaceAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean) => {
+    const getSpaceAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean) => {
         if(['.', ',', '!', '?'].includes(text)){
-            return (getAnnoToken(x, y, text, tag, selected));
+            return (getAnnoToken(x, y, text, tag, selected, relSelected));
         }
         return(
             <>
                 <span> </span>
-                {getAnnoToken(x, y, text, tag, selected)}
+                {getAnnoToken(x, y, text, tag, selected, relSelected)}
             </>
         );
     }
 
-    const getAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean) => {
+    const getAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean) => {
         return (
             <AnnoToken 
                 token={text} 
                 sentenceId={x} 
                 tokenId={y} 
-                style={getStyle(tag, selected)} 
+                style={getStyle(tag, selected, relSelected)}
                 select={select}
                 ctrlSelect={ctrlSelect}
                 shftSelect={shftSelect}
@@ -240,7 +261,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         );
     }
 
-    const display = (labs: string[][], sels: boolean[][]) => {
+    const display = (xxx: TokenInfo[][]) => {
         return(
             <span>
                 {
@@ -249,7 +270,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                             <span>
                                 {
                                     sentence.tokens.map((token, y) => {
-                                        return (getSpaceAnnoToken(x, y, token.token, props.labels[x][y], selected[x][y]));
+                                        return (getSpaceAnnoToken(x, y, token.token, props.sentences[x][y].label, props.sentences[x][y].selected, props.sentences[x][y].relSelected));
                                     })
                                 }
                             </span>
@@ -262,11 +283,11 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
     const updateLabels = (label: string) => {
         if (props.selection.length > 0) {
-            let newLabels = props.labels;
+            let newSentences = props.sentences.slice();
             props.selection.forEach ((ele) => {
-                props.labels[ele.sentenceId][ele.tokenId] = label;
+                newSentences[ele.sentenceId][ele.tokenId].label = label;
             });
-            props.setLabels(newLabels);
+            props.setSentences(newSentences);
             resetSelection();
 
             props.sendUpdate();
@@ -320,7 +341,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 <div
                     style={{'fontSize': 17, 'lineHeight': 1.5, 'userSelect': 'none'}}
                 >
-                    {display(props.labels, selected)}
+                    {display(props.sentences)}
                 </div>
             </Layout.Content>
         </Layout>

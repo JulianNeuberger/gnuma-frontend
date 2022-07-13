@@ -5,7 +5,7 @@ import {AnnoProjectContext} from '../components/AnnoProjectContextProvider/AnnoP
 import {AnnoDocumentContext} from '../components/AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
 import AnnoLabelSetTags from '../components/AnnoLabelSetTags/AnnoLabelSetTags';
-import AnnoDisplayText, {RelationElement, TokenIndex} from '../components/AnnoDisplayText/AnnoDisplayText';
+import AnnoDisplayText, {RelationElement, TokenIndex, TokenInfo} from '../components/AnnoDisplayText/AnnoDisplayText';
 import AnnoRelation from '../components/AnnoRelation/AnnoRelation'
 
 import {Button, Space, Card, Layout} from 'antd';
@@ -31,7 +31,7 @@ export default function AnnoDetailsView(){
     const [relationElements, setRelationElements] = React.useState<RelationElement[]>([]);
 
     const [relations, setRelations] = React.useState<Relation[]>([]);
-    const [labels, setLabels] = React.useState<string[][]>([]);
+    const [sentences, setSentences] = React.useState<TokenInfo[][]>([]);
 
     const {projectId, docId} = useParams<AnnodDetailsParams>();
 
@@ -57,7 +57,7 @@ export default function AnnoDetailsView(){
     const project = projectContext.state.elements[projectId];
 
     const sendUpdate = () => {
-        annoDocumentContext.onUpdate(projectId, docId, {'labels': labels, 'relations': relations, 'userId': 'HelmKondom'});
+        annoDocumentContext.onUpdate(projectId, docId, {'labels': sentences.map((sen) => {return(sen.map((tok) => {return(tok.label);}));}), 'relations': relations, 'userId': 'HelmKondom'});
     }
 
     const addRelation = () => {
@@ -122,15 +122,15 @@ export default function AnnoDetailsView(){
                         setOnlyRelations={setOnlyRelations}
                         setRelations={setRelationElements}
                         sendUpdate={sendUpdate}
-                        labels={labels}
-                        setLabels={setLabels}
+                        sentences={sentences}
+                        setSentences={setSentences}
                         selection={selection}
                         setSelection={setSelection}
                     />
 
                     <Layout.Sider
                         style={{backgroundColor: 'white', color: 'black'}}
-                        width={500}
+                        width={400}
                     >
                         <Card
                             title = {'Relations:'}
@@ -158,7 +158,13 @@ export default function AnnoDetailsView(){
                                                         return (ele.token);
                                                     })
                                                 }
-                                                highlighted={false}
+                                                highlighted={
+                                                    !onlyRelations && selection.every((sel) => {
+                                                         return (rel.elements.some((rel) => {
+                                                            return (sel.sentenceId === rel.sentenceId && sel.tokenId === rel.tokenId);
+                                                        }));
+                                                    })
+                                                }
                                                 updateRelation={
                                                     (a: string, b: string[]) => {}
                                                 }

@@ -19,7 +19,6 @@ export default function AnnoToken(props: AnnoTokenProps){
             id = {props.sentenceId + '_' + props.tokenId}
             style={{
                 ...props.style,
-                'borderRadius': 3,
                 'padding': '0.2px'
             }}
             onClick={ (e) => {
