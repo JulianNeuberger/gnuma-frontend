@@ -11,7 +11,7 @@ import { SelectValue } from 'antd/lib/select';
 interface ConvertFormatViewProps {}
 interface ConvertFormatViewState{
     // Selected file can be of type File or null
-    selectedFile : File | null
+    selectedFiles : File[]
     // List of uploaded files
     fileList : UploadFile[]
     // Format of the uploaded file
@@ -26,7 +26,7 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
         super(props);
         this.state = {
             // At the beginning, no file is uploaded
-            selectedFile : null,
+            selectedFiles : Array<RcFile>(),
             fileList : Array<UploadFile>(),
             // Formats selected by default
             conversionFrom : "auto",
@@ -35,32 +35,40 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
     };
 // On file change
     onFileChange = (file:RcFile) => {
-        this.setState({...this.state, selectedFile: file});
+        const fileListNew = this.state.selectedFiles;
+        fileListNew?.push(file);
+        fileListNew?.slice(-2);
+        this.setState({...this.state, selectedFiles: fileListNew});
         return false;
     };
 // On file upload
     onFileUpload = () => {
         const formData = new FormData();
-        if (this.state.selectedFile)
+        const filenames = Array<String>();
+        this.state.selectedFiles.forEach(function(sentFile)
+        {
+            filenames.push(sentFile.name);
+        });
+        formData.append(
+            "filename",
+            JSON.stringify(filenames)
+        );
+        this.state.selectedFiles.forEach(function(sentFile)
         {
             formData.append(
-                "filename",
-                this.state.selectedFile.name
-            );
-            formData.append(
-                "source_format",
-                this.state.conversionFrom
-            );
-            formData.append(
-                "target_format",
-                this.state.conversionTo
-            );
-            formData.append(
                 "file",
-                this.state.selectedFile
+                sentFile
             );
-        }
-        console.log(this.state.selectedFile);
+        });
+        formData.append(
+            "source_format",
+            this.state.conversionFrom
+        );
+        formData.append(
+            "target_format",
+            this.state.conversionTo
+        );
+        console.log(this.state.selectedFiles);
         // Post data as binary to server
         axios.post("api/uploadfile", formData);
         return false;
@@ -69,7 +77,7 @@ class ConvertFormatView extends Component<ConvertFormatViewProps, ConvertFormatV
     // Update file list
     handleChange = (info: UploadChangeParam<UploadFile<any>>) => {
         let newFileList = [...info.fileList];
-        //restrict upload to 2 files (ConLL, GMB and MUC need 1 file, BRAT needs 2)
+        //restrict upload to 2 files (ConLL, GMB and MUC need 1 file, BRAT needs 2np)
         newFileList = newFileList.slice(-2);
         this.setState({...this.state, fileList : newFileList});
     };
