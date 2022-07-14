@@ -40,6 +40,9 @@ type AnnoDisplayTextProps = {
     setRelations: (b: RelationElement[]) => void;
 
     sendUpdate: () => void;
+
+    resetSelection: () => void;
+    resetRelationSelection: () => void;
 }
 
 type LabelColorDict = {
@@ -120,10 +123,9 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     const select = (sentenceId: number, tokenId: number) => {
         let b = props.sentences[sentenceId][tokenId].selected;
         
-        resetSelection();
+        props.resetSelection();
+        props.resetRelationSelection();
         
-        //cant use the arr remove method cause react states are stupid
-        // and selection would not be cleared.
         if (!b) {
             let newSentences = props.sentences.slice();
             newSentences[sentenceId][tokenId].selected = true;
@@ -150,6 +152,8 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     }
 
     const ctrlSelect = (sentenceId: number, tokenId: number) => {
+        props.resetRelationSelection();
+
         addToRemoveFromSelection(sentenceId, tokenId);
         
         let b = true;
@@ -177,17 +181,6 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
     const shftSelect = (sentenceId: number, tokenId: number) => {
         //todo
-    }
-
-    const resetSelection = () => {
-        let newSentences = props.sentences.slice();
-        props.selection.forEach ((ele) => {
-            newSentences[ele.sentenceId][ele.tokenId].selected = false;
-        });
-        props.setSentences(newSentences);
-        props.setSelection([]);
-        props.setOnlyRelations(false);
-        props.setRelations([]);
     }
 
     const getStyle = (tag: string, selected: boolean, relSelected: boolean) => {
@@ -288,7 +281,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 newSentences[ele.sentenceId][ele.tokenId].label = label;
             });
             props.setSentences(newSentences);
-            resetSelection();
+            props.resetSelection();
 
             props.sendUpdate();
         }

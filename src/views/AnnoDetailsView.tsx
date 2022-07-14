@@ -72,6 +72,8 @@ export default function AnnoDetailsView(){
     }
 
     const selectRelation = (rel: Relation) => {
+        resetSelection();
+
         let newSentences = sentences.slice()
         if (selectedRelation) {
             selectedRelation.elements.forEach((ele) => {
@@ -94,6 +96,17 @@ export default function AnnoDetailsView(){
             setSentences(newSentences);
             setSelectedRelation(undefined);
         }
+    }
+
+    const resetSelection = () => {
+        let newSentences = sentences.slice();
+        selection.forEach ((ele) => {
+            newSentences[ele.sentenceId][ele.tokenId].selected = false;
+        });
+        setSentences(newSentences);
+        setSelection([]);
+        setOnlyRelations(false);
+        setRelations([]);
     }
 
     return(
@@ -151,6 +164,8 @@ export default function AnnoDetailsView(){
                         setSentences={setSentences}
                         selection={selection}
                         setSelection={setSelection}
+                        resetSelection={resetSelection}
+                        resetRelationSelection={unselectRelation}
                     />
 
                     <Layout.Sider
