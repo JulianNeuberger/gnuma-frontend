@@ -43,6 +43,9 @@ type AnnoDisplayTextProps = {
 
     resetSelection: () => void;
     resetRelationSelection: () => void;
+
+    tokenMode: number;
+    setTokenMode: (s: number) => void;
 }
 
 type LabelColorDict = {
@@ -51,6 +54,8 @@ type LabelColorDict = {
 
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     const [labelColorDict, setLabelColorDict] = React.useState<LabelColorDict>({});
+
+    const [currentTag, setCurrentTag] = React.useState<string>('');
 
     const documentContext = React.useContext(DocumentsContext);
     const labelSetContext = React.useContext(AnnoLabelSetContext);
@@ -136,9 +141,11 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
     const addToRemoveFromSelection = (sentenceId: number, tokenId: number) => {
         if (props.sentences[sentenceId][tokenId].selected) {
+            console.log(props.selection);
             let newSelection = props.selection.filter((sel) => {
-                return (sel.sentenceId === sentenceId && sel.tokenId === tokenId);
+                return (sel.sentenceId !== sentenceId || sel.tokenId !== tokenId);
             })
+            console.log(newSelection);
             props.setSelection(newSelection);
         } else {
             let newSelection = props.selection;
@@ -174,7 +181,6 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             props.setOnlyRelations(b);
             if (b) {
                 props.setRelations(rels);
-                console.log(rels)
             }
         }   
     }
@@ -250,6 +256,8 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 select={select}
                 ctrlSelect={ctrlSelect}
                 shftSelect={shftSelect}
+                mode={props.tokenMode}
+                applyTag={applyTag}
             />
         );
     }
@@ -284,7 +292,43 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             props.resetSelection();
 
             props.sendUpdate();
+        } else {
+            if (props.tokenMode === 1 && currentTag === label) {
+                props.setTokenMode(0);
+                setCurrentTag('');
+            } else if (props.tokenMode === 1 || props.tokenMode === 0){
+                props.setTokenMode(1);
+                setCurrentTag(label);
+            }
         }
+    }
+
+    const getButtonStyle = (color: string, label: string) => {
+        if (label === currentTag && props.tokenMode === 1) {
+            return (
+                {
+                    'color': presetPalettes[color][1],
+                    'background': presetPalettes[color][7],
+                    'borderColor': presetPalettes[color][3]
+                }
+            );
+        }
+        
+        return (
+            {
+                'color': presetPalettes[color][7],
+                'background': presetPalettes[color][1],
+                'borderColor': presetPalettes[color][3]
+            }
+        );
+    }
+
+    const applyTag = (sentenceId: number, tokenId: number) => {
+        let newSentences = props.sentences.slice();
+        newSentences[sentenceId][tokenId].label = currentTag;
+        props.setSentences(newSentences);
+
+        props.sendUpdate();
     }
 
     return (
@@ -294,31 +338,25 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             >
                 <Space>
                     <Button 
-                        style={{
-                            'color': presetPalettes['grey'][7],
-                            'background': presetPalettes['grey'][1],
-                            'borderColor': presetPalettes['grey'][3]
-                        }} 
+                        style={getButtonStyle('grey', 'O')} 
                         key={'RESET'}
                         onClick={ () => {
                             updateLabels('O');
                         }}
+                        disabled={props.tokenMode === 2}
                     >
-                        {'RESET'}
+                        {'NO LABEL'}
                     </Button>
                     {
                         labelSet.labels.map(label => {
                             return (
                                 <Button 
-                                    style={{
-                                        'color': presetPalettes[label.color][7],
-                                        'background': presetPalettes[label.color][1],
-                                        'borderColor': presetPalettes[label.color][3]
-                                    }} 
+                                    style={getButtonStyle(label.color, label.name)} 
                                     key={label.name}
                                     onClick={ () => {
                                         updateLabels(label.name);
                                     }}
+                                    disabled={props.tokenMode === 2}
                                 >
                                     {label.name.toUpperCase()}
                                 </Button>

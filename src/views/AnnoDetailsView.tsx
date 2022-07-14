@@ -33,6 +33,12 @@ export default function AnnoDetailsView(){
     const [relations, setRelations] = React.useState<Relation[]>([]);
     const [sentences, setSentences] = React.useState<TokenInfo[][]>([]);
 
+    // Modes:
+    // 0 => select token
+    // 1 => assign label to token
+    // 2 => Add/ Remove to relation
+    const [tokenMode, setTokenMode] = React.useState<number>(0);
+
     const {projectId, docId} = useParams<AnnodDetailsParams>();
 
     const documentContext = React.useContext(DocumentsContext);
@@ -68,7 +74,7 @@ export default function AnnoDetailsView(){
         })
         setRelations(newRelations);
 
-        sendUpdate();
+        annoDocumentContext.onUpdate(projectId, docId, {'labels': sentences.map((sen) => {return(sen.map((tok) => {return(tok.label);}));}), 'relations': newRelations, 'userId': 'HelmKondom'});
     }
 
     const selectRelation = (rel: Relation) => {
@@ -85,6 +91,8 @@ export default function AnnoDetailsView(){
         });
         setSentences(newSentences);
         setSelectedRelation(rel);
+
+        setTokenMode(2);
     }
 
     const unselectRelation = () => {
@@ -95,6 +103,8 @@ export default function AnnoDetailsView(){
             });
             setSentences(newSentences);
             setSelectedRelation(undefined);
+
+            setTokenMode(0);
         }
     }
 
@@ -106,7 +116,7 @@ export default function AnnoDetailsView(){
         setSentences(newSentences);
         setSelection([]);
         setOnlyRelations(false);
-        setRelations([]);
+        setRelationElements([]);
     }
 
     return(
@@ -166,6 +176,8 @@ export default function AnnoDetailsView(){
                         setSelection={setSelection}
                         resetSelection={resetSelection}
                         resetRelationSelection={unselectRelation}
+                        tokenMode={tokenMode}
+                        setTokenMode={setTokenMode}
                     />
 
                     <Layout.Sider
