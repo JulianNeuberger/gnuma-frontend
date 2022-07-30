@@ -20,7 +20,8 @@ type AnnodDetailsParams = {
 
 export type Relation = {
     predicate: string;
-    elements: RelationElement[];
+    subject: RelationElement;
+    object: RelationElement;
 }
 
 export default function AnnoDetailsView(){
@@ -70,7 +71,8 @@ export default function AnnoDetailsView(){
         let newRelations = relations.slice();
         newRelations.push({
             'predicate': 'tba',
-            'elements': relationElements
+            'subject': relationElements[0],
+            'object': relationElements[1]
         })
         setRelations(newRelations);
 
@@ -78,6 +80,7 @@ export default function AnnoDetailsView(){
     }
 
     const selectRelation = (rel: Relation) => {
+        /*
         resetSelection();
 
         let newSentences = sentences.slice()
@@ -93,9 +96,11 @@ export default function AnnoDetailsView(){
         setSelectedRelation(rel);
 
         setTokenMode(2);
+        */
     }
 
     const unselectRelation = () => {
+        /*
         if (selectedRelation) {
             let newSentences = sentences.slice()
             selectedRelation.elements.forEach((ele) => {
@@ -106,6 +111,7 @@ export default function AnnoDetailsView(){
 
             setTokenMode(0);
         }
+        */
     }
 
     const resetSelection = () => {
@@ -168,7 +174,8 @@ export default function AnnoDetailsView(){
                         labelSetId={project.labelSetId} 
                         projectId={projectId}
                         setOnlyRelations={setOnlyRelations}
-                        setRelations={setRelationElements}
+                        relations={relations}
+                        setRelationElements={setRelationElements}
                         sendUpdate={sendUpdate}
                         sentences={sentences}
                         setSentences={setSentences}
@@ -205,13 +212,7 @@ export default function AnnoDetailsView(){
                                         return(
                                             <AnnoRelation
                                                 rel = {rel}
-                                                elementSelected={
-                                                    (selection.length > 0) && selection.every((sel) => {
-                                                         return (rel.elements.some((rel) => {
-                                                            return (sel.sentenceId === rel.sentenceId && sel.tokenId === rel.tokenId);
-                                                        }));
-                                                    })
-                                                }
+                                                elementSelected={false}           
                                                 selected={selectedRelation !== undefined && selectedRelation === rel}
                                                 updateRelation={
                                                     (a: string, b: string[]) => {}

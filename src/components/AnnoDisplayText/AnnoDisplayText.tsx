@@ -2,10 +2,12 @@ import React from 'react';
 
 import {Layout, Button, Space} from 'antd';
 import {presetPalettes} from '@ant-design/colors';
+import Xarrow from "react-xarrows";
 
 import {DocumentsContext} from '../../components/DocumentsContextProvider/DocumentsContextProvider'
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 import AnnoToken from '../../components/AnnoToken/AnnoToken'
+import {Relation} from '../../views/AnnoDetailsView'
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
 export type RelationElement = {
@@ -17,10 +19,12 @@ export type RelationElement = {
 export type TokenIndex = {
     sentenceId: number;
     tokenId: number;
+    selectionLength: number;
 }
 
 export type TokenInfo = {
     label: string;
+    labelLength: number;
     selected: boolean;
     relSelected: boolean;
 }
@@ -37,7 +41,9 @@ type AnnoDisplayTextProps = {
     setSelection: (t: TokenIndex[]) => void;
 
     setOnlyRelations: (b: boolean) => void;
-    setRelations: (b: RelationElement[]) => void;
+
+    relations: Relation[];
+    setRelationElements: (b: RelationElement[]) => void;
 
     sendUpdate: () => void;
 
@@ -91,8 +97,10 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             doc.sentences.forEach((sen, x) => {
                 let infos: TokenInfo[] = [];
                 sen.tokens.forEach((tok, y) => {
+                    //todo adjust label length
                     infos.push({
                         'label': annoDocumentContext.state.elements[props.docId].labels[x][y],
+                        'labelLength': 0,
                         'selected': false,
                         'relSelected': false
                     });
@@ -109,6 +117,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 sen.tokens.forEach((tok) => {
                     infos.push({
                         'label': 'O',
+                        'labelLength': 0,
                         'selected': false,
                         'relSelected': false
                     });
@@ -125,7 +134,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         return(<>loading...</>)
     }
 
-    const select = (sentenceId: number, tokenId: number) => {
+    const select = (sentenceId: number, tokenId: number, labelLength: number) => {
         let b = props.sentences[sentenceId][tokenId].selected;
         
         props.resetSelection();
@@ -135,11 +144,11 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             let newSentences = props.sentences.slice();
             newSentences[sentenceId][tokenId].selected = true;
             props.setSentences(newSentences);
-            props.setSelection([{'sentenceId': sentenceId, 'tokenId': tokenId}]);
+            props.setSelection([{'sentenceId': sentenceId, 'tokenId': tokenId, 'selectionLength': labelLength}]);
         }
     }
 
-    const addToRemoveFromSelection = (sentenceId: number, tokenId: number) => {
+    const addToRemoveFromSelection = (sentenceId: number, tokenId: number, labelLength: number) => {
         if (props.sentences[sentenceId][tokenId].selected) {
             console.log(props.selection);
             let newSelection = props.selection.filter((sel) => {
@@ -149,7 +158,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             props.setSelection(newSelection);
         } else {
             let newSelection = props.selection;
-            newSelection.push({'sentenceId': sentenceId, 'tokenId': tokenId})
+            newSelection.push({'sentenceId': sentenceId, 'tokenId': tokenId, 'selectionLength': labelLength}) 
             props.setSelection(newSelection);
         }
 
@@ -158,10 +167,10 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         props.setSentences(newSentences);
     }
 
-    const ctrlSelect = (sentenceId: number, tokenId: number) => {
+    const ctrlSelect = (sentenceId: number, tokenId: number, labelLength: number) => {
         props.resetRelationSelection();
 
-        addToRemoveFromSelection(sentenceId, tokenId);
+        addToRemoveFromSelection(sentenceId, tokenId, labelLength);
         
         let b = true;
         let rels: RelationElement[] = [];
@@ -180,13 +189,19 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             })
             props.setOnlyRelations(b);
             if (b) {
-                props.setRelations(rels);
+                props.setRelationElements(rels);
             }
         }   
     }
 
     const shftSelect = (sentenceId: number, tokenId: number) => {
-        //todo
+        let last = props.selection[props.selection.length - 1];
+        if (last.sentenceId === sentenceId && last.tokenId < tokenId) {
+            last.selectionLength = tokenId - last.tokenId
+            let newSelection = props.selection;
+            newSelection[props.selection.length - 1] = last;
+            props.setSelection(newSelection);
+        }
     }
 
     const getStyle = (tag: string, selected: boolean, relSelected: boolean) => {
@@ -234,24 +249,25 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         return style;
     }
 
-    const getSpaceAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean) => {
+    const getSpaceAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean, labelLength: number) => {
         if(['.', ',', '!', '?'].includes(text)){
-            return (getAnnoToken(x, y, text, tag, selected, relSelected));
+            return (getAnnoToken(x, y, text, tag, selected, relSelected, labelLength));
         }
         return(
             <>
                 <span> </span>
-                {getAnnoToken(x, y, text, tag, selected, relSelected)}
+                {getAnnoToken(x, y, text, tag, selected, relSelected, labelLength)}
             </>
         );
     }
 
-    const getAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean) => {
+    const getAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean, labelLength: number) => {
         return (
             <AnnoToken 
                 token={text} 
                 sentenceId={x} 
-                tokenId={y} 
+                tokenId={y}
+                labelLength={labelLength} 
                 style={getStyle(tag, selected, relSelected)}
                 select={select}
                 ctrlSelect={ctrlSelect}
@@ -271,7 +287,17 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                             <span>
                                 {
                                     sentence.tokens.map((token, y) => {
-                                        return (getSpaceAnnoToken(x, y, token.token, props.sentences[x][y].label, props.sentences[x][y].selected, props.sentences[x][y].relSelected));
+                                        if (props.sentences[x][y].label === 'O') {
+                                            return (getSpaceAnnoToken(x, y, token.token, props.sentences[x][y].label, props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
+                                        }
+                                        if (props.sentences[x][y].label.slice(0,1) == 'B') {
+                                            let token_str = token.token;
+                                            let token_lab = props.sentences[x][y].label.slice(2); // label without b or i tag
+                                            for (let i = 0; i < props.sentences[x][y].labelLength; i++) {
+                                                token_str = token_str + ' ' + sentence.tokens[y+i+1].token;
+                                            }
+                                            return (getSpaceAnnoToken(x, y, token_str, token_lab, props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
+                                        }
                                     })
                                 }
                             </span>
@@ -282,12 +308,53 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         );
     }
 
+    const drawRelations = (rels: Relation[]) => {
+        return (
+            <div>
+                {
+                    rels.map((rel) => {
+                        return(
+                            <Xarrow 
+                                start={rel.subject.sentenceId + '_' + rel.subject.tokenId} 
+                                end={rel.object.sentenceId + '_' + rel.object.tokenId}
+                                startAnchor={{position: 'bottom', offset: {y: 10}}}
+                                endAnchor={{ position: 'bottom', offset: { y: 10 } }}
+                                headSize= {4}
+                                strokeWidth =  {4}
+                                path={'straight'}  
+                                color = {'grey'}
+                                labels= {<span style= {{color: 'black' }}>OwO</span>}
+                            />
+                        );
+                    })
+                }
+            </div>
+        );
+    }
+
     const updateLabels = (label: string) => {
         if (props.selection.length > 0) {
             let newSentences = props.sentences.slice();
-            props.selection.forEach ((ele) => {
-                newSentences[ele.sentenceId][ele.tokenId].label = label;
-            });
+
+            if (label !== 'O') {
+                props.selection.forEach ((ele) => {
+                    newSentences[ele.sentenceId][ele.tokenId].label = 'B-' + label;
+                    newSentences[ele.sentenceId][ele.tokenId].labelLength = ele.selectionLength; 
+                    for (let i = 0; i < ele.selectionLength; i++) {
+                        newSentences[ele.sentenceId][ele.tokenId + i + 1].label = 'I-' + label;
+                    }
+                });
+            } else {
+                props.selection.forEach ((ele) => {
+                    newSentences[ele.sentenceId][ele.tokenId].label = 'O';
+                    newSentences[ele.sentenceId][ele.tokenId].labelLength = 0; 
+                    for (let i = 0; i < ele.selectionLength; i++) {
+                        newSentences[ele.sentenceId][ele.tokenId + i + 1].label = 'O';
+                        newSentences[ele.sentenceId][ele.tokenId].labelLength = 0;
+                    }
+                });
+            }
+
             props.setSentences(newSentences);
             props.resetSelection();
 
@@ -373,6 +440,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                     style={{'fontSize': 17, 'lineHeight': 1.5, 'userSelect': 'none'}}
                 >
                     {display(props.sentences)}
+                    {drawRelations(props.relations)}
                 </div>
             </Layout.Content>
         </Layout>

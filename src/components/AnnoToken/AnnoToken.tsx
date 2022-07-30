@@ -6,10 +6,11 @@ type AnnoTokenProps = {
     sentenceId: number;
     tokenId: number;
     token: string;
+    labelLength: number;
     style: React.CSSProperties;
 
-    select: (sentenceId: number, tokenId: number) => void;
-    ctrlSelect: (sentenceId: number, tokenId: number) => void;
+    select: (sentenceId: number, tokenId: number, labelLength: number) => void;
+    ctrlSelect: (sentenceId: number, tokenId: number, labelLength: number) => void;
     shftSelect: (sentenceId: number, tokenId: number) => void;
 
     mode: number;
@@ -28,11 +29,11 @@ export default function AnnoToken(props: AnnoTokenProps){
             onClick={ (e) => {
                 if (props.mode === 0) {
                     if (e.ctrlKey) {
-                        props.ctrlSelect(props.sentenceId, props.tokenId);
+                        props.ctrlSelect(props.sentenceId, props.tokenId, props.labelLength);
                     } else if (e.shiftKey) {
                         props.shftSelect(props.sentenceId, props.tokenId);
                     } else {
-                        props.select(props.sentenceId, props.tokenId);
+                        props.select(props.sentenceId, props.tokenId, props.labelLength);
                     }
                 } else if (props.mode === 1) {
                     props.applyTag(props.sentenceId, props.tokenId);

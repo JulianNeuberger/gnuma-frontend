@@ -44,23 +44,6 @@ export default function AnnoRelation(props: AnnoRelationProps){
         return style;
     }
 
-    const displayContent = () => {
-        return (
-            <span>
-                (
-                {
-                    props.rel.elements.map((ele, x) => {
-                        if (x === props.rel.elements.length - 1) {
-                            return (<>{ele.token}</>);
-                        }
-                        return(<>{ele.token}, </>)
-                    })
-                }
-                )
-            </span>
-        );
-    }
-
     return (
         <div
             style = {getStyle()}
@@ -72,7 +55,7 @@ export default function AnnoRelation(props: AnnoRelationProps){
                 }
             }}
         >
-            {props.rel.predicate}{' -> '}{displayContent()}
+            {props.rel.subject.token}{' --- '}{props.rel.predicate}{' ---> '}{props.rel.object.token}
         </div>
     );
 }
