@@ -26,6 +26,7 @@ export type TokenInfo = {
     label: string;
     labelLength: number;
     selected: boolean;
+    selectionLength: number;
     relSelected: boolean;
 }
 
@@ -102,6 +103,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                         'label': annoDocumentContext.state.elements[props.docId].labels[x][y],
                         'labelLength': 0,
                         'selected': false,
+                        'selectionLength': 0,
                         'relSelected': false
                     });
                 })
@@ -119,6 +121,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                         'label': 'O',
                         'labelLength': 0,
                         'selected': false,
+                        'selectionLength': 0,
                         'relSelected': false
                     });
                 })
@@ -143,6 +146,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         if (!b) {
             let newSentences = props.sentences.slice();
             newSentences[sentenceId][tokenId].selected = true;
+            newSentences[sentenceId][tokenId].selectionLength = 0;
             props.setSentences(newSentences);
             props.setSelection([{'sentenceId': sentenceId, 'tokenId': tokenId, 'selectionLength': labelLength}]);
         }
@@ -163,6 +167,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         }
 
         let newSentences = props.sentences.slice();
+        newSentences[sentenceId][tokenId].selectionLength = 0;
         newSentences[sentenceId][tokenId].selected = !newSentences[sentenceId][tokenId].selected;
         props.setSentences(newSentences);
     }
@@ -195,12 +200,20 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     }
 
     const shftSelect = (sentenceId: number, tokenId: number) => {
-        let last = props.selection[props.selection.length - 1];
-        if (last.sentenceId === sentenceId && last.tokenId < tokenId) {
-            last.selectionLength = tokenId - last.tokenId
-            let newSelection = props.selection;
-            newSelection[props.selection.length - 1] = last;
-            props.setSelection(newSelection);
+        if (props.selection.length > 0) {
+            let last = props.selection[props.selection.length - 1];
+            if (last.sentenceId === sentenceId && last.tokenId < tokenId) {
+                let len = tokenId - last.tokenId;
+
+                let newSentences = props.sentences.slice();
+                newSentences[last.sentenceId][last.tokenId].selectionLength = len;
+                props.setSentences(newSentences);
+
+                last.selectionLength = len;
+                let newSelection = props.selection;
+                newSelection[props.selection.length - 1] = last;
+                props.setSelection(newSelection);
+            }
         }
     }
 
@@ -283,20 +296,33 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             <span>
                 {
                     doc.sentences.map((sentence, x) => {
+                        let count_down = 0;
                         return (
                             <span>
                                 {
                                     sentence.tokens.map((token, y) => {
-                                        if (props.sentences[x][y].label === 'O') {
-                                            return (getSpaceAnnoToken(x, y, token.token, props.sentences[x][y].label, props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
-                                        }
-                                        if (props.sentences[x][y].label.slice(0,1) == 'B') {
-                                            let token_str = token.token;
-                                            let token_lab = props.sentences[x][y].label.slice(2); // label without b or i tag
-                                            for (let i = 0; i < props.sentences[x][y].labelLength; i++) {
-                                                token_str = token_str + ' ' + sentence.tokens[y+i+1].token;
+                                        if (count_down > 0) {
+                                            count_down--;
+                                        } else {
+                                            if (props.sentences[x][y].label === 'O') {
+                                                if (props.sentences[x][y].selected === false) {
+                                                    return (getSpaceAnnoToken(x, y, token.token, props.sentences[x][y].label, props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
+                                                }
+                                                let token_str = token.token;
+                                                for (let i = 0; i < props.sentences[x][y].selectionLength; i++) {
+                                                    token_str = token_str + ' ' + sentence.tokens[y+i+1].token;
+                                                }
+                                                count_down = props.sentences[x][y].selectionLength;
+                                                return (getSpaceAnnoToken(x, y, token_str, 'O', props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
                                             }
-                                            return (getSpaceAnnoToken(x, y, token_str, token_lab, props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
+                                            if (props.sentences[x][y].label.slice(0,1) == 'B') {
+                                                let token_str = token.token;
+                                                let token_lab = props.sentences[x][y].label.slice(2); // label without b or i tag
+                                                for (let i = 0; i < props.sentences[x][y].labelLength; i++) {
+                                                    token_str = token_str + ' ' + sentence.tokens[y+i+1].token;
+                                                }
+                                                return (getSpaceAnnoToken(x, y, token_str, token_lab, props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
+                                            }
                                         }
                                     })
                                 }
