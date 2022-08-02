@@ -7,6 +7,7 @@ import Xarrow from "react-xarrows";
 import {DocumentsContext} from '../../components/DocumentsContextProvider/DocumentsContextProvider'
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 import AnnoToken from '../../components/AnnoToken/AnnoToken'
+import AnnoRelationArrow from '../../components/AnnoRelationArrow/AnnoRelationArrow'
 import {Relation} from '../../views/AnnoDetailsView'
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
@@ -92,7 +93,8 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
     if (props.sentences.length === 0) {
 
-        if(annoDocumentContext.state.elements[props.docId].labels.length !== 0){
+        if(annoDocumentContext.state.elements[props.docId].labels.length !== 0
+            && annoDocumentContext.state.elements[props.docId].labelLength.length !== 0){
             let newSentences: TokenInfo[][] = [];
 
             doc.sentences.forEach((sen, x) => {
@@ -101,7 +103,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                     //todo adjust label length
                     infos.push({
                         'label': annoDocumentContext.state.elements[props.docId].labels[x][y],
-                        'labelLength': 0,
+                        'labelLength': annoDocumentContext.state.elements[props.docId].labelLength[x][y],
                         'selected': false,
                         'selectionLength': 0,
                         'relSelected': false
@@ -340,16 +342,8 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 {
                     rels.map((rel) => {
                         return(
-                            <Xarrow 
-                                start={rel.subject.sentenceId + '_' + rel.subject.tokenId} 
-                                end={rel.object.sentenceId + '_' + rel.object.tokenId}
-                                startAnchor={{position: 'bottom', offset: {y: 10}}}
-                                endAnchor={{ position: 'bottom', offset: { y: 10 } }}
-                                headSize= {4}
-                                strokeWidth =  {4}
-                                path={'straight'}  
-                                color = {'grey'}
-                                labels= {<span style= {{color: 'black' }}>OwO</span>}
+                            <AnnoRelationArrow
+                                rel={rel}
                             />
                         );
                     })
@@ -463,7 +457,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 style={{backgroundColor: 'White'}}
             >
                 <div
-                    style={{'fontSize': 17, 'lineHeight': 1.5, 'userSelect': 'none'}}
+                    style={{'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}
                 >
                     {display(props.sentences)}
                     {drawRelations(props.relations)}

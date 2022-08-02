@@ -11,6 +11,7 @@ export type AnnoDocument = {
     labeled: boolean;
     userId: string;
     labels: string[][];
+    labelLength: number[][];
     relations: Relation[];
 }
 

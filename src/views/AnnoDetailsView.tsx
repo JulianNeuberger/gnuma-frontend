@@ -64,7 +64,13 @@ export default function AnnoDetailsView(){
     const project = projectContext.state.elements[projectId];
 
     const sendUpdate = () => {
-        annoDocumentContext.onUpdate(projectId, docId, {'labels': sentences.map((sen) => {return(sen.map((tok) => {return(tok.label);}));}), 'relations': relations, 'userId': 'HelmKondom'});
+        annoDocumentContext.onUpdate(projectId, docId, 
+            {
+                'labels': sentences.map((sen) => {return(sen.map((tok) => {return(tok.label);}));}), 
+                'relations': relations,
+                'labelLength': sentences.map((sen) => {return(sen.map((tok) => {return(tok.labelLength);}));}),
+                'userId': 'HelmKondom'
+            });
     }
 
     const addRelation = () => {
