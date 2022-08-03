@@ -4,6 +4,7 @@ import {apiUrlBuilder, checkResponse} from './common';
 import {AnnoProject, UnPersistedAnnoProject} from  '../state/anno/annoProjectReducer';
 import {AnnoDocument} from '../state/anno/annoDocumentReducer';
 import {AnnoLabelSet, UnPersistedAnnoLabelSet} from '../state/anno/annoLabelSetReducer'
+import {AnnoRelationSet, UnPersistedAnnoRelationSet} from '../state/anno/annoRelationSetReducer'
 
 export const API_HOST = process.env.REACT_APP_ANNO_SERVICE_API_HOST;
 export const API_PORT = process.env.REACT_APP_ANNO_SERVICE_API_PORT;
@@ -149,9 +150,41 @@ export const createAnnoLabelSet = async (labelSet: UnPersistedAnnoLabelSet): Pro
     return getSingleAnnoLabelSet(data);
 }
 
-// Get the metadata for a lable set.
+// Get single lable set.
 export const getSingleAnnoLabelSet = async (labelSetId: string): Promise<AnnoLabelSet> => {
     const endpoint = getApiUrl(`labels/${labelSetId}`);
+    const response = await fetch(endpoint);
+    checkResponse(response);
+    return await response.json();
+}
+
+
+// Get list of all relation sets.
+export const getAllAnnoRelationSets = async (): Promise<AnnoRelationSet[]> => {
+    const response = await fetch(getApiUrl('relations'));
+    checkResponse(response);
+    return await response.json();
+}
+
+// Create a new relation set.
+export const createAnnoRelationSet = async (relationSet: UnPersistedAnnoRelationSet): Promise<AnnoRelationSet> => {
+    const endpoint = getApiUrl('realtions');
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(relationSet)
+    });
+    checkResponse(response);
+
+    const data = await response.json();
+    return getSingleAnnoRelationSet(data);
+}
+
+// Get single relation set.
+export const getSingleAnnoRelationSet = async (relationSetId: string): Promise<AnnoRelationSet> => {
+    const endpoint = getApiUrl(`relations/${relationSetId}`);
     const response = await fetch(endpoint);
     checkResponse(response);
     return await response.json();

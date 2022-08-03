@@ -8,12 +8,15 @@ import {FieldData} from 'rc-field-form/lib/interface';
 import AnnoProjectList from '../components/AnnoProjectList/AnnoProjectList'
 
 import {AnnoProjectContext} from '../components/AnnoProjectContextProvider/AnnoProjectContextProvider'
-import {AnnoLabelSetContext} from '../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 
 import AnnoLabelSetSelection from '../components/AnnoLabelSetSelection/AnnoLabelSetSelection'
 import AnnoLabelSetCreation from '../components/AnnoLabelSetCreation/AnnoLabelSetCreation'
+import AnnoRelationSetSelection from '../components/AnnoRelationSetSelection/AnnoRelationSetSelection'
+import AnnoRelationSetCreation from '../components/AnnoRelationSetCreation/AnnoRelationSetCreation'
+
 
 import {AnnoLabel} from '../state/anno/annoLabelSetReducer'
+import {AnnoRelationType} from '../state/anno/annoRelationSetReducer'
 
 
 export type MetaData = {
@@ -21,6 +24,7 @@ export type MetaData = {
     date: string;
     creator: string;
     labelSetId: string;
+    relationSetId: string;
     [key: string]: any;
 }
 
@@ -31,12 +35,20 @@ export type LabelSetMetaData = {
     colors: string[];
 }
 
+export type RelationSetMetaData = {
+    name: string;
+    relationTypeName: string;
+    relationTypes: AnnoRelationType[];
+    colors: string[];
+}
+
 export default function AnnoView(){
     const projectContext = React.useContext(AnnoProjectContext);
-    const labelSetConext = React.useContext(AnnoLabelSetContext);
 
     const [modalVisible, setModalVisible] = React.useState(false);
     const [labelSetCreationVisible, setLabelSetCreationVisible] = React.useState(false);
+    const [relationSetCreationVisible, setRelationSetCreationVisible] = React.useState(false);
+
     const [currentStep, setCurrentStep] = React.useState(0);
 
     const {Step} = Steps;
@@ -45,7 +57,8 @@ export default function AnnoView(){
         name: '',
         date: '',
         creator: '',
-        labelSetId: ''
+        labelSetId: '',
+        relationSetId: ''
     });
     const [labelSetMetaData, setLabelSetMetaData] = React.useState<LabelSetMetaData>({
         name: '',
@@ -54,12 +67,20 @@ export default function AnnoView(){
         colors: ['red', 'green', 'blue', 'yellow', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano']
     });
 
+    const [relationSetMetaData, setRelationSetMetaData] = React.useState<RelationSetMetaData>({
+        name: '',
+        relationTypeName: '',
+        relationTypes: [],
+        colors: ['red', 'green', 'blue', 'yellow', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano']
+    });
+
     const resetMetaData = () => {
         setMetaData({
             name: '',
             date: '',
             creator: '',
-            labelSetId: ''
+            labelSetId: '',
+            relationSetId: ''
         })
     }
 
@@ -168,7 +189,26 @@ export default function AnnoView(){
             action: (
                 <>
                     <Button onClick={() => {setLabelSetCreationVisible(true)}}>New Label Set</Button>
-                    <Button onClick={executeCreate} disabled={!metaData['labelSetId']}>Create</Button> 
+                    <Button onClick={nextStep} disabled={!metaData['labelSetId']}>Next</Button> 
+                </>)
+        },
+        {
+            title: 'Choose A Relation Set',
+            content: (
+                <AnnoRelationSetSelection 
+                    showSelection={true}
+                    onSelectionChanged={(id: string) => {
+                        let newMetaData = {...metaData};
+                        newMetaData['relationSetId'] = id;
+                        setMetaData(newMetaData);
+                    }}
+                    selected={[metaData['relationSetId']]}
+                />
+                ),
+            action: (
+                <>
+                    <Button onClick={() => {setRelationSetCreationVisible(true)}}>New Relation Set</Button>
+                    <Button onClick={executeCreate} disabled={!metaData['relationSetId']}>Create Project</Button> 
                 </>)
         }
     ]
@@ -214,6 +254,18 @@ export default function AnnoView(){
                         (labelSetId) => {
                             let newMetaData = metaData;
                             newMetaData['labelSetId'] = labelSetId;
+                            setMetaData(newMetaData);
+                        }
+                    }
+                />
+
+                <AnnoRelationSetCreation 
+                    modalVisible={relationSetCreationVisible}
+                    setModalVisible={setRelationSetCreationVisible}
+                    onCreate={
+                        (relationSetId) => {
+                            let newMetaData = metaData;
+                            newMetaData['relationSetId'] = relationSetId;
                             setMetaData(newMetaData);
                         }
                     }

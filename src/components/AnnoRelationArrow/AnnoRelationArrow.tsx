@@ -17,7 +17,7 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
                 end={props.rel.object.sentenceId + '_' + props.rel.object.tokenId}
                 startAnchor={[{position: 'left', offset: {y: 10}}, { position: 'right', offset: {y: 10}}, {position: 'top', offset: {x: 5}}, {position: 'bottom', offset: {x: 5}}]}
                 endAnchor={[{position: 'left', offset: {y: 10}}, { position: 'right', offset: {y: 10}}, {position: 'top', offset: {x: -5}}, {position: 'bottom', offset: {x: -5}}]}
-                strokeWidth= {3}
+                strokeWidth= {2}
                 headSize={4}
                 path={'straight'}  
                 color = {'grey'}
