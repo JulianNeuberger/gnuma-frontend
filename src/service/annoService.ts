@@ -168,7 +168,7 @@ export const getAllAnnoRelationSets = async (): Promise<AnnoRelationSet[]> => {
 
 // Create a new relation set.
 export const createAnnoRelationSet = async (relationSet: UnPersistedAnnoRelationSet): Promise<AnnoRelationSet> => {
-    const endpoint = getApiUrl('realtions');
+    const endpoint = getApiUrl('relations');
     const response = await fetch(endpoint, {
         method: 'POST',
         headers: {

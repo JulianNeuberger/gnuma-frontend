@@ -10,13 +10,15 @@ import {AnnoProject} from '../../state/anno/annoProjectReducer';
 import {AnnoLabelSet} from '../../state/anno/annoLabelSetReducer';
 
 import AnnoLabelSetTags from '../../components/AnnoLabelSetTags/AnnoLabelSetTags';
+import AnnoRelationSetTags from '../../components/AnnoRelationSetTags/AnnoRelationSetTags';
+
 
 import {AnnoProjectContext} from '../../components/AnnoProjectContextProvider/AnnoProjectContextProvider'
 
 import {FieldData} from 'rc-field-form/lib/interface';
 
 
-type AnnoProjectColumn = 'name' | 'date' | 'creator' | 'labelSet' | 'actions';
+type AnnoProjectColumn = 'name' | 'date' | 'creator' | 'labelSet' | 'relationSet' | 'actions';
 
 export type MetaData = {
     name: string;
@@ -67,7 +69,7 @@ export default function AnnoProjectList(props: AnnoProjectListProps){
         setMetaData(newMetaData);
     }
 
-    const visibleColumns = props.visibleColumns || ['name', 'creator', 'date' , 'labelSet'];
+    const visibleColumns = props.visibleColumns || ['name', 'creator', 'date' , 'labelSet', 'relationSet'];
 
     if (props.showActions) {
         visibleColumns.push('actions');
@@ -89,13 +91,24 @@ export default function AnnoProjectList(props: AnnoProjectListProps){
             key: 'creator'
         },
         labelSet: {
-            title: 'LabelSet',
+            title: 'Label Set',
             dataIndex: '',
             key: 'labelSet',
             render: (_, record) => {
                 //return(<>Sadge</>);
                 return(
                         <AnnoLabelSetTags id={record.labelSetId}/>
+                );
+            }
+        },
+        relationSet: {
+            title: 'Relation Set',
+            dataIndex: '',
+            key: 'relationSet',
+            render: (_, record) => {
+                //return(<>Sadge</>);
+                return(
+                        <AnnoRelationSetTags id={record.relationSetId}/>
                 );
             }
         },

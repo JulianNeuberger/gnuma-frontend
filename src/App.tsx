@@ -23,7 +23,8 @@ import DatasetsContextProvider from './components/DatasetsContextProvider/Datase
 import DocumentsContextProvider from './components/DocumentsContextProvider/DocumentsContextProvider';
 import AnnoProjectContextProvider from './components/AnnoProjectContextProvider/AnnoProjectContextProvider';
 import AnnoDocumentContextProvider from './components/AnnoDocumentContextProvider/AnnoDocumentContextProvider';
-import AnnoLabelSetContextProvider from './components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
+import AnnoLabelSetContextProvider from './components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider';
+import AnnoRelationSetContextProvider from './components/AnnoRelationSetContextProvider/AnnoRelationSetContextProvider';
 import LogsContextProvider from './components/LogsContextProvider/LogsContextProvider';
 import DebugConfigView from './views/DebugConfigView';
 
@@ -127,23 +128,25 @@ function App() {
                 <AnnoProjectContextProvider>
                     <AnnoDocumentContextProvider>
                         <AnnoLabelSetContextProvider>
-                            <LogsContextProvider>
-                                <Layout style={{minHeight: '100vh'}}>
-                                    <Header style={{color: color.primary, fontSize: '1.25em'}}>
-                                        GNUMA
-                                    </Header>
-                                    <Layout>
-                                        <Sider>
-                                            {renderMenu()}
-                                        </Sider>
-                                        <Content
-                                            className={'gnuma-view'}
-                                        >
-                                            {renderContent()}
-                                        </Content>
+                            <AnnoRelationSetContextProvider>
+                                <LogsContextProvider>
+                                    <Layout style={{minHeight: '100vh'}}>
+                                        <Header style={{color: color.primary, fontSize: '1.25em'}}>
+                                            GNUMA
+                                        </Header>
+                                        <Layout>
+                                            <Sider>
+                                                {renderMenu()}
+                                            </Sider>
+                                            <Content
+                                                className={'gnuma-view'}
+                                            >
+                                                {renderContent()}
+                                            </Content>
+                                        </Layout>
                                     </Layout>
-                                </Layout>
-                            </LogsContextProvider>
+                                </LogsContextProvider>
+                            </AnnoRelationSetContextProvider>
                         </AnnoLabelSetContextProvider>
                     </AnnoDocumentContextProvider>
                 </AnnoProjectContextProvider>

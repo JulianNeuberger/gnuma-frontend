@@ -174,7 +174,7 @@ export default function AnnoView(){
             action: (<Button onClick={nextStep} type={'primary'} disabled={!metaData['name'] || !metaData['creator']}>Next</Button>)
         },
         {
-            title: 'Choose A Label Set',
+            title: 'Choose Label Set',
             content: (
                 <AnnoLabelSetSelection 
                     showSelection={true}
@@ -193,7 +193,7 @@ export default function AnnoView(){
                 </>)
         },
         {
-            title: 'Choose A Relation Set',
+            title: 'Choose Relation Set',
             content: (
                 <AnnoRelationSetSelection 
                     showSelection={true}

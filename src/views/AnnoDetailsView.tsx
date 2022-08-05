@@ -7,13 +7,14 @@ import {AnnoDocumentContext} from '../components/AnnoDocumentContextProvider/Ann
 import AnnoLabelSetTags from '../components/AnnoLabelSetTags/AnnoLabelSetTags';
 import AnnoDisplayText, {RelationElement, TokenIndex, TokenInfo} from '../components/AnnoDisplayText/AnnoDisplayText';
 import AnnoRelation from '../components/AnnoRelation/AnnoRelation'
+import AnnoDisplayRelation from '../components/AnnoDisplayRelation/AnnoDisplayRelation';
 
 import {Button, Space, Card, Layout} from 'antd';
 import {UpOutlined, CheckOutlined, PlusOutlined, UndoOutlined, RedoOutlined} from '@ant-design/icons';
 
 import {Link, useParams} from 'react-router-dom';
 
-type AnnodDetailsParams = {
+type AnnoDetailsParams = {
     projectId: string;
     docId: string;
 }
@@ -28,7 +29,7 @@ export default function AnnoDetailsView(){
     const [selection, setSelection] = React.useState<TokenIndex[]>([]);
     const [selectedRelation, setSelectedRelation] = React.useState<Relation>();
 
-    const [onlyRelations, setOnlyRelations] = React.useState<boolean>(false);
+    const [twoRelations, setTwoRelations] = React.useState<boolean>(false);
     const [relationElements, setRelationElements] = React.useState<RelationElement[]>([]);
 
     const [relations, setRelations] = React.useState<Relation[]>([]);
@@ -40,7 +41,7 @@ export default function AnnoDetailsView(){
     // 2 => Add/ Remove to relation
     const [tokenMode, setTokenMode] = React.useState<number>(0);
 
-    const {projectId, docId} = useParams<AnnodDetailsParams>();
+    const {projectId, docId} = useParams<AnnoDetailsParams>();
 
     const documentContext = React.useContext(DocumentsContext);
     const projectContext = React.useContext(AnnoProjectContext);
@@ -73,16 +74,17 @@ export default function AnnoDetailsView(){
             });
     }
 
-    const addRelation = () => {
+    const addRelation = (predicate: string) => {
         let newRelations = relations.slice();
         newRelations.push({
-            'predicate': 'tba',
+            'predicate': predicate,
             'subject': relationElements[0],
             'object': relationElements[1]
         })
         setRelations(newRelations);
 
-        annoDocumentContext.onUpdate(projectId, docId, {'labels': sentences.map((sen) => {return(sen.map((tok) => {return(tok.label);}));}), 'relations': newRelations, 'userId': 'HelmKondom'});
+        sendUpdate();
+        resetSelection();
     }
 
     const selectRelation = (rel: Relation) => {
@@ -127,7 +129,7 @@ export default function AnnoDetailsView(){
         });
         setSentences(newSentences);
         setSelection([]);
-        setOnlyRelations(false);
+        setTwoRelations(false);
         setRelationElements([]);
     }
 
@@ -179,7 +181,7 @@ export default function AnnoDetailsView(){
                         docId={docId} 
                         labelSetId={project.labelSetId} 
                         projectId={projectId}
-                        setOnlyRelations={setOnlyRelations}
+                        setTwoRelations={setTwoRelations}
                         relations={relations}
                         setRelationElements={setRelationElements}
                         sendUpdate={sendUpdate}
@@ -197,40 +199,17 @@ export default function AnnoDetailsView(){
                         style={{backgroundColor: 'white', color: 'black'}}
                         width={400}
                     >
-                        <Card
-                            title = {'Relations:'}
-                            extra = {
-                                <Space>
-                                    <Button
-                                        type = {'default'}
-                                        onClick={addRelation}
-                                        icon= {<PlusOutlined/>}
-                                        disabled = {!onlyRelations}
-                                    >
-                                        Add Relation
-                                    </Button>
-                                </Space>
-                            }
-                        >
-                            <div style = {{'userSelect': 'none'}}>
-                                {
-                                    relations.map((rel) => {
-                                        return(
-                                            <AnnoRelation
-                                                rel = {rel}
-                                                elementSelected={false}           
-                                                selected={selectedRelation !== undefined && selectedRelation === rel}
-                                                updateRelation={
-                                                    (a: string, b: string[]) => {}
-                                                }
-                                                selectRelation={selectRelation}
-                                                unselectRelation={unselectRelation}
-                                            />
-                                        );
-                                    })
-                                }
-                            </div>
-                        </Card>
+                        <AnnoDisplayRelation
+                            docId={docId} 
+                            relationSetId={project.relationSetId} 
+                            projectId={projectId}
+                            relations={relations}
+                            setRelations={setRelations}
+                            addRelation={addRelation}
+                            twoRelations={twoRelations}
+                            selectedRelation={selectedRelation}
+                            setSelectedRelation={setSelectedRelation}
+                        />
                     </Layout.Sider>
                 </Layout>
             </Card>

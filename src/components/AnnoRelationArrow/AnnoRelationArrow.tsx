@@ -6,6 +6,7 @@ import {Relation} from '../../views/AnnoDetailsView'
 
 type AnnoRelationArrowProps = {
     rel: Relation;
+    color: string;
 }
 
 export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
@@ -20,7 +21,7 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
                 strokeWidth= {2}
                 headSize={4}
                 path={'straight'}  
-                color = {'grey'}
+                color = {props.color}
                 labels= {<span style= {{color: 'black' }}></span>}
             />
         </>

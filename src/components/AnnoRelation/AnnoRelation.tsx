@@ -10,10 +10,7 @@ type AnnoRelationProps = {
     elementSelected: boolean;
     selected: boolean;
 
-    selectRelation: (rel: Relation) => void;
-    unselectRelation: () => void;
-
-    updateRelation: (name: string, content: string[]) => void;
+    setSelectedRelation: (rel: Relation) => void;
 }
 
 export default function AnnoRelation(props: AnnoRelationProps){
@@ -48,11 +45,13 @@ export default function AnnoRelation(props: AnnoRelationProps){
         <div
             style = {getStyle()}
             onClick = {() => {
+                /*
                 if (props.selected) {
-                    props.unselectRelation()
+                    props.setSelectedRelation(undefined);
                 } else {
-                    props.selectRelation(props.rel)
+                    props.setSelectedRelation(props.rel)
                 }
+                */
             }}
         >
             {props.rel.subject.token}{' --- '}{props.rel.predicate}{' ---> '}{props.rel.object.token}

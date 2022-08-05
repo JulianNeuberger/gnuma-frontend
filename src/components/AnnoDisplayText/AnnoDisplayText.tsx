@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Layout, Button, Space} from 'antd';
 import {presetPalettes} from '@ant-design/colors';
-import Xarrow from "react-xarrows";
+import Xarrow from 'react-xarrows';
 
 import {DocumentsContext} from '../../components/DocumentsContextProvider/DocumentsContextProvider'
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
@@ -42,7 +42,7 @@ type AnnoDisplayTextProps = {
     selection: TokenIndex[];
     setSelection: (t: TokenIndex[]) => void;
 
-    setOnlyRelations: (b: boolean) => void;
+    setTwoRelations: (b: boolean) => void;
 
     relations: Relation[];
     setRelationElements: (b: RelationElement[]) => void;
@@ -194,7 +194,10 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                     }
                 }
             })
-            props.setOnlyRelations(b);
+            if (rels.length !== 2) {
+                b = false;
+            }
+            props.setTwoRelations(b);
             if (b) {
                 props.setRelationElements(rels);
             }
@@ -336,22 +339,6 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         );
     }
 
-    const drawRelations = (rels: Relation[]) => {
-        return (
-            <div>
-                {
-                    rels.map((rel) => {
-                        return(
-                            <AnnoRelationArrow
-                                rel={rel}
-                            />
-                        );
-                    })
-                }
-            </div>
-        );
-    }
-
     const updateLabels = (label: string) => {
         if (props.selection.length > 0) {
             let newSentences = props.sentences.slice();
@@ -452,7 +439,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                         })
                     }
                 </Space> 
-            </Layout.Header>
+            </Layout.Header> 
             <Layout.Content
                 style={{backgroundColor: 'White'}}
             >
@@ -460,7 +447,6 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                     style={{'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}
                 >
                     {display(props.sentences)}
-                    {drawRelations(props.relations)}
                 </div>
             </Layout.Content>
         </Layout>

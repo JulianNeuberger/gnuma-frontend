@@ -9,6 +9,7 @@ export type AnnoProject = {
     date: string;
     creator: string;
     labelSetId: string;
+    relationSetId: string;
 }
 
 export type UnPersistedAnnoProject = {
@@ -16,6 +17,7 @@ export type UnPersistedAnnoProject = {
     date: string;
     creator: string;
     labelSetId: string;
+    relationSetId: string;
 }
 
 export const initialAnnoProjectState: GenericPayloadState<AnnoProject> = {
