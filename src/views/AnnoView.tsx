@@ -1,7 +1,7 @@
 import React from 'react';
 
-import {Button, Card, Modal, Steps, Row, Col, Divider, Form, Input, Switch} from 'antd';
-import {PlusOutlined} from '@ant-design/icons';
+import {Button, Card, Modal, Steps, Row, Col, Divider, Form, Input, Switch, Space} from 'antd';
+import {PlusOutlined, UserOutlined} from '@ant-design/icons';
 
 import {FieldData} from 'rc-field-form/lib/interface';
 
@@ -18,6 +18,25 @@ import AnnoRelationSetCreation from '../components/AnnoRelationSetCreation/AnnoR
 import {AnnoLabel} from '../state/anno/annoLabelSetReducer'
 import {AnnoRelationType} from '../state/anno/annoRelationSetReducer'
 
+// Set a cookie with the userId so it does not have to be entered every time
+export const setUserIdCookie = (uId: string) => {
+    //Set cookie for 30 days
+    const d = new Date();
+    d.setTime(d.getTime() + (30*24*60*60*1000));
+
+    document.cookie = 'userId=' + uId + '; expires=' + d.toUTCString() +'; path=/;';
+}
+
+// Read the userId cookie and reset the expiration date
+export const getUserIdCookie = (): string =>  {
+    let cookie = document.cookie;
+    if (cookie !== '') {
+        let uId = cookie.substring(7, cookie.length);
+        setUserIdCookie(uId);
+        return uId;
+    }
+    return '';
+}
 
 export type MetaData = {
     name: string;
@@ -48,6 +67,10 @@ export default function AnnoView(){
     const [modalVisible, setModalVisible] = React.useState(false);
     const [labelSetCreationVisible, setLabelSetCreationVisible] = React.useState(false);
     const [relationSetCreationVisible, setRelationSetCreationVisible] = React.useState(false);
+    const [setUserIdVisible, setSetUserIdVisible] = React.useState(false);
+
+    const [userId, setUserId] = React.useState<string>(getUserIdCookie());
+    const [userIdInput, setUserIdInput] = React.useState<string>('');
 
     const [currentStep, setCurrentStep] = React.useState(0);
 
@@ -218,13 +241,22 @@ export default function AnnoView(){
             <Card
                 title = {'Annotation projects'}
                 extra = {
-                    <Button
-                        type = {'primary'}
-                        icon = {<PlusOutlined/>}
-                        onClick={() => setModalVisible(true)}
-                    >
-                        New 
-                    </Button>
+                    <Space>
+                        <Button
+                            type = {'primary'}
+                            icon = {<PlusOutlined/>}
+                            onClick={() => setModalVisible(true)}
+                        >
+                            New
+                        </Button>
+                        <UserOutlined/>
+                        {userId}
+                        <Button
+                            onClick={() => setSetUserIdVisible(true)}
+                        >
+                            Set UserId
+                        </Button>
+                    </Space>
                 }
             >
                 <Modal
@@ -245,6 +277,45 @@ export default function AnnoView(){
                             {steps[currentStep].content}
                         </div>
                     </div>
+                </Modal>
+
+                <Modal
+                    title={'Set UserId'}
+                    width={600}
+                    visible={setUserIdVisible}
+                    onCancel={() => {
+                        setSetUserIdVisible(false);
+                        setUserIdInput('');
+                    }}
+                    footer={
+                        <Button
+                            disabled={userIdInput === ''}
+                            onClick={() => {
+                                setUserId(userIdInput);
+                                setUserIdCookie(userIdInput)
+                                setSetUserIdVisible(false);
+                                setUserIdInput('');
+                            }}
+                        >
+                            Set UserId
+                        </Button>
+                    }
+                >
+                    <Form
+                        id='userIdForm'
+                    >
+                        <Form.Item
+                            label={'UserId'}
+                            name={'userId'}
+                        >
+                            <Input
+                                type='text'
+                                placeholder={'Type id here'}
+                                defaultValue={userId}
+                                onChange={(e) => setUserIdInput(e.target.value)}
+                            />
+                        </Form.Item>
+                    </Form>
                 </Modal>
 
                 <AnnoLabelSetCreation 

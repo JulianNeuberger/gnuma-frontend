@@ -5,6 +5,7 @@ import {AnnoProject, UnPersistedAnnoProject} from  '../state/anno/annoProjectRed
 import {AnnoDocument} from '../state/anno/annoDocumentReducer';
 import {AnnoLabelSet, UnPersistedAnnoLabelSet} from '../state/anno/annoLabelSetReducer'
 import {AnnoRelationSet, UnPersistedAnnoRelationSet} from '../state/anno/annoRelationSetReducer'
+import {getUserIdCookie} from "../views/AnnoView";
 
 export const API_HOST = process.env.REACT_APP_ANNO_SERVICE_API_HOST;
 export const API_PORT = process.env.REACT_APP_ANNO_SERVICE_API_PORT;
@@ -81,10 +82,9 @@ export const getAllAnnoDocuments = async (projectId: string): Promise<AnnoDocume
 }
 
 // Get single document.
-export const getSingleAnnoDocument = async (projectId: string, docId: string): Promise<AnnoDocument> => {
-    const endpoint = getApiUrl(`projects/${projectId}/docs/${docId}`);
+export const getSingleAnnoDocument = async (projectId: string, docId: string, userId: string): Promise<AnnoDocument> => {
+    const endpoint = getApiUrl(`projects/${projectId}/docs/${docId}/user/${userId}`);
 
-    //TODO Make dynamic
     const response = await fetch(endpoint)
     checkResponse(response);
     return await response.json();
@@ -102,13 +102,19 @@ export const addAnnoDocument = async (projectId: string, docId: string): Promise
     });
     checkResponse(response);
 
-    return getSingleAnnoDocument(projectId, docId);
+    return getSingleAnnoDocument(projectId, docId, getUserIdCookie());
 }
 
 // Delete a document.
 export const deleteAnnoDocument = async (projectId: string, docId: string): Promise<void> => {
-    const endpoint = getApiUrl(`projects/${projectId}/docs/${docId}`)
-    const response = await fetch(endpoint, {method: 'DELETE',});
+    const endpoint = getApiUrl(`projects/${projectId}/docs`)
+    const response = await fetch(endpoint, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({'docId': docId})
+    });
     checkResponse(response)
 }
 
@@ -120,8 +126,8 @@ export const getAllAnnoLabelSets = async (): Promise<AnnoLabelSet[]> => {
 }
 
 // Update Labels and relations.
-export const updateAnnoDocument = async (projectId: string, docId: string, document: Partial<AnnoDocument>): Promise<AnnoDocument> => {
-    const endpoint = getApiUrl(`projects/${projectId}/docs/${docId}`);
+export const updateAnnoDocument = async (projectId: string, docId: string, userId: string, document: Partial<AnnoDocument>): Promise<AnnoDocument> => {
+    const endpoint = getApiUrl(`projects/${projectId}/docs/${docId}/user/${userId}`);
     const response = await fetch(endpoint, {
         method: 'PATCH',
         headers: {
@@ -131,7 +137,7 @@ export const updateAnnoDocument = async (projectId: string, docId: string, docum
     });
     checkResponse(response);
 
-    return await getSingleAnnoDocument(projectId, docId);
+    return await getSingleAnnoDocument(projectId, docId, userId);
 }
 
 // Create a new label set.

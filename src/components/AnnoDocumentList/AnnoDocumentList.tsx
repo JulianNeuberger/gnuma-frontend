@@ -13,7 +13,7 @@ import {Document} from '../../state/documents/reducer'
 
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
-type AnnoDocumentColumn = 'name' | 'labeled' | 'actions';
+type AnnoDocumentColumn = 'name' | 'labeled' | 'labeledBy' | 'actions';
 
 export type AnnoDocumentListProps = {
     projectId: string;
@@ -37,7 +37,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
 
     const [docDict, setDocDict] = React.useState<DocDict>({});
 
-    const visibleColumns = props.visibleColumns || ['name', 'labeled'];
+    const visibleColumns = props.visibleColumns || ['name', 'labeled', 'labeledBy'];
     if (props.showActions) {
         visibleColumns.push('actions');
     }
@@ -82,6 +82,11 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
                 }
                 return(<CloseCircleFilled style={{color: 'red', fontSize: '24px'}}/>);
             }
+        },
+        labeledBy: {
+            title: 'Labeled by',
+            dataIndex: 'labeledBy',
+            key: 'labeled'
         },
         actions: {
             title: 'Actions',

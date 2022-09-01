@@ -39,12 +39,12 @@ export function buildGenericCreate<T, P>(dispatch: Dispatch<GenericPayloadAction
     }
 }
 
-export function buildGenericUpdate<T>(dispatch: Dispatch<GenericPayloadActions<T>>, updater: (projectId: string, docId: string, changes: Partial<T>) => Promise<T>) {
-    return async (projectId: string, docId: string, changes: Partial<T>) => {
+export function buildGenericUpdate<T>(dispatch: Dispatch<GenericPayloadActions<T>>, updater: (projectId: string, docId: string, userId: string, changes: Partial<T>) => Promise<T>) {
+    return async (projectId: string, docId: string, userId: string, changes: Partial<T>) => {
         const messageKey = `update-${docId}`;
         try {
             message.loading({content: 'Updating...', key: messageKey});
-            const updatedElement = await updater(projectId, docId, changes);
+            const updatedElement = await updater(projectId, docId, userId, changes);
             message.success({
                 content: `Update successful!`,
                 key: messageKey
@@ -62,13 +62,13 @@ export function buildGenericUpdate<T>(dispatch: Dispatch<GenericPayloadActions<T
     }
 }
 
-export function buildGenericFetchOne<T>(dispatch: Dispatch<GenericPayloadActions<T>>, fetcher: (projectId: string, docId: string) => Promise<T>) {
-    return async (projectId: string, docId: string) => {
+export function buildGenericFetchOne<T>(dispatch: Dispatch<GenericPayloadActions<T>>, fetcher: (projectId: string, docId: string, userId: string) => Promise<T>) {
+    return async (projectId: string, docId: string, userId: string) => {
         try {
             dispatch({
                 type: 'START_FETCH'
             });
-            const data = await fetcher(projectId, docId);
+            const data = await fetcher(projectId, docId, userId);
             dispatch({
                 type: 'SET_ONE',
                 payload: data

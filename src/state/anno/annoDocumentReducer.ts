@@ -9,7 +9,7 @@ import {Relation} from '../../views/AnnoDetailsView'
 export type AnnoDocument = {
     id: string;
     labeled: boolean;
-    userId: string;
+    labeledBy: string[];
     labels: string[][];
     labelLength: number[][];
     relations: Relation[];

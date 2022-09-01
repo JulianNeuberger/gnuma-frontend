@@ -9,9 +9,9 @@ type AnnoDocumentContextType = {
     state: GenericPayloadState<AnnoDocument>;
     onFetchAll: (projectId: string) => void;
     onCreate: (projectId: string, docId: string) => void;
-    onFetchOne: (projectId: string, docId: string) => void;
+    onFetchOne: (projectId: string, docId: string, userId: string) => void;
     onDelete: (projectId: string, docId: string) => void;
-    onUpdate: (projectId: string, docId: string, document: Partial<AnnoDocument>) => void;
+    onUpdate: (projectId: string, docId: string, userId: string, document: Partial<AnnoDocument>) => void;
 }
 
 const missingProviderError = (name: string) => {

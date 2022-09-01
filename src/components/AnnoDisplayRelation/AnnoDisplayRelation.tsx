@@ -14,6 +14,7 @@ import {Relation} from '../../views/AnnoDetailsView'
 type AnnoDisplayRelationProps = {
     projectId: string;
     docId: string;
+    userId: string;
     relationSetId: string;
 
     relations: Relation[];
@@ -38,7 +39,7 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
     const annoDocumentContext = React.useContext(AnnoDocumentContext);
 
     React.useEffect(() => {
-        annoDocumentContext.onFetchOne(props.projectId, props.docId);
+        annoDocumentContext.onFetchOne(props.projectId, props.docId, props.userId);
         relationSetContext.onFetchOne(props.relationSetId);
     }, []);
 

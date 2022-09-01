@@ -10,9 +10,10 @@ import AnnoRelation from '../components/AnnoRelation/AnnoRelation'
 import AnnoDisplayRelation from '../components/AnnoDisplayRelation/AnnoDisplayRelation';
 
 import {Button, Space, Card, Layout} from 'antd';
-import {UpOutlined, CheckOutlined, PlusOutlined, UndoOutlined, RedoOutlined} from '@ant-design/icons';
+import {UpOutlined, CheckOutlined, PlusOutlined, UndoOutlined, RedoOutlined, UserOutlined} from '@ant-design/icons';
 
 import {Link, useParams} from 'react-router-dom';
+import {getUserIdCookie} from "./AnnoView";
 
 type AnnoDetailsParams = {
     projectId: string;
@@ -35,6 +36,8 @@ export default function AnnoDetailsView(){
     const [relations, setRelations] = React.useState<Relation[]>([]);
     const [sentences, setSentences] = React.useState<TokenInfo[][]>([]);
 
+    const [userId, setUserId] = React.useState<string>(getUserIdCookie);
+
     // Modes:
     // 0 => select token
     // 1 => assign label to token
@@ -50,7 +53,7 @@ export default function AnnoDetailsView(){
     React.useEffect(() => {
         documentContext.onFetchOne(docId);
         projectContext.onFetchOne(projectId);
-        annoDocumentContext.onFetchOne(projectId, docId);
+        annoDocumentContext.onFetchOne(projectId, docId, userId);
     }, []);
 
     if (!documentContext.state.elements[docId]  || !projectContext.state.elements[projectId] || !annoDocumentContext.state.elements[docId] || !annoDocumentContext.state.elements[docId].relations){
@@ -64,13 +67,21 @@ export default function AnnoDetailsView(){
     const doc = documentContext.state.elements[docId];
     const project = projectContext.state.elements[projectId];
 
-    const sendUpdate = () => {
-        annoDocumentContext.onUpdate(projectId, docId, 
+    const sendUpdate = (labeled: boolean) => {
+        if (labeled){
+            annoDocumentContext.onUpdate(projectId, docId, userId,
+                {
+                    'labels': sentences.map((sen) => {return(sen.map((tok) => {return(tok.label);}));}),
+                    'relations': relations,
+                    'labelLength': sentences.map((sen) => {return(sen.map((tok) => {return(tok.labelLength);}));}),
+                    'labeled': true,
+                });
+        }
+        annoDocumentContext.onUpdate(projectId, docId, userId,
             {
                 'labels': sentences.map((sen) => {return(sen.map((tok) => {return(tok.label);}));}), 
                 'relations': relations,
                 'labelLength': sentences.map((sen) => {return(sen.map((tok) => {return(tok.labelLength);}));}),
-                'userId': 'HelmKondom'
             });
     }
 
@@ -83,7 +94,7 @@ export default function AnnoDetailsView(){
         })
         setRelations(newRelations);
 
-        sendUpdate();
+        sendUpdate(false);
         resetSelection();
     }
 
@@ -156,7 +167,7 @@ export default function AnnoDetailsView(){
 
                         <Button
                             type = {'primary'}
-                            onClick={() => console.log('todo')}
+                            onClick={() => sendUpdate(true)}
                             icon= {<CheckOutlined/>}
                         >
                             Mark as labeled
@@ -173,6 +184,9 @@ export default function AnnoDetailsView(){
                                 All Documents
                             </Button>
                         </Link>
+
+                        <UserOutlined/>
+                        {userId}
                     </Space>
                 }
             >
@@ -181,6 +195,7 @@ export default function AnnoDetailsView(){
                         docId={docId} 
                         labelSetId={project.labelSetId} 
                         projectId={projectId}
+                        userId={userId}
                         setTwoRelations={setTwoRelations}
                         relations={relations}
                         setRelationElements={setRelationElements}
@@ -203,6 +218,7 @@ export default function AnnoDetailsView(){
                             docId={docId} 
                             relationSetId={project.relationSetId} 
                             projectId={projectId}
+                            userId={userId}
                             relations={relations}
                             setRelations={setRelations}
                             addRelation={addRelation}

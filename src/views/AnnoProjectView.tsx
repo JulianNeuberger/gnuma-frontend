@@ -1,7 +1,7 @@
 import React, {useContext, useEffect} from 'react';
 
 import {Button, Card, Modal, Steps, Space, Divider, Form, Input} from 'antd';
-import {PlusOutlined, UpOutlined} from '@ant-design/icons';
+import {PlusOutlined, UpOutlined, UserOutlined} from '@ant-design/icons';
 
 import {FieldData} from 'rc-field-form/lib/interface';
 
@@ -11,9 +11,8 @@ import DocumentsList from '../components/DocumentList/DocumentsList'
 import {AnnoProjectContext} from '../components/AnnoProjectContextProvider/AnnoProjectContextProvider'
 import {AnnoDocumentContext} from '../components/AnnoDocumentContextProvider/AnnoDocumentContextProvider'
 
-import {AnnoProject} from '../state/anno/annoProjectReducer'
-
 import {Link, useParams} from 'react-router-dom';
+import {getUserIdCookie} from "./AnnoView";
 
 type AnnoProjectParams = {
     projectId: string;
@@ -23,7 +22,9 @@ export default function AnnoProjectView(){
     const {projectId} = useParams<AnnoProjectParams>();
 
     const projectContext = React.useContext(AnnoProjectContext);
-    const documentContext = React.useContext(AnnoDocumentContext)
+    const documentContext = React.useContext(AnnoDocumentContext);
+
+    const [userId, setUserId] = React.useState<string>(getUserIdCookie);
 
     const [modalVisible, setModalVisible] = React.useState(false);
     const [documents, setDocuments] = React.useState<string[]>([]);
@@ -74,6 +75,9 @@ export default function AnnoProjectView(){
                                 All Projects
                             </Button>
                         </Link>
+
+                        <UserOutlined/>
+                        {userId}
                     </Space>
                 }
             >

@@ -34,6 +34,7 @@ export type TokenInfo = {
 type AnnoDisplayTextProps = {
     projectId: string;
     docId: string;
+    userId: string;
     labelSetId: string;
 
     sentences: TokenInfo[][];
@@ -47,7 +48,7 @@ type AnnoDisplayTextProps = {
     relations: Relation[];
     setRelationElements: (b: RelationElement[]) => void;
 
-    sendUpdate: () => void;
+    sendUpdate: (b: boolean) => void;
 
     resetSelection: () => void;
     resetRelationSelection: () => void;
@@ -72,7 +73,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     React.useEffect(() => {
         documentContext.onFetchOne(props.docId);
         labelSetContext.onFetchOne(props.labelSetId);
-        annoDocumentContext.onFetchOne(props.projectId, props.docId);
+        annoDocumentContext.onFetchOne(props.projectId, props.docId, props.userId);
     }, []);
 
     if(!documentContext.state.elements[props.docId]  || !labelSetContext.state.elements[props.labelSetId] || !annoDocumentContext.state.elements[props.docId] || !annoDocumentContext.state.elements[props.docId].labels){
@@ -365,7 +366,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             props.setSentences(newSentences);
             props.resetSelection();
 
-            props.sendUpdate();
+            props.sendUpdate(false);
         } else {
             if (props.tokenMode === 1 && currentTag === label) {
                 props.setTokenMode(0);
@@ -402,7 +403,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         newSentences[sentenceId][tokenId].label = currentTag;
         props.setSentences(newSentences);
 
-        props.sendUpdate();
+        props.sendUpdate(false);
     }
 
     return (
