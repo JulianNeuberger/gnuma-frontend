@@ -85,8 +85,21 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
         },
         labeledBy: {
             title: 'Labeled by',
-            dataIndex: 'labeledBy',
-            key: 'labeled'
+            dataIndex: '',
+            key: 'labeled',
+            render: (_, record) => {
+                if(record.labeled){
+                    let str = ''
+                    record.labeledBy.forEach((x, i) => {
+                        if (i !== 0) {
+                            str = str + ', ';
+                        }
+                        str = str + x;
+                    })
+                    return(str);
+                }
+                return('');
+            }
         },
         actions: {
             title: 'Actions',

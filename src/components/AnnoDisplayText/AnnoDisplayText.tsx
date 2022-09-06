@@ -52,9 +52,6 @@ type AnnoDisplayTextProps = {
 
     resetSelection: () => void;
     resetRelationSelection: () => void;
-
-    tokenMode: number;
-    setTokenMode: (s: number) => void;
 }
 
 type LabelColorDict = {
@@ -63,8 +60,6 @@ type LabelColorDict = {
 
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     const [labelColorDict, setLabelColorDict] = React.useState<LabelColorDict>({});
-
-    const [currentTag, setCurrentTag] = React.useState<string>('');
 
     const documentContext = React.useContext(DocumentsContext);
     const labelSetContext = React.useContext(AnnoLabelSetContext);
@@ -291,8 +286,6 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 select={select}
                 ctrlSelect={ctrlSelect}
                 shftSelect={shftSelect}
-                mode={props.tokenMode}
-                applyTag={applyTag}
             />
         );
     }
@@ -367,28 +360,10 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             props.resetSelection();
 
             props.sendUpdate(false);
-        } else {
-            if (props.tokenMode === 1 && currentTag === label) {
-                props.setTokenMode(0);
-                setCurrentTag('');
-            } else if (props.tokenMode === 1 || props.tokenMode === 0){
-                props.setTokenMode(1);
-                setCurrentTag(label);
-            }
         }
     }
 
     const getButtonStyle = (color: string, label: string) => {
-        if (label === currentTag && props.tokenMode === 1) {
-            return (
-                {
-                    'color': presetPalettes[color][1],
-                    'background': presetPalettes[color][7],
-                    'borderColor': presetPalettes[color][3]
-                }
-            );
-        }
-        
         return (
             {
                 'color': presetPalettes[color][7],
@@ -396,14 +371,6 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 'borderColor': presetPalettes[color][3]
             }
         );
-    }
-
-    const applyTag = (sentenceId: number, tokenId: number) => {
-        let newSentences = props.sentences.slice();
-        newSentences[sentenceId][tokenId].label = currentTag;
-        props.setSentences(newSentences);
-
-        props.sendUpdate(false);
     }
 
     return (
@@ -418,7 +385,6 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                         onClick={ () => {
                             updateLabels('O');
                         }}
-                        disabled={props.tokenMode === 2}
                     >
                         {'NO LABEL'}
                     </Button>
@@ -431,7 +397,6 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                     onClick={ () => {
                                         updateLabels(label.name);
                                     }}
-                                    disabled={props.tokenMode === 2}
                                 >
                                     {label.name.toUpperCase()}
                                 </Button>

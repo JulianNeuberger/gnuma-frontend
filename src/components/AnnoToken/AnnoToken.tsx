@@ -12,9 +12,6 @@ type AnnoTokenProps = {
     select: (sentenceId: number, tokenId: number, labelLength: number) => void;
     ctrlSelect: (sentenceId: number, tokenId: number, labelLength: number) => void;
     shftSelect: (sentenceId: number, tokenId: number) => void;
-
-    mode: number;
-    applyTag: (sentenceId: number, tokenId: number) => void;
 } 
 
 export default function AnnoToken(props: AnnoTokenProps){
@@ -27,16 +24,12 @@ export default function AnnoToken(props: AnnoTokenProps){
                 'padding': '0.2px'
             }}
             onClick={ (e) => {
-                if (props.mode === 0) {
-                    if (e.ctrlKey) {
-                        props.ctrlSelect(props.sentenceId, props.tokenId, props.labelLength);
-                    } else if (e.shiftKey) {
-                        props.shftSelect(props.sentenceId, props.tokenId);
-                    } else {
-                        props.select(props.sentenceId, props.tokenId, props.labelLength);
-                    }
-                } else if (props.mode === 1) {
-                    props.applyTag(props.sentenceId, props.tokenId);
+                if (e.ctrlKey) {
+                    props.ctrlSelect(props.sentenceId, props.tokenId, props.labelLength);
+                } else if (e.shiftKey) {
+                    props.shftSelect(props.sentenceId, props.tokenId);
+                } else {
+                    props.select(props.sentenceId, props.tokenId, props.labelLength);
                 }
             }}
         >

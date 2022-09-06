@@ -4,9 +4,7 @@ import {DocumentsContext} from '../components/DocumentsContextProvider/Documents
 import {AnnoProjectContext} from '../components/AnnoProjectContextProvider/AnnoProjectContextProvider';
 import {AnnoDocumentContext} from '../components/AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
-import AnnoLabelSetTags from '../components/AnnoLabelSetTags/AnnoLabelSetTags';
 import AnnoDisplayText, {RelationElement, TokenIndex, TokenInfo} from '../components/AnnoDisplayText/AnnoDisplayText';
-import AnnoRelation from '../components/AnnoRelation/AnnoRelation'
 import AnnoDisplayRelation from '../components/AnnoDisplayRelation/AnnoDisplayRelation';
 
 import {Button, Space, Card, Layout} from 'antd';
@@ -36,13 +34,7 @@ export default function AnnoDetailsView(){
     const [relations, setRelations] = React.useState<Relation[]>([]);
     const [sentences, setSentences] = React.useState<TokenInfo[][]>([]);
 
-    const [userId, setUserId] = React.useState<string>(getUserIdCookie);
-
-    // Modes:
-    // 0 => select token
-    // 1 => assign label to token
-    // 2 => Add/ Remove to relation
-    const [tokenMode, setTokenMode] = React.useState<number>(0);
+    const [userId, setUserId] = React.useState<string>(getUserIdCookie());
 
     const {projectId, docId} = useParams<AnnoDetailsParams>();
 
@@ -169,6 +161,7 @@ export default function AnnoDetailsView(){
                             type = {'primary'}
                             onClick={() => sendUpdate(true)}
                             icon= {<CheckOutlined/>}
+                            disabled={annoDocumentContext.state.elements[docId].labeled && (annoDocumentContext.state.elements[docId].labeledBy.includes(userId))}
                         >
                             Mark as labeled
                         </Button>
@@ -206,8 +199,6 @@ export default function AnnoDetailsView(){
                         setSelection={setSelection}
                         resetSelection={resetSelection}
                         resetRelationSelection={unselectRelation}
-                        tokenMode={tokenMode}
-                        setTokenMode={setTokenMode}
                     />
 
                     <Layout.Sider
