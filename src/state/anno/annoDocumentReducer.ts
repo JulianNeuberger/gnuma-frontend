@@ -5,7 +5,7 @@ import {GenericPayloadActions} from '../common/actions';
 
 import {Relation} from '../../views/AnnoDetailsView'
 
-
+// Anno document type
 export type AnnoDocument = {
     id: string;
     labeled: boolean;

@@ -5,6 +5,7 @@ import {createAnnoProject, getAllAnnoProjects, deleteAnnoProject, getSingleAnnoP
 import {buildGenericCreate, buildGenericFetchAll, buildGenericDeleteSingle, buildGenericFetchOne, buildGenericUpdate} from '../../util/presentation'
 import {GenericPayloadState} from '../../state/common/reducer'
 
+// props for the project context.
 type AnnoProjectContextType = {
 	state: GenericPayloadState<AnnoProject>;
 	onFetchAll: () => void;
@@ -20,6 +21,7 @@ const missingProviderError = (name: string) => {
 	}
 }
 
+// The project context.
 export const AnnoProjectContext = createContext<AnnoProjectContextType>({
 	state: initialAnnoProjectState,
 	onFetchAll: missingProviderError('onFetchAll'),
@@ -33,6 +35,7 @@ type AnnoProjectContextProviderProps = {
 	children: React.ReactChildren | React.ReactNode;
 }
 
+// the context provider.
 const AnnoProjectContextProvider = (props: AnnoProjectContextProviderProps) => {
 	const [projects, dispatch] = useReducer(AnnoProjectReducer, initialAnnoProjectState);
 

@@ -5,13 +5,7 @@ import {Dispatch} from 'react';
 import {GenericPayloadActions} from '../../state/common/actions';
 
 
-export const missingProviderError = (name: string) => {
-    return () => {
-        console.error(`Context callback "${name}" not available, did you forget to wrap ` +
-            'your top level view into the applicable ContextProvider?');
-    }
-}
-
+// Default Error Message
 export const defaultErrorMessage = (e: any, messageKey?: string) => {
     console.error(e);
     message.error({content: e.message, key: messageKey});
@@ -20,6 +14,7 @@ export const defaultErrorMessage = (e: any, messageKey?: string) => {
     }
 }
 
+// Generic create with one id.
 export function buildGenericCreate<T, P>(dispatch: Dispatch<GenericPayloadActions<T>>, creator: (projectId: string, payload: P) => Promise<T>) {
     return async (projectId: string, payload: P) => {
         try {
@@ -39,6 +34,7 @@ export function buildGenericCreate<T, P>(dispatch: Dispatch<GenericPayloadAction
     }
 }
 
+// generic update for three ids.
 export function buildGenericUpdate<T>(dispatch: Dispatch<GenericPayloadActions<T>>, updater: (projectId: string, docId: string, userId: string, changes: Partial<T>) => Promise<T>) {
     return async (projectId: string, docId: string, userId: string, changes: Partial<T>) => {
         const messageKey = `update-${docId}`;
@@ -62,6 +58,7 @@ export function buildGenericUpdate<T>(dispatch: Dispatch<GenericPayloadActions<T
     }
 }
 
+// generic fetch one for three ids.
 export function buildGenericFetchOne<T>(dispatch: Dispatch<GenericPayloadActions<T>>, fetcher: (projectId: string, docId: string, userId: string) => Promise<T>) {
     return async (projectId: string, docId: string, userId: string) => {
         try {
@@ -82,6 +79,7 @@ export function buildGenericFetchOne<T>(dispatch: Dispatch<GenericPayloadActions
     }
 }
 
+// generic fetch all for one id.
 export function buildGenericFetchAll<T>(dispatch: Dispatch<GenericPayloadActions<T>>, fetcher: (projectId: string) => Promise<T[]>) {
     return async (projectId: string) => {
         try {
@@ -102,6 +100,7 @@ export function buildGenericFetchAll<T>(dispatch: Dispatch<GenericPayloadActions
     }
 }
 
+// generic delete for two ids.
 export function buildGenericDeleteSingle<T>(dispatch: Dispatch<GenericPayloadActions<T>>, deleter: (projectId: string, docId: string) => Promise<void>) {
     return async (projectId: string, docId: string) => {
         const messageKey = `delete-${docId}`;

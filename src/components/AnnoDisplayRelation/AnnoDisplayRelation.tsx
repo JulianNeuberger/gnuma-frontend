@@ -11,6 +11,7 @@ import AnnoRelation from '../../components/AnnoRelation/AnnoRelation'
 
 import {Relation} from '../../views/AnnoDetailsView'
 
+// Props that contain all info needed for displaying relations.
 type AnnoDisplayRelationProps = {
     projectId: string;
     docId: string;
@@ -28,10 +29,12 @@ type AnnoDisplayRelationProps = {
     twoRelations: boolean;
 }
 
+// Used for building a dict that contains the colors of relation types.
 type RelationColorDict = {
     [label: string]: string;
 }
 
+// Displays relations.
 export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
     const [relationColorDict, setRelationColorDict] = React.useState<RelationColorDict>({});
 
@@ -43,12 +46,13 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
         relationSetContext.onFetchOne(props.relationSetId);
     }, []);
 
+    // Check that context is not empty
     if (!relationSetContext.state.elements[props.relationSetId] || !annoDocumentContext.state.elements[props.docId] || !annoDocumentContext.state.elements[props.docId].relations) {
         return (<>loading...</>);
     }
 
+    // Fill dict with relation colors.
     const relationSet = relationSetContext.state.elements[props.relationSetId];
-
     if (Object.keys(relationColorDict).length === 0) {
         let newRelationColorDict: RelationColorDict = {};
         relationSet.relationTypes.forEach( (ele) => {
@@ -58,10 +62,12 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
         setRelationColorDict(newRelationColorDict);
     }
 
+    // Load relation saved to server.
     if (props.relations.length === 0 && annoDocumentContext.state.elements[props.docId].relations.length !== 0) {
         props.setRelations(annoDocumentContext.state.elements[props.docId].relations);
     }
 
+    // Returns the style for a relation arrow of specific color.
     const getStyle = (color: string) => {
         return (
             {
@@ -72,6 +78,7 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
         );
     }
 
+    // Function that draws the relation arrows.
     const drawRelations = (rels: Relation[]) => {
         return (
             <div>
@@ -89,6 +96,7 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
         );
     }
 
+    // Fill the Relation specific sider and draws the arrows over the text.
     return (
         <Layout>
             <Layout.Header

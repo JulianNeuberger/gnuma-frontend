@@ -2,27 +2,28 @@ import React from 'react';
 
 import {Layout, Button, Space} from 'antd';
 import {presetPalettes} from '@ant-design/colors';
-import Xarrow from 'react-xarrows';
 
 import {DocumentsContext} from '../../components/DocumentsContextProvider/DocumentsContextProvider'
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 import AnnoToken from '../../components/AnnoToken/AnnoToken'
-import AnnoRelationArrow from '../../components/AnnoRelationArrow/AnnoRelationArrow'
 import {Relation} from '../../views/AnnoDetailsView'
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
+// Relation element type.
 export type RelationElement = {
     sentenceId: number;
     tokenId: number;
     token: string;
 }
 
+// Defines a span selected in text. Start of the span and its length is saved.
 export type TokenIndex = {
     sentenceId: number;
     tokenId: number;
     selectionLength: number;
 }
 
+// Defines a labeled span.
 export type TokenInfo = {
     label: string;
     labelLength: number;
@@ -31,6 +32,7 @@ export type TokenInfo = {
     relSelected: boolean;
 }
 
+// Props containing everything needed for displaying the text and its labels.
 type AnnoDisplayTextProps = {
     projectId: string;
     docId: string;
@@ -54,10 +56,12 @@ type AnnoDisplayTextProps = {
     resetRelationSelection: () => void;
 }
 
+// Used for defining a dict that links labels to colors.
 type LabelColorDict = {
     [label: string]: string;
 }
 
+// Function for displaying the text.
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     const [labelColorDict, setLabelColorDict] = React.useState<LabelColorDict>({});
 
@@ -71,13 +75,16 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         annoDocumentContext.onFetchOne(props.projectId, props.docId, props.userId);
     }, []);
 
+    // Check that context exists.
     if(!documentContext.state.elements[props.docId]  || !labelSetContext.state.elements[props.labelSetId] || !annoDocumentContext.state.elements[props.docId] || !annoDocumentContext.state.elements[props.docId].labels){
         return (<>loading...</>);
     }
 
+    // Document that is displayed
     const doc = documentContext.state.elements[props.docId];
-    const labelSet = labelSetContext.state.elements[props.labelSetId];
 
+    // Fill the color dict.
+    const labelSet = labelSetContext.state.elements[props.labelSetId];
     if (Object.keys(labelColorDict).length === 0) {
         let newLabelColorDict: LabelColorDict = {};
         labelSet.labels.forEach( (ele) => {
@@ -87,8 +94,10 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         setLabelColorDict(newLabelColorDict);
     }
 
+    // Create the info for every token.
     if (props.sentences.length === 0) {
 
+        // Load info saved on server.
         if(annoDocumentContext.state.elements[props.docId].labels.length !== 0
             && annoDocumentContext.state.elements[props.docId].labelLength.length !== 0){
             let newSentences: TokenInfo[][] = [];
@@ -109,7 +118,9 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             })
 
             props.setSentences(newSentences);
-        } else {
+        }
+        // create new info per token
+        else {
             let newSentences: TokenInfo[][] = [];
 
             doc.sentences.forEach((sen) => {
@@ -130,11 +141,12 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         }
     }
 
-    // why is react like this :(
+    // Check if sentences are loaded.
     if (props.sentences.length === 0){
         return(<>loading...</>)
     }
 
+    // select a token.
     const select = (sentenceId: number, tokenId: number, labelLength: number) => {
         let b = props.sentences[sentenceId][tokenId].selected;
         
@@ -150,6 +162,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         }
     }
 
+    // Add or remove a token from the selection
     const addToRemoveFromSelection = (sentenceId: number, tokenId: number, labelLength: number) => {
         if (props.sentences[sentenceId][tokenId].selected) {
             console.log(props.selection);
@@ -170,6 +183,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         props.setSentences(newSentences);
     }
 
+    // Handles the select process while pressing ctrl.
     const ctrlSelect = (sentenceId: number, tokenId: number, labelLength: number) => {
         props.resetRelationSelection();
 
@@ -200,6 +214,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         }   
     }
 
+    // Handles select while holding shift.
     const shftSelect = (sentenceId: number, tokenId: number) => {
         if (props.selection.length > 0) {
             let last = props.selection[props.selection.length - 1];
@@ -218,6 +233,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         }
     }
 
+    // Returns the style of a token based on it being selected and based on tag.
     const getStyle = (tag: string, selected: boolean, relSelected: boolean) => {
         //default
         let style: React.CSSProperties = {
@@ -263,6 +279,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         return style;
     }
 
+    // Checks if there should be a whitespace before the token when displayed.
     const getSpaceAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean, labelLength: number) => {
         if(['.', ',', '!', '?'].includes(text)){
             return (getAnnoToken(x, y, text, tag, selected, relSelected, labelLength));
@@ -275,6 +292,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         );
     }
 
+    // Creates the display of a single span/ token.
     const getAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean, labelLength: number) => {
         return (
             <AnnoToken 
@@ -290,6 +308,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         );
     }
 
+    // Handles the display of the all tokens.
     const display = (xxx: TokenInfo[][]) => {
         return(
             <span>
@@ -303,10 +322,12 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                         if (count_down > 0) {
                                             count_down--;
                                         } else {
+                                            // display token that is not labeled
                                             if (props.sentences[x][y].label === 'O') {
                                                 if (props.sentences[x][y].selected === false) {
                                                     return (getSpaceAnnoToken(x, y, token.token, props.sentences[x][y].label, props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
                                                 }
+                                                // token is selected
                                                 let token_str = token.token;
                                                 for (let i = 0; i < props.sentences[x][y].selectionLength; i++) {
                                                     token_str = token_str + ' ' + sentence.tokens[y+i+1].token;
@@ -314,6 +335,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                                 count_down = props.sentences[x][y].selectionLength;
                                                 return (getSpaceAnnoToken(x, y, token_str, 'O', props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
                                             }
+                                            //display a token or span that is labeled
                                             if (props.sentences[x][y].label.slice(0,1) == 'B') {
                                                 let token_str = token.token;
                                                 let token_lab = props.sentences[x][y].label.slice(2); // label without b or i tag
@@ -333,6 +355,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         );
     }
 
+    // Update the label of selcted tokens/ spans.
     const updateLabels = (label: string) => {
         if (props.selection.length > 0) {
             let newSentences = props.sentences.slice();
@@ -363,6 +386,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         }
     }
 
+    // Get the style of a label button
     const getButtonStyle = (color: string, label: string) => {
         return (
             {
@@ -373,6 +397,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         );
     }
 
+    // Displays text and the labeling buttons.
     return (
         <Layout>
             <Layout.Header

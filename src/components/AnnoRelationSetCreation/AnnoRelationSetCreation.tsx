@@ -4,26 +4,25 @@ import {UnPersistedAnnoRelationSet, AnnoRelationType} from '../../state/anno/ann
 
 import {Form, Input, Divider, Button, Tag, Modal} from 'antd'
 
-import {FieldData} from 'rc-field-form/lib/interface';
-
-
+// props for the creation
 export type AnnoRelationSetCreationProps = {
     modalVisible: boolean;
     setModalVisible: (value: boolean) => void;
     onCreate: (relationSetId: string) => void;
 }
 
-
+// Function for creating a relation set.
 export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationProps){
 
-    const relationSetConext = React.useContext(AnnoRelationSetContext);
+    const relationSetContext = React.useContext(AnnoRelationSetContext);
 
+    // necessary states.
     const [name, setName] = React.useState<string>('');
-    const [state, setState] = React.useState<any>();
     const [relationName, setRelationName] = React.useState<string>('');
     const [relationTypes, setRelationTypes] = React.useState<AnnoRelationType[]>([]);
     const [colors, setColors] = React.useState<string[]>(['red', 'green', 'blue', 'yellow', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano']);
 
+    // Add a relation type to the state.
     const addRelationType = () => {
         let newColors = colors;
         let newRelationTypes = relationTypes;
@@ -38,6 +37,7 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
         setRelationName('');
     }
 
+    // cancel the creation
     const cancelCreate = () => {
         setName('');
         setRelationName('');
@@ -46,19 +46,19 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
         props.setModalVisible(false);
     }
 
+    // Execute the creation
     const executeCreate = async() => {
         let out: UnPersistedAnnoRelationSet;
         out = {'name': name, 'relationTypes': relationTypes};
 
         console.log(out);
 
-        let labelSet = await relationSetConext.onCreate(out);
-
-        setState(labelSet);
+        let relationSet = await relationSetContext.onCreate(out);
 
         cancelCreate();
     }
 
+    // Render the buttons
     const renderButtons = () => {
         const buttons: React.ReactNode[] = [];
 
@@ -68,6 +68,7 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
         return buttons;
     }
 
+    // Return the creation modal.
     return (
         <Modal
             title={'Create A New Relation Set'}

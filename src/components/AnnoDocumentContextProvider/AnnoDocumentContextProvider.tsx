@@ -5,6 +5,7 @@ import {getAllAnnoDocuments, addAnnoDocument, getSingleAnnoDocument, deleteAnnoD
 import {buildGenericFetchAll, buildGenericCreate, buildGenericFetchOne, buildGenericDeleteSingle, buildGenericUpdate} from '../../util/AnnoUtil/annoDocumentPresentation'
 import {GenericPayloadState} from '../../state/common/reducer'
 
+// Define the context type
 type AnnoDocumentContextType = {
     state: GenericPayloadState<AnnoDocument>;
     onFetchAll: (projectId: string) => void;
@@ -14,12 +15,14 @@ type AnnoDocumentContextType = {
     onUpdate: (projectId: string, docId: string, userId: string, document: Partial<AnnoDocument>) => void;
 }
 
+// Displayed when providor is mising.
 const missingProviderError = (name: string) => {
     return () => {
         console.error(`Context callback ${name} is sad`);
     }
 }
 
+// Define the context
 export const AnnoDocumentContext = createContext<AnnoDocumentContextType>({
     state: initialAnnoDocumentState,
     onFetchAll: missingProviderError('onFetchAll'),
@@ -33,6 +36,7 @@ type AnnoDocumentContextProviderProps = {
     children: React.ReactChildren | React.ReactNode;
 }
 
+//define the provider
 const AnnoDocumentContextProvider = (props: AnnoDocumentContextProviderProps) => {
     const [documents, dispatch] = useReducer(DocumentReducer, initialAnnoDocumentState);
 

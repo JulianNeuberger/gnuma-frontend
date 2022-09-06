@@ -1,7 +1,6 @@
 import React from 'react';
 
-import {presetPalettes} from '@ant-design/colors';
-
+// props needed for a token
 type AnnoTokenProps = {
     sentenceId: number;
     tokenId: number;
@@ -14,6 +13,7 @@ type AnnoTokenProps = {
     shftSelect: (sentenceId: number, tokenId: number) => void;
 } 
 
+// display a token or span
 export default function AnnoToken(props: AnnoTokenProps){
 
     return (
@@ -24,6 +24,7 @@ export default function AnnoToken(props: AnnoTokenProps){
                 'padding': '0.2px'
             }}
             onClick={ (e) => {
+                // event based on click type
                 if (e.ctrlKey) {
                     props.ctrlSelect(props.sentenceId, props.tokenId, props.labelLength);
                 } else if (e.shiftKey) {

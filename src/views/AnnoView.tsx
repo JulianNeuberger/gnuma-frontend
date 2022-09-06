@@ -38,6 +38,7 @@ export const getUserIdCookie = (): string =>  {
     return '';
 }
 
+// metadata type for project creation
 export type MetaData = {
     name: string;
     date: string;
@@ -47,23 +48,11 @@ export type MetaData = {
     [key: string]: any;
 }
 
-export type LabelSetMetaData = {
-    name: string;
-    labelName: string;
-    labels: AnnoLabel[];
-    colors: string[];
-}
-
-export type RelationSetMetaData = {
-    name: string;
-    relationTypeName: string;
-    relationTypes: AnnoRelationType[];
-    colors: string[];
-}
-
+// function of the main anno view displaying a list of projects.
 export default function AnnoView(){
     const projectContext = React.useContext(AnnoProjectContext);
 
+    // define needed states
     const [modalVisible, setModalVisible] = React.useState(false);
     const [labelSetCreationVisible, setLabelSetCreationVisible] = React.useState(false);
     const [relationSetCreationVisible, setRelationSetCreationVisible] = React.useState(false);
@@ -83,20 +72,8 @@ export default function AnnoView(){
         labelSetId: '',
         relationSetId: ''
     });
-    const [labelSetMetaData, setLabelSetMetaData] = React.useState<LabelSetMetaData>({
-        name: '',
-        labelName: '',
-        labels: [],
-        colors: ['red', 'green', 'blue', 'yellow', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano']
-    });
 
-    const [relationSetMetaData, setRelationSetMetaData] = React.useState<RelationSetMetaData>({
-        name: '',
-        relationTypeName: '',
-        relationTypes: [],
-        colors: ['red', 'green', 'blue', 'yellow', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano']
-    });
-
+    // reset the meta data
     const resetMetaData = () => {
         setMetaData({
             name: '',
@@ -107,12 +84,14 @@ export default function AnnoView(){
         })
     }
 
+    // cancel project creation
     const cancelCreate= async () => {
         setModalVisible(false);
         setCurrentStep(0);
         resetMetaData();
     }
 
+    // execute project creation
     const executeCreate = async() => {
         let today = new Date();
         let date = today.getDate() + '.' + today.getMonth() + '.' + today.getFullYear();
@@ -125,14 +104,17 @@ export default function AnnoView(){
         cancelCreate();
     }
 
+    // go to next step in creation process.
     const nextStep = () => {
         setCurrentStep(currentStep + 1);
     }
 
+    // go to previous step in creation process.
     const prevStep = () => {
         setCurrentStep(currentStep - 1);
     }
 
+    // fields change => adjust metadata.
     const onFieldsChanged = (changedFields: FieldData[], _: FieldData[]) => {
         let newMetaData = {...metaData};
         changedFields.forEach(field => {
@@ -147,6 +129,7 @@ export default function AnnoView(){
         setMetaData(newMetaData);
     }
 
+    // render the buttons of the creation modal
     const renderButtons= () => {
         const buttons: React.ReactNode[] = [];
         if (currentStep > 0) {
@@ -158,6 +141,7 @@ export default function AnnoView(){
         return buttons;
     }
 
+    // define the creation step of the project creation process
     const steps: {
         title: string;
         description?: string;
@@ -236,6 +220,7 @@ export default function AnnoView(){
         }
     ]
 
+    // Return the main view displaying a list of projects.
     return (
         <div key={'anno-view'}>
             <Card

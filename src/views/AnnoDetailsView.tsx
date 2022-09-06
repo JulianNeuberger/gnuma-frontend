@@ -8,22 +8,25 @@ import AnnoDisplayText, {RelationElement, TokenIndex, TokenInfo} from '../compon
 import AnnoDisplayRelation from '../components/AnnoDisplayRelation/AnnoDisplayRelation';
 
 import {Button, Space, Card, Layout} from 'antd';
-import {UpOutlined, CheckOutlined, PlusOutlined, UndoOutlined, RedoOutlined, UserOutlined} from '@ant-design/icons';
+import {UpOutlined, CheckOutlined, UndoOutlined, RedoOutlined, UserOutlined} from '@ant-design/icons';
 
 import {Link, useParams} from 'react-router-dom';
 import {getUserIdCookie} from "./AnnoView";
 
+// document params
 type AnnoDetailsParams = {
     projectId: string;
     docId: string;
 }
 
+// Define the type of a relation triplet
 export type Relation = {
     predicate: string;
     subject: RelationElement;
     object: RelationElement;
 }
 
+// Function of the details view. show document text, entity labels and relations.
 export default function AnnoDetailsView(){
     const [selection, setSelection] = React.useState<TokenIndex[]>([]);
     const [selectedRelation, setSelectedRelation] = React.useState<Relation>();
@@ -36,8 +39,10 @@ export default function AnnoDetailsView(){
 
     const [userId, setUserId] = React.useState<string>(getUserIdCookie());
 
+    // get params from url
     const {projectId, docId} = useParams<AnnoDetailsParams>();
 
+    // define context and load data
     const documentContext = React.useContext(DocumentsContext);
     const projectContext = React.useContext(AnnoProjectContext);
     const annoDocumentContext = React.useContext(AnnoDocumentContext);
@@ -48,10 +53,12 @@ export default function AnnoDetailsView(){
         annoDocumentContext.onFetchOne(projectId, docId, userId);
     }, []);
 
+    // check if data got loaded
     if (!documentContext.state.elements[docId]  || !projectContext.state.elements[projectId] || !annoDocumentContext.state.elements[docId] || !annoDocumentContext.state.elements[docId].relations){
         return (<>loading...</>);
     }
 
+    // create list of relation if exist on server.
     if (relations.length === 0 && annoDocumentContext.state.elements[docId].relations.length > 0) {
         setRelations(annoDocumentContext.state.elements[docId].relations);
     }
@@ -59,7 +66,9 @@ export default function AnnoDetailsView(){
     const doc = documentContext.state.elements[docId];
     const project = projectContext.state.elements[projectId];
 
+    // send an update to the server
     const sendUpdate = (labeled: boolean) => {
+        // update when document is marked as labeled.
         if (labeled){
             annoDocumentContext.onUpdate(projectId, docId, userId,
                 {
@@ -69,6 +78,7 @@ export default function AnnoDetailsView(){
                     'labeled': true,
                 });
         }
+        // usual update.
         annoDocumentContext.onUpdate(projectId, docId, userId,
             {
                 'labels': sentences.map((sen) => {return(sen.map((tok) => {return(tok.label);}));}), 
@@ -77,6 +87,7 @@ export default function AnnoDetailsView(){
             });
     }
 
+    // Add a new relation to the list.
     const addRelation = (predicate: string) => {
         let newRelations = relations.slice();
         newRelations.push({
@@ -90,6 +101,7 @@ export default function AnnoDetailsView(){
         resetSelection();
     }
 
+    // select a relation
     const selectRelation = (rel: Relation) => {
         /*
         resetSelection();
@@ -110,6 +122,7 @@ export default function AnnoDetailsView(){
         */
     }
 
+    // unselect a relation
     const unselectRelation = () => {
         /*
         if (selectedRelation) {
@@ -125,6 +138,7 @@ export default function AnnoDetailsView(){
         */
     }
 
+    // reset the selection.
     const resetSelection = () => {
         let newSentences = sentences.slice();
         selection.forEach ((ele) => {
@@ -136,6 +150,7 @@ export default function AnnoDetailsView(){
         setRelationElements([]);
     }
 
+    // Return the text, labels and relations.
     return(
         <div key={'anno-details-view'}  style = {{'userSelect': 'none'}}>
             <Card

@@ -4,6 +4,7 @@ import {presetPalettes} from '@ant-design/colors';
 
 import {Relation} from '../../views/AnnoDetailsView'
 
+// Props needed for displaying a relation
 type AnnoRelationProps = {
     rel: Relation;
 
@@ -13,8 +14,10 @@ type AnnoRelationProps = {
     setSelectedRelation: (rel: Relation) => void;
 }
 
+// Display a relation
 export default function AnnoRelation(props: AnnoRelationProps){
 
+    // get the style of the relation
     const getStyle = () => {
         //default
         let style: React.CSSProperties = {
@@ -41,6 +44,7 @@ export default function AnnoRelation(props: AnnoRelationProps){
         return style;
     }
 
+    // Return the relation.
     return (
         <div
             style = {getStyle()}

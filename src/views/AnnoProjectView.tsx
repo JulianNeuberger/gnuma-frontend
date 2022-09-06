@@ -3,8 +3,6 @@ import React, {useContext, useEffect} from 'react';
 import {Button, Card, Modal, Steps, Space, Divider, Form, Input} from 'antd';
 import {PlusOutlined, UpOutlined, UserOutlined} from '@ant-design/icons';
 
-import {FieldData} from 'rc-field-form/lib/interface';
-
 import AnnoDocumentList from '../components/AnnoDocumentList/AnnoDocumentList'
 import DocumentsList from '../components/DocumentList/DocumentsList'
 
@@ -14,11 +12,14 @@ import {AnnoDocumentContext} from '../components/AnnoDocumentContextProvider/Ann
 import {Link, useParams} from 'react-router-dom';
 import {getUserIdCookie} from "./AnnoView";
 
+// params of the project
 type AnnoProjectParams = {
     projectId: string;
 }
 
+// Function showing a list of documents in the project.
 export default function AnnoProjectView(){
+    // get project id from url
     const {projectId} = useParams<AnnoProjectParams>();
 
     const projectContext = React.useContext(AnnoProjectContext);
@@ -33,15 +34,18 @@ export default function AnnoProjectView(){
         projectContext.onFetchOne(projectId);
     }, []);
 
+    // Check if context not empty
     if (!projectContext.state.elements[projectId]) {
         return (<>loading...</>);
     }
 
+    // Cancel adding a document
     const cancelAdd= async () => {
         setModalVisible(false);
         setDocuments([]);
     }
 
+    // execute adding documents to the project
     const executeAdd = async() => {
         for (const ele of documents) {
             await documentContext.onCreate(projectId, ele);
@@ -50,6 +54,7 @@ export default function AnnoProjectView(){
         cancelAdd();
     }
 
+    // Return the view displaying a list of documents in the project.
     return (
         <div key={'anno-project-view'}>
             <Card

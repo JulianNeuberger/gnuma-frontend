@@ -6,8 +6,7 @@ import {AnnoRelationSet} from '../../state/anno/annoRelationSetReducer'
 import {Table, Tag, TableColumnProps, Modal} from 'antd'
 import {TableRowSelection} from 'antd/es/table/interface';
 
-type AnnoRelationSetColumn = 'name' | 'relationType';
-
+// Props of the list
 export type AnnoRelationSetSelectionProps = {
     showSelection?: boolean;
     selected?: string[];
@@ -15,16 +14,19 @@ export type AnnoRelationSetSelectionProps = {
     onSelectionChanged?: (relationSetId: string) => void;
 }
 
+// Returns a list of relation sets for selecting a set.
 export default function AnnoRelationSetSelection(props: AnnoRelationSetSelectionProps){
 
-    const relationSetConext = useContext(AnnoRelationSetContext);
+    const relationSetContext = useContext(AnnoRelationSetContext);
 
+    // two fixed columns, no actions
     const visibleColumns = ['name', 'relationType'];
 
     useEffect(() => {
-        relationSetConext.onFetchAll();
+        relationSetContext.onFetchAll();
     }, []);
 
+    // Define what the columns display.
     const columns: {[key: string]: TableColumnProps<AnnoRelationSet>} = {
         name: {
             title: 'Name',
@@ -50,6 +52,7 @@ export default function AnnoRelationSetSelection(props: AnnoRelationSetSelection
         }
     }
 
+    // Row selection. Only select one thing at a time.
     const rowSelection = (): TableRowSelection<AnnoRelationSet> | undefined => {
         if(!props.showSelection) {
             return undefined;
@@ -68,15 +71,15 @@ export default function AnnoRelationSetSelection(props: AnnoRelationSetSelection
         }
     }
    
-    const relationSets = Object.values(relationSetConext.state.elements)
-
+    const relationSets = Object.values(relationSetContext.state.elements)
+    // Return the list.
     return(
         <Table
             rowKey={(r) => r.id}
             columns={visibleColumns.map((col) => columns[col])}
             rowSelection={rowSelection()}
             dataSource={relationSets}
-            loading={relationSetConext.state.loading}
+            loading={relationSetContext.state.loading}
         />
         );
 }

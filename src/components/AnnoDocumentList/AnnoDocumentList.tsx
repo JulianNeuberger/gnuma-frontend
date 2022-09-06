@@ -15,6 +15,8 @@ import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentCo
 
 type AnnoDocumentColumn = 'name' | 'labeled' | 'labeledBy' | 'actions';
 
+
+// props for the list.
 export type AnnoDocumentListProps = {
     projectId: string;
 
@@ -27,16 +29,13 @@ export type AnnoDocumentListProps = {
     onSelectionChanged?: (documents: string[]) => void;
 }
 
-type DocDict = {
-    [key: string]: Document;
-}
-
+// Returns a list displaying the anno documents
 export default function AnnoDocumentList(props: AnnoDocumentListProps) {
     const documentContext = React.useContext(DocumentsContext);
     const annoDocumentContext = React.useContext(AnnoDocumentContext);
 
-    const [docDict, setDocDict] = React.useState<DocDict>({});
 
+    // visible columns in the list.
     const visibleColumns = props.visibleColumns || ['name', 'labeled', 'labeledBy'];
     if (props.showActions) {
         visibleColumns.push('actions');
@@ -48,12 +47,14 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
     }, []);
 
 
+    // Define how the document columns are displayed in the list.
     const columns: { [key: string]: TableColumnProps<AnnoDocument>} = {
         name: {
             title: 'name',
             dataIndex: '',
             key: 'name',
             render: (_, record) => {
+                // Get the doc title from the document context for the doc service.
                 if (documentContext.state.elements[record.id]) {
                     return(
                         <Link
@@ -129,6 +130,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
         }
     }
 
+    // row selection method.
     const rowSelection = (): TableRowSelection<AnnoDocument> | undefined => {
         if(!props.showSelection) {
             return undefined;
@@ -146,7 +148,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
     }
 
     const documents = Object.values(annoDocumentContext.state.elements);
-
+    // Return the list.
     return (
         <Table
             rowKey={(r) => r.id}

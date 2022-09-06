@@ -17,19 +17,17 @@ import {AnnoProjectContext} from '../../components/AnnoProjectContextProvider/An
 
 import {FieldData} from 'rc-field-form/lib/interface';
 
-
+// possible columns of the list.
 type AnnoProjectColumn = 'name' | 'date' | 'creator' | 'labelSet' | 'relationSet' | 'actions';
 
+// project meta data.
 export type MetaData = {
     name: string;
     creator: string;
     [key: string]: any;
 }
 
-export type LabelSetDict = {
-    [key: string]: AnnoLabelSet;
-}
-
+// props of the list
 export type AnnoProjectListProps = {
     showActions?: boolean;
     showSelection?: boolean;
@@ -40,17 +38,19 @@ export type AnnoProjectListProps = {
     onSelectionChanged?: (projects: string[]) => void;
 }
 
+// export the function for displaying the list of projects.
 export default function AnnoProjectList(props: AnnoProjectListProps){
     const projectContext = useContext(AnnoProjectContext);
 
+    //define the states.
     const [modalVisible, setModalVisible] = React.useState(false);
     const [projectId, setProjectId] = React.useState<string>();
-    const [labelSetDict, setLabelSetDict] = React.useState<LabelSetDict>({})
     const [metaData, setMetaData] = React.useState<MetaData>({
         name: '',
         creator: ''
     });
 
+    // Reset the meta data
     const resetMetaData = () => {
         setMetaData({name: '', creator: ''});
     }
@@ -69,6 +69,7 @@ export default function AnnoProjectList(props: AnnoProjectListProps){
         setMetaData(newMetaData);
     }
 
+    // visible columsn + show actions?
     const visibleColumns = props.visibleColumns || ['name', 'creator', 'date' , 'labelSet', 'relationSet'];
 
     if (props.showActions) {
@@ -79,6 +80,7 @@ export default function AnnoProjectList(props: AnnoProjectListProps){
         projectContext.onFetchAll();
     }, []);
 
+    // define what the columns display
     const columns: { [key: string]: TableColumnProps<AnnoProject>} = {
         date: {
             title: 'Creation Date',
@@ -168,6 +170,7 @@ export default function AnnoProjectList(props: AnnoProjectListProps){
         }
     }
 
+    // method for row selection
     const rowSelection = (): TableRowSelection<AnnoProject> | undefined => {
         if(!props.showSelection) {
             return undefined;
@@ -185,7 +188,7 @@ export default function AnnoProjectList(props: AnnoProjectListProps){
     }
 
     const projects = Object.values(projectContext.state.elements);
-
+    // Return the list and a modal for editing project meta data.
     return (
         <div>
             <Modal

@@ -5,6 +5,7 @@ import {getAllAnnoRelationSets, getSingleAnnoRelationSet, createAnnoRelationSet}
 import {buildGenericFetchAll, buildGenericFetchOne, buildGenericCreate} from '../../util/presentation'
 import {GenericPayloadState} from '../../state/common/reducer'
 
+// Relation set context typ
 type AnnoRelationSetContextType = {
     state: GenericPayloadState<AnnoRelationSet>;
     onFetchAll: () => void;
@@ -18,6 +19,7 @@ const missingProviderError = (name: string) => {
     }
 }
 
+// The context.
 export const AnnoRelationSetContext = createContext<AnnoRelationSetContextType>({
     state: initialAnnoRelationSetState,
     onFetchAll: missingProviderError('onFetchAll'),
@@ -29,6 +31,7 @@ type AnnoRelationSetContextProviderProps = {
     children: React.ReactChildren | React.ReactNode;
 }
 
+// The context provider.
 const AnnoRelationSetContextProvider = (props: AnnoRelationSetContextProviderProps) => {
     const [projects, dispatch] = useReducer(AnnoRelationSetReducer, initialAnnoRelationSetState);
 

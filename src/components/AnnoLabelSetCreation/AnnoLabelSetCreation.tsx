@@ -5,26 +5,26 @@ import {UnPersistedAnnoLabelSet, AnnoLabel} from '../../state/anno/annoLabelSetR
 
 import {Form, Input, Divider, Button, Tag, Modal} from 'antd'
 
-import {FieldData} from 'rc-field-form/lib/interface';
-
-
+// Props for defining a new label set
 export type AnnoLabelSetCreationProps = {
     modalVisible: boolean;
     setModalVisible: (value: boolean) => void;
     onCreate: (labelSetId: string) => void;
 }
 
-
+// Return a modal for defining a new label set.
 export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
 
     const labelSetConext = React.useContext(AnnoLabelSetContext);
 
+    // states for creation.
     const [name, setName] = React.useState<string>('');
     const [state, setState] = React.useState<any>();
     const [labelName, setLabelName] = React.useState<string>('');
     const [labels, setLabels] = React.useState<AnnoLabel[]>([]);
     const [colors, setColors] = React.useState<string[]>(['red', 'green', 'blue', 'yellow', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano']);
 
+    // add new label to list
     const addLabel = () => {
         let newColors = colors;
         let newLabels = labels;
@@ -39,6 +39,7 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
         setLabelName('');
     }
 
+    // cancel the creation
     const cancelCreate = () => {
         setName('');
         setLabelName('');
@@ -47,6 +48,7 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
         props.setModalVisible(false);
     }
 
+    // execute the creation
     const executeCreate = async() => {
         let out: UnPersistedAnnoLabelSet;
         out = {'name': name, 'labels': labels};
@@ -60,6 +62,7 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
         //props.onCreate(labelSet['id']);
     }
 
+    // Buttons of the modal.
     const renderButtons = () => {
         const buttons: React.ReactNode[] = [];
 
@@ -69,6 +72,7 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
         return buttons;
     }
 
+    // Return the modal with its input fields.
     return (
         <Modal
             title={'Create A New Label Set'}

@@ -5,6 +5,7 @@ import {getAllAnnoLabelSets, getSingleAnnoLabelSet, createAnnoLabelSet} from '..
 import {buildGenericFetchAll, buildGenericFetchOne, buildGenericCreate} from '../../util/presentation'
 import {GenericPayloadState} from '../../state/common/reducer'
 
+// Type for label set context
 type AnnoLabelSetContextType = {
 	state: GenericPayloadState<AnnoLabelSet>;
 	onFetchAll: () => void;
@@ -18,6 +19,7 @@ const missingProviderError = (name: string) => {
 	}
 }
 
+// define the label set context.
 export const AnnoLabelSetContext = createContext<AnnoLabelSetContextType>({
 	state: initialAnnoLabelSetState,
 	onFetchAll: missingProviderError('onFetchAll'),
@@ -29,6 +31,7 @@ type AnnoLabelSetContextProviderProps = {
 	children: React.ReactChildren | React.ReactNode;
 }
 
+// define the context provider.
 const AnnoLabelSetContextProvider = (props: AnnoLabelSetContextProviderProps) => {
 	const [projects, dispatch] = useReducer(AnnoLabelSetReducer, initialAnnoLabelSetState);
 

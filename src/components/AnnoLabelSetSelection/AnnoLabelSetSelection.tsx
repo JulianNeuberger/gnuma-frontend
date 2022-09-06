@@ -8,6 +8,7 @@ import {TableRowSelection} from 'antd/es/table/interface';
 
 type AnnoLabelSetColumn = 'name' | 'labels';
 
+// Props for list used for label set selection
 export type AnnoLabelSelectionProps = {
     showSelection?: boolean;
     selected?: string[];
@@ -15,16 +16,19 @@ export type AnnoLabelSelectionProps = {
     onSelectionChanged?: (labelSetId: string) => void;
 }
 
+// Displays a list of label sets to select one
 export default function AnnoLabelSetSelection(props: AnnoLabelSelectionProps){
 
-    const labelSetConext = useContext(AnnoLabelSetContext);
+    const labelSetContext = useContext(AnnoLabelSetContext);
 
+    // two fixed columns. no actions.
     const visibleColumns = ['name', 'labels'];
 
     useEffect(() => {
-        labelSetConext.onFetchAll();
+        labelSetContext.onFetchAll();
     }, []);
 
+    // define what the columns display.
     const columns: {[key: string]: TableColumnProps<AnnoLabelSet>} = {
         name: {
             title: 'Name',
@@ -50,6 +54,7 @@ export default function AnnoLabelSetSelection(props: AnnoLabelSelectionProps){
         }
     }
 
+    // the selection process for a row. Only select one at a time.
     const rowSelection = (): TableRowSelection<AnnoLabelSet> | undefined => {
         if(!props.showSelection) {
             return undefined;
@@ -68,15 +73,15 @@ export default function AnnoLabelSetSelection(props: AnnoLabelSelectionProps){
         }
     }
    
-    const labelSets = Object.values(labelSetConext.state.elements)
-
+    const labelSets = Object.values(labelSetContext.state.elements)
+    // Return the list.
     return(
         <Table
             rowKey={(r) => r.id}
             columns={visibleColumns.map((col) => columns[col])}
             rowSelection={rowSelection()}
             dataSource={labelSets}
-            loading={labelSetConext.state.loading}
+            loading={labelSetContext.state.loading}
         />
         );
 }

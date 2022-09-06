@@ -1,14 +1,14 @@
-import {Layout, Button, Space} from 'antd';
 import Xarrow from "react-xarrows";
 
 import {Relation} from '../../views/AnnoDetailsView'
 
-
+// props needed for the arrow.
 type AnnoRelationArrowProps = {
     rel: Relation;
     color: string;
 }
 
+// Return the arrow of a relation from one span to another.
 export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
 
     return(
