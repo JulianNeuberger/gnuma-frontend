@@ -18,6 +18,8 @@ type AnnoDisplayRelationProps = {
     userId: string;
     relationSetId: string;
 
+    getText: (sentenceId: number, tokenId: number) => string;
+
     relations: Relation[];
     setRelations: (b: Relation[]) => void;
 
@@ -142,6 +144,7 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                                     elementSelected={false}           
                                     selected={rel === props.selectedRelation}
                                     setSelectedRelation={props.setSelectedRelation}
+                                    getText={props.getText}
                                 />
                             );
                         })

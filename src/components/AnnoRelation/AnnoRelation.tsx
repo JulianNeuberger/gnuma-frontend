@@ -8,6 +8,8 @@ import {Relation} from '../../views/AnnoDetailsView'
 type AnnoRelationProps = {
     rel: Relation;
 
+    getText: (sentenceId: number, tokenId: number) => string;
+
     elementSelected: boolean;
     selected: boolean;
 
@@ -44,6 +46,11 @@ export default function AnnoRelation(props: AnnoRelationProps){
         return style;
     }
 
+    // Returns the text for a relation.
+    const getText = (sentenceId: number, tokenId: number) => {
+
+    }
+
     // Return the relation.
     return (
         <div
@@ -58,7 +65,7 @@ export default function AnnoRelation(props: AnnoRelationProps){
                 */
             }}
         >
-            {props.rel.subject.token}{' --- '}{props.rel.predicate}{' ---> '}{props.rel.object.token}
+            {props.getText(props.rel.subject.sentenceId, props.rel.subject.tokenId)}{' --- '}{props.rel.predicate}{' ---> '}{props.getText(props.rel.object.sentenceId, props.rel.object.tokenId)}
         </div>
     );
 }

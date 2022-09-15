@@ -66,6 +66,15 @@ export default function AnnoDetailsView(){
     const doc = documentContext.state.elements[docId];
     const project = projectContext.state.elements[projectId];
 
+    // get the text for a span
+    const getText = (sentenceId: number, tokenId: number) => {
+        let str = '';
+        for (let i = 0; i <= sentences[sentenceId][tokenId].labelLength; i++){
+            str = str + doc.sentences[sentenceId].tokens[tokenId + i].token + ' ';
+        }
+        return str;
+    }
+
     // send an update to the server
     const sendUpdate = (labeled: boolean) => {
         // update when document is marked as labeled.
@@ -85,6 +94,11 @@ export default function AnnoDetailsView(){
                 'relations': relations,
                 'labelLength': sentences.map((sen) => {return(sen.map((tok) => {return(tok.labelLength);}));}),
             });
+    }
+
+    //Add a new label
+    const addLabel = (sentenceId: string, tokenId: string, labelLength: number, label: string) => {
+
     }
 
     // Add a new relation to the list.
@@ -231,6 +245,7 @@ export default function AnnoDetailsView(){
                             twoRelations={twoRelations}
                             selectedRelation={selectedRelation}
                             setSelectedRelation={setSelectedRelation}
+                            getText={getText}
                         />
                     </Layout.Sider>
                 </Layout>

@@ -23,7 +23,6 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
                 path={'straight'}
                 showHead={false}
                 color = {props.color}
-                labels= {<span style= {{color: 'black' }}></span>}
             />
             <Xarrow 
                 start={props.rel.subject.sentenceId + '_' + props.rel.subject.tokenId} 

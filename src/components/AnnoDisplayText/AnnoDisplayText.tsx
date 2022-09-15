@@ -8,6 +8,7 @@ import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/
 import AnnoToken from '../../components/AnnoToken/AnnoToken'
 import {Relation} from '../../views/AnnoDetailsView'
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
+import AnnoTokenRecommendation from "../AnnoTokenRecommendatioin/AnnoTokenRecommendation";
 
 // Relation element type.
 export type RelationElement = {
@@ -64,6 +65,9 @@ type LabelColorDict = {
 // Function for displaying the text.
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     const [labelColorDict, setLabelColorDict] = React.useState<LabelColorDict>({});
+
+    const [recLabels, setRecLabels] = React.useState<string[][]>([['B-A', 'O', 'O', 'O'], ['O', 'O', 'O', 'O'], ['O', 'O', 'O', 'O'], ['O', 'O', 'O', 'O']]);
+    const [recLabelLength, setRecLabelLength] = React.useState<number[][]>([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],[0, 0, 0, 0]]);
 
     const documentContext = React.useContext(DocumentsContext);
     const labelSetContext = React.useContext(AnnoLabelSetContext);
@@ -249,6 +253,9 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             };
         }
 
+        //todo fix this
+        tag = tag.toLowerCase();
+
         // Has label
         if (tag in labelColorDict){
             let col = labelColorDict[tag]
@@ -292,6 +299,19 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         );
     }
 
+    // Checks if there should be a whitespace before the token when displayed. Called for reccomendations
+    const getSpaceAnnoTokenRecommendation = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean, labelLength: number) => {
+        if(['.', ',', '!', '?'].includes(text)){
+            return (getAnnoTokenRecommendation(x, y, text, tag, selected, relSelected, labelLength));
+        }
+        return(
+            <>
+                <span> </span>
+                {getAnnoTokenRecommendation(x, y, text, tag, selected, relSelected, labelLength)}
+            </>
+        );
+    }
+
     // Creates the display of a single span/ token.
     const getAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean, labelLength: number) => {
         return (
@@ -300,6 +320,22 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 sentenceId={x} 
                 tokenId={y}
                 labelLength={labelLength} 
+                style={getStyle(tag, selected, relSelected)}
+                select={select}
+                ctrlSelect={ctrlSelect}
+                shftSelect={shftSelect}
+            />
+        );
+    }
+
+    // Creates the display of a single span/ token recommendation.
+    const getAnnoTokenRecommendation = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean, labelLength: number) => {
+        return (
+            <AnnoTokenRecommendation
+                token={text}
+                sentenceId={x}
+                tokenId={y}
+                labelLength={labelLength}
                 style={getStyle(tag, selected, relSelected)}
                 select={select}
                 ctrlSelect={ctrlSelect}
@@ -322,19 +358,6 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                         if (count_down > 0) {
                                             count_down--;
                                         } else {
-                                            // display token that is not labeled
-                                            if (props.sentences[x][y].label === 'O') {
-                                                if (props.sentences[x][y].selected === false) {
-                                                    return (getSpaceAnnoToken(x, y, token.token, props.sentences[x][y].label, props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
-                                                }
-                                                // token is selected
-                                                let token_str = token.token;
-                                                for (let i = 0; i < props.sentences[x][y].selectionLength; i++) {
-                                                    token_str = token_str + ' ' + sentence.tokens[y+i+1].token;
-                                                }
-                                                count_down = props.sentences[x][y].selectionLength;
-                                                return (getSpaceAnnoToken(x, y, token_str, 'O', props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
-                                            }
                                             //display a token or span that is labeled
                                             if (props.sentences[x][y].label.slice(0,1) == 'B') {
                                                 let token_str = token.token;
@@ -344,6 +367,31 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                                 }
                                                 return (getSpaceAnnoToken(x, y, token_str, token_lab, props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
                                             }
+
+                                            // display recommendation
+                                            if (typeof recLabels[x][y] === 'string'  && recLabels[x][y].slice(0,1) == 'B') {
+                                                let token_str = token.token;
+                                                let token_lab = recLabels[x][y].slice(2); // label without b or i tag
+                                                for (let i = 0; i < recLabelLength[x][y]; i++) {
+                                                    token_str = token_str + ' ' + sentence.tokens[y+i+1].token;
+                                                }
+                                                return (getSpaceAnnoTokenRecommendation(x, y, token_str, token_lab, props.sentences[x][y].selected, props.sentences[x][y].relSelected, recLabelLength[x][y]));
+                                            }
+
+                                            // display token that is not labeled
+                                            if (props.sentences[x][y].label === 'O') {
+                                                if (props.sentences[x][y].selected === false) {
+                                                    return (getSpaceAnnoToken(x, y, token.token, props.sentences[x][y].label, props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
+                                                }
+                                                // token is selected
+                                                let token_str = token.token;
+                                                for (let i = 0; i < props.sentences[x][y].selectionLength; i++) {
+                                                    token_str = token_str + ' ' + sentence.tokens[y + i + 1].token;
+                                                }
+                                                count_down = props.sentences[x][y].selectionLength;
+                                                return (getSpaceAnnoToken(x, y, token_str, 'O', props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
+                                            }
+
                                         }
                                     })
                                 }
