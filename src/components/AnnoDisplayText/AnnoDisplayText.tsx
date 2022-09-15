@@ -5,33 +5,13 @@ import {presetPalettes} from '@ant-design/colors';
 
 import {DocumentsContext} from '../../components/DocumentsContextProvider/DocumentsContextProvider'
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
-import AnnoToken from '../../components/AnnoToken/AnnoToken'
-import {Relation} from '../../views/AnnoDetailsView'
+import AnnoEntity from '../AnnoEntity/AnnoEntity'
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
-import AnnoTokenRecommendation from "../AnnoTokenRecommendatioin/AnnoTokenRecommendation";
+import AnnoEntityRecommendation from "../AnnoEntityRecommendation/AnnoEntityRecommendation";
+import {Entity, EntityDict} from "../../state/anno/annoDocumentReducer";
+import {TokenSpan} from "../../views/AnnoDetailsView";
+import AnnoToken from "../AnnoToken/AnnoToken";
 
-// Relation element type.
-export type RelationElement = {
-    sentenceId: number;
-    tokenId: number;
-    token: string;
-}
-
-// Defines a span selected in text. Start of the span and its length is saved.
-export type TokenIndex = {
-    sentenceId: number;
-    tokenId: number;
-    selectionLength: number;
-}
-
-// Defines a labeled span.
-export type TokenInfo = {
-    label: string;
-    labelLength: number;
-    selected: boolean;
-    selectionLength: number;
-    relSelected: boolean;
-}
 
 // Props containing everything needed for displaying the text and its labels.
 type AnnoDisplayTextProps = {
@@ -40,21 +20,18 @@ type AnnoDisplayTextProps = {
     userId: string;
     labelSetId: string;
 
-    sentences: TokenInfo[][];
-    setSentences: (s: TokenInfo[][]) => void;
+    entities: EntityDict;
+    sentenceEntities: string[][];
 
-    selection: TokenIndex[];
-    setSelection: (t: TokenIndex[]) => void;
+    addEntity: (sentenceIndex: number, start: number, end: number, type: string) => void;
+    updateEntity: (id: string, type: string) => void;
+    removeEntity: (id: string) => void
 
-    setTwoRelations: (b: boolean) => void;
+    selectedEntities: string[];
+    setSelectedEntities: (x: string[]) => void;
 
-    relations: Relation[];
-    setRelationElements: (b: RelationElement[]) => void;
-
-    sendUpdate: (b: boolean) => void;
-
-    resetSelection: () => void;
-    resetRelationSelection: () => void;
+    selectedTokens: TokenSpan[];
+    setSelectedTokens: (x: TokenSpan[]) => void;
 }
 
 // Used for defining a dict that links labels to colors.
@@ -66,8 +43,8 @@ type LabelColorDict = {
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     const [labelColorDict, setLabelColorDict] = React.useState<LabelColorDict>({});
 
-    const [recLabels, setRecLabels] = React.useState<string[][]>([['B-A', 'O', 'O', 'O'], ['O', 'O', 'O', 'O'], ['O', 'O', 'O', 'O'], ['O', 'O', 'O', 'O']]);
-    const [recLabelLength, setRecLabelLength] = React.useState<number[][]>([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0],[0, 0, 0, 0]]);
+    const [recEntities, setRecEntities] = React.useState<EntityDict>({'asf' : {'id': 'asf', 'sentenceIndex': 0, 'start': 0, 'end': 1, 'type': 'a', 'relations': []}});
+    const [recSentenceEntities, setRecSentnceEntities] = React.useState<string[][]>([['asf'], [], [],[]]);
 
     const documentContext = React.useContext(DocumentsContext);
     const labelSetContext = React.useContext(AnnoLabelSetContext);
@@ -80,7 +57,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     }, []);
 
     // Check that context exists.
-    if(!documentContext.state.elements[props.docId]  || !labelSetContext.state.elements[props.labelSetId] || !annoDocumentContext.state.elements[props.docId] || !annoDocumentContext.state.elements[props.docId].labels){
+    if(!documentContext.state.elements[props.docId]  || !labelSetContext.state.elements[props.labelSetId] || !annoDocumentContext.state.elements[props.docId]){
         return (<>loading...</>);
     }
 
@@ -92,306 +69,290 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     if (Object.keys(labelColorDict).length === 0) {
         let newLabelColorDict: LabelColorDict = {};
         labelSet.labels.forEach( (ele) => {
-            newLabelColorDict[ele.name] = ele.color
+            newLabelColorDict[ele.type] = ele.color
         });
 
         setLabelColorDict(newLabelColorDict);
     }
-
-    // Create the info for every token.
-    if (props.sentences.length === 0) {
-
-        // Load info saved on server.
-        if(annoDocumentContext.state.elements[props.docId].labels.length !== 0
-            && annoDocumentContext.state.elements[props.docId].labelLength.length !== 0){
-            let newSentences: TokenInfo[][] = [];
-
-            doc.sentences.forEach((sen, x) => {
-                let infos: TokenInfo[] = [];
-                sen.tokens.forEach((tok, y) => {
-                    //todo adjust label length
-                    infos.push({
-                        'label': annoDocumentContext.state.elements[props.docId].labels[x][y],
-                        'labelLength': annoDocumentContext.state.elements[props.docId].labelLength[x][y],
-                        'selected': false,
-                        'selectionLength': 0,
-                        'relSelected': false
-                    });
-                })
-                newSentences.push(infos);
-            })
-
-            props.setSentences(newSentences);
-        }
-        // create new info per token
-        else {
-            let newSentences: TokenInfo[][] = [];
-
-            doc.sentences.forEach((sen) => {
-                let infos: TokenInfo[] = [];
-                sen.tokens.forEach((tok) => {
-                    infos.push({
-                        'label': 'O',
-                        'labelLength': 0,
-                        'selected': false,
-                        'selectionLength': 0,
-                        'relSelected': false
-                    });
-                })
-                newSentences.push(infos);
-            })
-
-            props.setSentences(newSentences);
-        }
-    }
-
-    // Check if sentences are loaded.
-    if (props.sentences.length === 0){
-        return(<>loading...</>)
+    
+    //remove rec entity
+    const removeRecEntity = (id: string, sentenceIndex: number) => {
+        let newRecSentenceEntities = recSentenceEntities.slice();
+        let newRecEntities = {...recEntities};
+        
+        delete newRecEntities[id];
+        newRecSentenceEntities[sentenceIndex].splice(newRecSentenceEntities[sentenceIndex].indexOf(id), 1);
+        
+        setRecEntities(newRecEntities);
+        setRecSentnceEntities(newRecSentenceEntities);
     }
 
     // select a token.
-    const select = (sentenceId: number, tokenId: number, labelLength: number) => {
-        let b = props.sentences[sentenceId][tokenId].selected;
-        
-        props.resetSelection();
-        props.resetRelationSelection();
-        
-        if (!b) {
-            let newSentences = props.sentences.slice();
-            newSentences[sentenceId][tokenId].selected = true;
-            newSentences[sentenceId][tokenId].selectionLength = 0;
-            props.setSentences(newSentences);
-            props.setSelection([{'sentenceId': sentenceId, 'tokenId': tokenId, 'selectionLength': labelLength}]);
-        }
-    }
-
-    // Add or remove a token from the selection
-    const addToRemoveFromSelection = (sentenceId: number, tokenId: number, labelLength: number) => {
-        if (props.sentences[sentenceId][tokenId].selected) {
-            console.log(props.selection);
-            let newSelection = props.selection.filter((sel) => {
-                return (sel.sentenceId !== sentenceId || sel.tokenId !== tokenId);
-            })
-            console.log(newSelection);
-            props.setSelection(newSelection);
-        } else {
-            let newSelection = props.selection;
-            newSelection.push({'sentenceId': sentenceId, 'tokenId': tokenId, 'selectionLength': labelLength}) 
-            props.setSelection(newSelection);
-        }
-
-        let newSentences = props.sentences.slice();
-        newSentences[sentenceId][tokenId].selectionLength = 0;
-        newSentences[sentenceId][tokenId].selected = !newSentences[sentenceId][tokenId].selected;
-        props.setSentences(newSentences);
-    }
-
-    // Handles the select process while pressing ctrl.
-    const ctrlSelect = (sentenceId: number, tokenId: number, labelLength: number) => {
-        props.resetRelationSelection();
-
-        addToRemoveFromSelection(sentenceId, tokenId, labelLength);
-        
+    const selectToken = (sentenceIndex: number, start: number, end: number) => {
         let b = true;
-        let rels: RelationElement[] = [];
-        
-        if (props.selection.length > 1) {
-            props.selection.forEach((ele) => {
-                //check if not labeled and if selected cause selection length is not consistent.
-                if (props.sentences[ele.sentenceId][ele.tokenId].selected === true) {
-                    if (props.sentences[ele.sentenceId][ele.tokenId].label === 'O') {
-                        b = false;
-                    } else {
-                        //fill element contatining relations
-                        rels.push({'sentenceId': ele.sentenceId, 'tokenId': ele.tokenId, 'token': doc.sentences[ele.sentenceId].tokens[ele.tokenId].token});
-                    }
-                }
-            })
-            if (rels.length !== 2) {
+
+        // select?
+        for (let i = 0; i < props.selectedTokens.length; i++) {
+            if (sentenceIndex === props.selectedTokens[i].sentenceIndex && start === props.selectedTokens[i].start && end === props.selectedTokens[i].end) {
                 b = false;
             }
-            props.setTwoRelations(b);
-            if (b) {
-                props.setRelationElements(rels);
-            }
-        }   
+        }
+
+        props.setSelectedEntities([]);
+        props.setSelectedTokens([]);
+
+        // else select
+        if (b) {
+            props.setSelectedTokens([{
+                'sentenceIndex': sentenceIndex,
+                'start': start,
+                'end': end
+            }]);
+        }
     }
 
-    // Handles select while holding shift.
-    const shftSelect = (sentenceId: number, tokenId: number) => {
-        if (props.selection.length > 0) {
-            let last = props.selection[props.selection.length - 1];
-            if (last.sentenceId === sentenceId && last.tokenId < tokenId) {
-                let len = tokenId - last.tokenId;
+    // Handles the select process while pressing ctrl for tokens.
+    const ctrlSelectToken = (sentenceIndex: number, start: number, end: number) => {
+        let b = false;
+        let newSelectedTokens = props.selectedTokens.slice();
 
-                let newSentences = props.sentences.slice();
-                newSentences[last.sentenceId][last.tokenId].selectionLength = len;
-                props.setSentences(newSentences);
-
-                last.selectionLength = len;
-                let newSelection = props.selection;
-                newSelection[props.selection.length - 1] = last;
-                props.setSelection(newSelection);
+        // unselected
+        for (let i = 0; i < props.selectedTokens.length; i++) {
+            if (sentenceIndex === props.selectedTokens[i].sentenceIndex && start === props.selectedTokens[i].start && end === props.selectedTokens[i].end) {
+                newSelectedTokens.splice(i, 1);
+                props.setSelectedTokens(newSelectedTokens);
+                b = true;
             }
         }
+
+        // else select
+        if (!b) {
+            newSelectedTokens.push({
+                'sentenceIndex': sentenceIndex,
+                'start': start,
+                'end': end
+            });
+        }
+
+        props.setSelectedTokens(newSelectedTokens);
+    }
+
+    // Handles select while holding shift for tokens.
+    const shftSelectToken = (sentenceIndex: number, start: number, end: number) => {
+        //something is selected else normal select
+        if (props.selectedTokens.length > 0) {
+            //in same sentence
+
+            if (props.selectedTokens[props.selectedTokens.length - 1].sentenceIndex === sentenceIndex) {
+                let new_start = Math.min(start, end, props.selectedTokens[props.selectedTokens.length - 1].start, props.selectedTokens[props.selectedTokens.length - 1].end);
+                let new_end = Math.max(start, end, props.selectedTokens[props.selectedTokens.length - 1].start, props.selectedTokens[props.selectedTokens.length - 1].end);
+
+                // not overlapping with entities
+                let overlapping = false
+
+                for (let i = 0; i < props.sentenceEntities[sentenceIndex].length; i++) {
+                    let entity = props.entities[props.sentenceEntities[sentenceIndex][i]];
+
+                    if (entity !== undefined) {
+                        //check overlapping
+                        if ((entity.start >= new_start && entity.end < new_end) || (entity.end >= new_start && entity.end < new_end) || (entity.start < new_start && entity.end >= new_end)) {
+                            overlapping = true;
+                        }
+                    }
+                }
+
+                //not over lapping -> modify selection
+                if (!overlapping) {
+                    let newSelectedTokens = props.selectedTokens.slice();
+                    newSelectedTokens[props.selectedTokens.length - 1].start = new_start;
+                    newSelectedTokens[props.selectedTokens.length - 1].end = new_end;
+                    props.setSelectedTokens(newSelectedTokens);
+                }
+            }
+        } else {
+            selectToken(sentenceIndex, start, end);
+        }
+    }
+
+    const selectEntity = (id: string) => {
+        props.setSelectedTokens([])
+
+        if (props.selectedEntities.includes(id)) {
+            props.setSelectedEntities([]);
+        } else {
+          props.setSelectedEntities([id]);
+        }
+    }
+
+    const ctrlSelectEntity = (id: string) => {
+        let newSelectedEntities = props.selectedEntities.slice();
+
+        if (props.selectedEntities.includes(id)) {
+            newSelectedEntities.splice(newSelectedEntities.indexOf(id), 1);
+        } else {
+            newSelectedEntities.push(id);
+        }
+
+        props.setSelectedEntities(newSelectedEntities);
     }
 
     // Returns the style of a token based on it being selected and based on tag.
-    const getStyle = (tag: string, selected: boolean, relSelected: boolean) => {
-        //default
-        let style: React.CSSProperties = {
-            'color': 'black',
-            'background': 'white'
-        };
+    const getEntityStyle = (type: string, selected: boolean = false) => {
+        if (Object.keys(labelColorDict).includes(type)) {
+            let col = labelColorDict[type];
 
-        //selected
-        if (selected === true) {
-            style = {
-                'color': presetPalettes['grey'][8],
-                'background': presetPalettes['grey'][1]
-            };
-        }
-
-        //todo fix this
-        tag = tag.toLowerCase();
-
-        // Has label
-        if (tag in labelColorDict){
-            let col = labelColorDict[tag]
-
-            // default label style
-            style = {
-                'color': presetPalettes[col][7],
-                'background': presetPalettes[col][1]
-            };
-
-            //colored label style
             if (selected === true) {
-                style = {
+                return ({
                     'color': presetPalettes[col][1],
                     'background': presetPalettes[col][7]
-                };
+                });
             }
-        }
 
-        // add border if relSelected
-        if (relSelected) {
-            style = {
-                ...style,
-                'border': '2px solid black'
-            }
+            return ({
+                'color': presetPalettes[col][7],
+                'background': presetPalettes[col][1]
+            });
         }
-
-        return style;
+        console.log(type + ' sadge');
+        return ({});
     }
 
-    // Checks if there should be a whitespace before the token when displayed.
-    const getSpaceAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean, labelLength: number) => {
+    // Return a token with or without a white space in front
+    const getAnnoToken = (sentenceIndex: number, start: number, end: number, text: string, selected: boolean) => {
+
         if(['.', ',', '!', '?'].includes(text)){
-            return (getAnnoToken(x, y, text, tag, selected, relSelected, labelLength));
+            return (getAnnoTokenSecret(sentenceIndex, start, end, text, selected));
         }
-        return(
-            <>
-                <span> </span>
-                {getAnnoToken(x, y, text, tag, selected, relSelected, labelLength)}
-            </>
-        );
-    }
-
-    // Checks if there should be a whitespace before the token when displayed. Called for reccomendations
-    const getSpaceAnnoTokenRecommendation = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean, labelLength: number) => {
-        if(['.', ',', '!', '?'].includes(text)){
-            return (getAnnoTokenRecommendation(x, y, text, tag, selected, relSelected, labelLength));
-        }
-        return(
-            <>
-                <span> </span>
-                {getAnnoTokenRecommendation(x, y, text, tag, selected, relSelected, labelLength)}
-            </>
-        );
-    }
-
-    // Creates the display of a single span/ token.
-    const getAnnoToken = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean, labelLength: number) => {
         return (
-            <AnnoToken 
-                token={text} 
-                sentenceId={x} 
-                tokenId={y}
-                labelLength={labelLength} 
-                style={getStyle(tag, selected, relSelected)}
-                select={select}
-                ctrlSelect={ctrlSelect}
-                shftSelect={shftSelect}
+            <span>
+                    {' '}
+                {getAnnoTokenSecret(sentenceIndex, start, end, text, selected)}
+                </span>
+        );
+    }
+
+    // return a anno token
+    const getAnnoTokenSecret = (sentenceIndex: number, start: number, end: number, text: string, selected: boolean) => {
+        return (
+            <AnnoToken
+                sentenceIndex={sentenceIndex}
+                start={start}
+                end={end}
+                text={text}
+                selected={selected}
+                selectToken={selectToken}
+                ctrlSelectToken={ctrlSelectToken}
+                shftSelectToken={shftSelectToken}
             />
         );
     }
 
-    // Creates the display of a single span/ token recommendation.
-    const getAnnoTokenRecommendation = (x: number, y: number, text: string, tag: string, selected: boolean, relSelected: boolean, labelLength: number) => {
+    // return an anno entity
+    // expected to always have a white space in front
+    const getAnnoEntity = (entity: Entity, text: string) => {
         return (
-            <AnnoTokenRecommendation
-                token={text}
-                sentenceId={x}
-                tokenId={y}
-                labelLength={labelLength}
-                style={getStyle(tag, selected, relSelected)}
-                select={select}
-                ctrlSelect={ctrlSelect}
-                shftSelect={shftSelect}
-            />
+            <span>
+                {' '}
+                <AnnoEntity
+                    entity={entity}
+                    text={text}
+                    style={getEntityStyle(entity.type, props.selectedEntities.includes(entity.id))}
+                    selectEntity={selectEntity}
+                    ctrlSelectEntity={ctrlSelectEntity}
+                />
+            </span>
+        );
+    }
+
+    // return an anno entity recommendation
+    // expected to always have a white space in front
+    const getAnnoEntityRecommendation = (entity: Entity, text: string) => {
+        return (
+            <span>
+                {' '}
+                <AnnoEntityRecommendation
+                    entity={entity}
+                    text={text}
+                    style={getEntityStyle(entity.type)}
+                    selectToken={selectToken}
+                    addEntity={props.addEntity}
+                    removeRecEntity={removeRecEntity}
+                />
+            </span>
         );
     }
 
     // Handles the display of the all tokens.
-    const display = (xxx: TokenInfo[][]) => {
+    const display = (xxx: EntityDict, yyy: string[][]) => {
         return(
             <span>
                 {
                     doc.sentences.map((sentence, x) => {
-                        let count_down = 0;
+                        let countdown = 0;
                         return (
                             <span>
                                 {
                                     sentence.tokens.map((token, y) => {
-                                        if (count_down > 0) {
-                                            count_down--;
+                                        if (countdown > 0) {
+                                            countdown--;
                                         } else {
-                                            //display a token or span that is labeled
-                                            if (props.sentences[x][y].label.slice(0,1) == 'B') {
-                                                let token_str = token.token;
-                                                let token_lab = props.sentences[x][y].label.slice(2); // label without b or i tag
-                                                for (let i = 0; i < props.sentences[x][y].labelLength; i++) {
-                                                    token_str = token_str + ' ' + sentence.tokens[y+i+1].token;
+                                            //display entity
+                                            for (let j = 0; j < props.sentenceEntities[x].length; j++) {
+                                                let entity = props.entities[props.sentenceEntities[x][j]];
+
+                                                if (entity !== undefined) {
+                                                    if (entity.start === y) {
+                                                        let text = '';
+                                                        for (let i = y; i < entity.end; i++) {
+                                                            text = text + ' ' + sentence.tokens[i].token;
+                                                        }
+                                                        countdown = entity.end - entity.start - 1;
+                                                        return (getAnnoEntity(entity, text));
+                                                    }
                                                 }
-                                                return (getSpaceAnnoToken(x, y, token_str, token_lab, props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
                                             }
 
-                                            // display recommendation
-                                            if (typeof recLabels[x][y] === 'string'  && recLabels[x][y].slice(0,1) == 'B') {
-                                                let token_str = token.token;
-                                                let token_lab = recLabels[x][y].slice(2); // label without b or i tag
-                                                for (let i = 0; i < recLabelLength[x][y]; i++) {
-                                                    token_str = token_str + ' ' + sentence.tokens[y+i+1].token;
+                                            // display recommendations
+                                            for (let j = 0; j < recSentenceEntities[x].length; j++) {
+                                                let recEntity = recEntities[recSentenceEntities[x][j]];
+
+                                                if (recEntity.start === y) {
+                                                    let interferes = false;
+                                                    // not interfering with entities
+                                                    for (let i = 0; i < props.sentenceEntities[x].length; i++) {
+                                                        let entity = props.entities[props.sentenceEntities[x][i]];
+                                                        if (entity.start > recEntity.start && entity.start < recEntity.end) {
+                                                            interferes = true;
+                                                        }
+                                                    }
+                                                    //display if not interferes
+                                                    if (!interferes) {
+                                                        let text = '';
+                                                        for (let i = y; i < recEntity.end; i++) {
+                                                            text = text + ' ' + sentence.tokens[i].token;
+                                                        }
+                                                        countdown = recEntity.end - recEntity.start - 1;
+                                                        return (getAnnoEntityRecommendation(recEntity, text));
+                                                    }
                                                 }
-                                                return (getSpaceAnnoTokenRecommendation(x, y, token_str, token_lab, props.sentences[x][y].selected, props.sentences[x][y].relSelected, recLabelLength[x][y]));
                                             }
 
-                                            // display token that is not labeled
-                                            if (props.sentences[x][y].label === 'O') {
-                                                if (props.sentences[x][y].selected === false) {
-                                                    return (getSpaceAnnoToken(x, y, token.token, props.sentences[x][y].label, props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
+                                            // display selected token span
+                                            // expected to not interfere with entities or recommendations
+                                            for (let i = 0; i < props.selectedTokens.length; i++) {
+                                                let span = props.selectedTokens[i];
+                                                if(span.sentenceIndex === x && span.start == y) {
+                                                    let text = '';
+                                                    for (let j = y; j < span.end; j++) {
+                                                        text = text + ' ' + sentence.tokens[j].token;
+                                                    }
+                                                    countdown = span.end - span.start - 1;
+                                                    return getAnnoToken(span.sentenceIndex, span.start, span.end, text, true);
                                                 }
-                                                // token is selected
-                                                let token_str = token.token;
-                                                for (let i = 0; i < props.sentences[x][y].selectionLength; i++) {
-                                                    token_str = token_str + ' ' + sentence.tokens[y + i + 1].token;
-                                                }
-                                                count_down = props.sentences[x][y].selectionLength;
-                                                return (getSpaceAnnoToken(x, y, token_str, 'O', props.sentences[x][y].selected, props.sentences[x][y].relSelected, props.sentences[x][y].labelLength));
                                             }
 
+                                            // display normal text
+                                            return getAnnoToken(x, y, y+1, token.token, false);
                                         }
                                     })
                                 }
@@ -404,34 +365,26 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     }
 
     // Update the label of selcted tokens/ spans.
-    const updateLabels = (label: string) => {
-        if (props.selection.length > 0) {
-            let newSentences = props.sentences.slice();
-
-            if (label !== 'O') {
-                props.selection.forEach ((ele) => {
-                    newSentences[ele.sentenceId][ele.tokenId].label = 'B-' + label;
-                    newSentences[ele.sentenceId][ele.tokenId].labelLength = ele.selectionLength; 
-                    for (let i = 0; i < ele.selectionLength; i++) {
-                        newSentences[ele.sentenceId][ele.tokenId + i + 1].label = 'I-' + label;
-                    }
-                });
-            } else {
-                props.selection.forEach ((ele) => {
-                    newSentences[ele.sentenceId][ele.tokenId].label = 'O';
-                    newSentences[ele.sentenceId][ele.tokenId].labelLength = 0; 
-                    for (let i = 0; i < ele.selectionLength; i++) {
-                        newSentences[ele.sentenceId][ele.tokenId + i + 1].label = 'O';
-                        newSentences[ele.sentenceId][ele.tokenId].labelLength = 0;
-                    }
-                });
+    const updateLabels = (type: string) => {
+        // Remove entities
+        if (type == 'O') {
+            for (let i = 0; i < props.selectedEntities.length; i++) {
+                props.removeEntity(props.selectedEntities[i]);
             }
-
-            props.setSentences(newSentences);
-            props.resetSelection();
-
-            props.sendUpdate(false);
+        } else {
+            // Adjust old entities
+            for (let i = 0; i < props.selectedEntities.length; i++) {
+                props.updateEntity(props.selectedEntities[i], type);
+            }
+            // Add new entities
+            for (let i = 0; i < props.selectedTokens.length; i++) {
+                props.addEntity(props.selectedTokens[i].sentenceIndex, props.selectedTokens[i].start, props.selectedTokens[i].end, type);
+            }
         }
+
+        // reset selection
+        props.setSelectedEntities([]);
+        props.setSelectedTokens([]);
     }
 
     // Get the style of a label button
@@ -465,13 +418,13 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                         labelSet.labels.map(label => {
                             return (
                                 <Button 
-                                    style={getButtonStyle(label.color, label.name)} 
-                                    key={label.name}
+                                    style={getButtonStyle(label.color, label.type)}
+                                    key={label.type}
                                     onClick={ () => {
-                                        updateLabels(label.name);
+                                        updateLabels(label.type);
                                     }}
                                 >
-                                    {label.name.toUpperCase()}
+                                    {label.type.toUpperCase()}
                                 </Button>
                                 
                             );
@@ -485,7 +438,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 <div
                     style={{'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}
                 >
-                    {display(props.sentences)}
+                    {display(props.entities, props.sentenceEntities)}
                 </div>
             </Layout.Content>
         </Layout>

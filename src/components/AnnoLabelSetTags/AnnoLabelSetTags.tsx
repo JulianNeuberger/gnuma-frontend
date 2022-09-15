@@ -34,8 +34,8 @@ export default function AnnoLabelSetTags(props: AnnoLabelSetTagsProps){
             {
                 labelSetContext.state.elements[props.id].labels.map(label => {
                     return (
-                        <Tag color={label.color} key={label.name}>
-                            {label.name.toUpperCase()}
+                        <Tag color={label.color} key={label.type}>
+                            {label.type.toUpperCase()}
                         </Tag>
                     );
                 })

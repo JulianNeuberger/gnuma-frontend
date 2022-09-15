@@ -2,7 +2,7 @@ import React from 'react';
 
 import {presetPalettes} from '@ant-design/colors';
 
-import {Relation} from '../../views/AnnoDetailsView'
+import {Relation} from "../../state/anno/annoDocumentReducer";
 
 // Props needed for displaying a relation
 type AnnoRelationProps = {
@@ -13,7 +13,6 @@ type AnnoRelationProps = {
     elementSelected: boolean;
     selected: boolean;
 
-    setSelectedRelation: (rel: Relation) => void;
 }
 
 // Display a relation
@@ -65,7 +64,6 @@ export default function AnnoRelation(props: AnnoRelationProps){
                 */
             }}
         >
-            {props.getText(props.rel.subject.sentenceId, props.rel.subject.tokenId)}{' --- '}{props.rel.predicate}{' ---> '}{props.getText(props.rel.object.sentenceId, props.rel.object.tokenId)}
         </div>
     );
 }

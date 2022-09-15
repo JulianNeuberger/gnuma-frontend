@@ -44,8 +44,8 @@ export default function AnnoLabelSetSelection(props: AnnoLabelSelectionProps){
                 {
                     record.labels.map(label => {
                         return (
-                            <Tag color={label.color} key={label.name}>
-                                {label.name.toUpperCase()}
+                            <Tag color={label.color} key={label.type}>
+                                {label.type.toUpperCase()}
                             </Tag>
                         );
                     })}

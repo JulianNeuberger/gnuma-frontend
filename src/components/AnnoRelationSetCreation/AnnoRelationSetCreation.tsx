@@ -28,7 +28,7 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
         let newRelationTypes = relationTypes;
 
         newRelationTypes.push({
-            'predicate': relationName,
+            'type': relationName,
             'color': newColors.shift()!
         })
 
@@ -126,8 +126,8 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
                     {
                         relationTypes.map(rel => {
                             return (
-                                <Tag color={rel.color} key={rel.predicate}>
-                                    {rel.predicate}
+                                <Tag color={rel.color} key={rel.type}>
+                                    {rel.type}
                                 </Tag>
                             );
                         })

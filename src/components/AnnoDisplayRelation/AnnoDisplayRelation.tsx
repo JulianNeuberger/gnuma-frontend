@@ -7,9 +7,8 @@ import {AnnoRelationSetContext} from '../../components/AnnoRelationSetContextPro
 import {AnnoDocumentContext} from '../../components/AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
 import AnnoRelationArrow from '../../components/AnnoRelationArrow/AnnoRelationArrow';
-import AnnoRelation from '../../components/AnnoRelation/AnnoRelation'
 
-import {Relation} from '../../views/AnnoDetailsView'
+import {RelationDict} from "../../state/anno/annoDocumentReducer";
 
 // Props that contain all info needed for displaying relations.
 type AnnoDisplayRelationProps = {
@@ -18,17 +17,13 @@ type AnnoDisplayRelationProps = {
     userId: string;
     relationSetId: string;
 
-    getText: (sentenceId: number, tokenId: number) => string;
+    relations: RelationDict;
 
-    relations: Relation[];
-    setRelations: (b: Relation[]) => void;
+    addRelation: (head: string, tail: string, type: string) => void;
+    removeRelation: (id: string) => void;
 
-    addRelation: (predicate: string) => void;
-
-    selectedRelation: Relation | undefined;
-    setSelectedRelation: (rel: Relation) => void;
-
-    twoRelations: boolean;
+    selectedEntities: string[];
+    setSelectedEntities: (x: string[]) => void;
 }
 
 // Used for building a dict that contains the colors of relation types.
@@ -49,7 +44,7 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
     }, []);
 
     // Check that context is not empty
-    if (!relationSetContext.state.elements[props.relationSetId] || !annoDocumentContext.state.elements[props.docId] || !annoDocumentContext.state.elements[props.docId].relations) {
+    if (!relationSetContext.state.elements[props.relationSetId] || !annoDocumentContext.state.elements[props.docId]) {
         return (<>loading...</>);
     }
 
@@ -58,15 +53,10 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
     if (Object.keys(relationColorDict).length === 0) {
         let newRelationColorDict: RelationColorDict = {};
         relationSet.relationTypes.forEach( (ele) => {
-            newRelationColorDict[ele.predicate] = ele.color
+            newRelationColorDict[ele.type] = ele.color
         });
 
         setRelationColorDict(newRelationColorDict);
-    }
-
-    // Load relation saved to server.
-    if (props.relations.length === 0 && annoDocumentContext.state.elements[props.docId].relations.length !== 0) {
-        props.setRelations(annoDocumentContext.state.elements[props.docId].relations);
     }
 
     // Returns the style for a relation arrow of specific color.
@@ -81,15 +71,15 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
     }
 
     // Function that draws the relation arrows.
-    const drawRelations = (rels: Relation[]) => {
+    const drawRelations = (rels: RelationDict) => {
         return (
             <div>
                 {
-                    rels.map((rel) => {
+                    Object.values(rels).map((rel) => {
                         return(
                             <AnnoRelationArrow
                                 rel={rel}
-                                color={relationColorDict[rel.predicate]}
+                                color={relationColorDict[rel.type]}
                             />
                         );
                     })
@@ -110,7 +100,7 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                         key={'RESET'}
                         onClick={ () => {
                         }}
-                        disabled={!props.twoRelations}
+                        disabled={props.selectedEntities.length !== 2}
                     >
                         {'REMOVE'}
                     </Button>
@@ -119,13 +109,13 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                             return (
                                 <Button 
                                     style={getStyle(relation.color)} 
-                                    key={relation.predicate}
+                                    key={relation.type}
                                     onClick={ () => {
-                                        props.addRelation(relation.predicate)
+                                        props.addRelation(props.selectedEntities[0], props.selectedEntities[1], relation.type)
                                     }}
-                                    disabled={!props.twoRelations}
+                                    disabled={props.selectedEntities.length !== 2}
                                 >
-                                    {relation.predicate}
+                                    {relation.type}
                                 </Button>
                                 
                             );
@@ -136,19 +126,6 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
         
             <Layout.Content>
                 <div style = {{'userSelect': 'none'}}>
-                    {
-                        props.relations.map((rel) => {
-                            return(
-                                <AnnoRelation
-                                    rel = {rel}
-                                    elementSelected={false}           
-                                    selected={rel === props.selectedRelation}
-                                    setSelectedRelation={props.setSelectedRelation}
-                                    getText={props.getText}
-                                />
-                            );
-                        })
-                    }
                     {drawRelations(props.relations)}
                 </div>
             </Layout.Content>

@@ -30,7 +30,7 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
         let newLabels = labels;
 
         newLabels.push({
-            'name': labelName,
+            'type': labelName,
             'color': newColors.shift()!
         })
 
@@ -130,8 +130,8 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
                     {
                         labels.map(label => {
                             return (
-                                <Tag color={label.color} key={label.name}>
-                                    {label.name.toUpperCase()}
+                                <Tag color={label.color} key={label.type}>
+                                    {label.type.toUpperCase()}
                                 </Tag>
                             );
                         })

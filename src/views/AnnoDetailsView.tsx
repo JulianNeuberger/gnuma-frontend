@@ -1,10 +1,11 @@
 import React from 'react';
+import {v4 as uuidv4} from 'uuid';
 
 import {DocumentsContext} from '../components/DocumentsContextProvider/DocumentsContextProvider';
 import {AnnoProjectContext} from '../components/AnnoProjectContextProvider/AnnoProjectContextProvider';
 import {AnnoDocumentContext} from '../components/AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
-import AnnoDisplayText, {RelationElement, TokenIndex, TokenInfo} from '../components/AnnoDisplayText/AnnoDisplayText';
+import AnnoDisplayText from '../components/AnnoDisplayText/AnnoDisplayText';
 import AnnoDisplayRelation from '../components/AnnoDisplayRelation/AnnoDisplayRelation';
 
 import {Button, Space, Card, Layout} from 'antd';
@@ -12,6 +13,7 @@ import {UpOutlined, CheckOutlined, UndoOutlined, RedoOutlined, UserOutlined} fro
 
 import {Link, useParams} from 'react-router-dom';
 import {getUserIdCookie} from "./AnnoView";
+import {Entity, EntityDict, Relation, RelationDict} from "../state/anno/annoDocumentReducer";
 
 // document params
 type AnnoDetailsParams = {
@@ -19,23 +21,24 @@ type AnnoDetailsParams = {
     docId: string;
 }
 
-// Define the type of a relation triplet
-export type Relation = {
-    predicate: string;
-    subject: RelationElement;
-    object: RelationElement;
+//Token
+export type TokenSpan = {
+    sentenceIndex: number;
+    start: number;
+    end: number;
 }
 
 // Function of the details view. show document text, entity labels and relations.
 export default function AnnoDetailsView(){
-    const [selection, setSelection] = React.useState<TokenIndex[]>([]);
-    const [selectedRelation, setSelectedRelation] = React.useState<Relation>();
+    const [entities, setEntities] = React.useState<EntityDict>({});
+    const [sentenceEntities, setSentenceEntities] = React.useState<string[][]>([]);
+    const [relations, setRelations] = React.useState<RelationDict>({});
 
-    const [twoRelations, setTwoRelations] = React.useState<boolean>(false);
-    const [relationElements, setRelationElements] = React.useState<RelationElement[]>([]);
+    const [selectedEntities, setSelectedEntities] = React.useState<string[]>([]);
+    const [selectedTokens, setSelectedTokens] = React.useState<TokenSpan[]>([]);
 
-    const [relations, setRelations] = React.useState<Relation[]>([]);
-    const [sentences, setSentences] = React.useState<TokenInfo[][]>([]);
+    //if this works im sad
+    const [halp, sendHalp] = React.useState<boolean>(true);
 
     const [userId, setUserId] = React.useState<string>(getUserIdCookie());
 
@@ -54,114 +57,149 @@ export default function AnnoDetailsView(){
     }, []);
 
     // check if data got loaded
-    if (!documentContext.state.elements[docId]  || !projectContext.state.elements[projectId] || !annoDocumentContext.state.elements[docId] || !annoDocumentContext.state.elements[docId].relations){
+    if (documentContext.state.elements[docId] === undefined  || projectContext.state.elements[projectId] === undefined || annoDocumentContext.state.elements[docId] === undefined){
         return (<>loading...</>);
-    }
-
-    // create list of relation if exist on server.
-    if (relations.length === 0 && annoDocumentContext.state.elements[docId].relations.length > 0) {
-        setRelations(annoDocumentContext.state.elements[docId].relations);
     }
 
     const doc = documentContext.state.elements[docId];
     const project = projectContext.state.elements[projectId];
+    const annoDoc = annoDocumentContext.state.elements[docId];
 
-    // get the text for a span
-    const getText = (sentenceId: number, tokenId: number) => {
-        let str = '';
-        for (let i = 0; i <= sentences[sentenceId][tokenId].labelLength; i++){
-            str = str + doc.sentences[sentenceId].tokens[tokenId + i].token + ' ';
+    // This is why i hate react ...
+    if (halp) {
+        sendHalp(false);
+        // load relations
+        if (annoDoc.relations !== undefined && Object.keys(relations).length === 0 && Object.keys(annoDoc.relations).length > 0) {
+            setRelations(annoDoc.relations);
         }
-        return str;
+
+        // load entities
+        if (annoDoc.entities !== undefined && sentenceEntities.length === 0 && Object.keys(entities).length === 0 && Object.keys(annoDoc.entities).length > 0) {
+            setEntities(annoDoc.entities);
+            setSentenceEntities(annoDoc.sentenceEntities);
+        } else {
+            let newSentenceEntities: string[][] = [];
+            for (let i = 0; i < doc.sentences.length; i++) {
+                newSentenceEntities.push([]);
+            }
+            setSentenceEntities(newSentenceEntities);
+        }
+    }
+
+    // Add a new entity to the entity dictionary
+    const addEntity = (sentenceIndex: number, start: number, end: number, label: string) => {
+        //todo check for overlapping
+
+        let newEntities = {...entities};
+
+        let newId: string = uuidv4();
+        let newEntity: Entity = {
+            'id': newId,
+            'sentenceIndex': sentenceIndex,
+            'start': start,
+            'end': end,
+            'type': label,
+            'relations': []
+        };
+
+        newEntities[newId] = newEntity;
+        setEntities(newEntities);
+
+        let newSentenceEntities = sentenceEntities.slice();
+        if (newSentenceEntities[sentenceIndex] !== undefined) {
+            newSentenceEntities[sentenceIndex].push(newId);
+        }
+        setSentenceEntities(newSentenceEntities);
+
+        sendUpdate(false);
+    }
+
+    // Update the label for an entity
+    const updateEntity = (id: string, type: string) => {
+        let newEntities = {...entities};
+        newEntities[id].type = type;
+        setEntities(newEntities);
+    }
+
+    // Remove an entity and all relations its in
+    const removeEntity = (id: string) => {
+        // remove Relations
+        for (let i = 0; i < entities[id].relations.length; i++) {
+            removeRelation(entities[id].relations[i]);
+        }
+
+        //remove from sentence list
+        let newSentenceEntities = sentenceEntities.slice();
+        newSentenceEntities[entities[id].sentenceIndex].splice(newSentenceEntities[entities[id].sentenceIndex].indexOf(id), 1);
+
+        // remove the entity
+        let newEntities = {...entities};
+        delete newEntities[id];
+        setEntities(newEntities);
+
+        setSentenceEntities(newSentenceEntities);
+
+        sendUpdate(false);
+    }
+
+    // Add a relation
+    const addRelation = (head: string, tail: string, type: string) => {
+        // todo check for duplicates
+
+        let newRelations = {...relations};
+
+        let newId = uuidv4();
+        let newRelation: Relation = {
+            'id': newId,
+            'head': head,
+            'tail': tail,
+            'type': type
+        }
+
+        newRelations[newId] = newRelation;
+        setRelations(newRelations);
+
+        // add relation to entities
+        // todo check if ok
+        entities[head].relations.push(newId);
+        entities[tail].relations.push(newId);
+
+        // clear selection
+        setSelectedTokens([]);
+        setSelectedEntities([]);
+
+        sendUpdate(false);
+    }
+
+    // Remove a relation
+    const removeRelation = (id: string) => {
+        // todo check if this works
+        let newEntities = {...entities};
+
+        newEntities[relations[id].head].relations.splice(newEntities[relations[id].head].relations.indexOf(id),1);
+        newEntities[relations[id].tail].relations.splice(newEntities[relations[id].tail].relations.indexOf(id),1);
+
+        setEntities(newEntities);
+
+        let newRelations = {...relations};
+        delete newRelations[id];
+        setRelations(newRelations);
+
+        sendUpdate(false);
     }
 
     // send an update to the server
     const sendUpdate = (labeled: boolean) => {
-        // update when document is marked as labeled.
-        if (labeled){
-            annoDocumentContext.onUpdate(projectId, docId, userId,
-                {
-                    'labels': sentences.map((sen) => {return(sen.map((tok) => {return(tok.label);}));}),
-                    'relations': relations,
-                    'labelLength': sentences.map((sen) => {return(sen.map((tok) => {return(tok.labelLength);}));}),
-                    'labeled': true,
-                });
+        // add entities, relations and info if labeled
+        let out = {
+            'entities': entities,
+            'sentenceEntities': sentenceEntities,
+            'relations': relations,
+            'labeled': labeled
         }
-        // usual update.
-        annoDocumentContext.onUpdate(projectId, docId, userId,
-            {
-                'labels': sentences.map((sen) => {return(sen.map((tok) => {return(tok.label);}));}), 
-                'relations': relations,
-                'labelLength': sentences.map((sen) => {return(sen.map((tok) => {return(tok.labelLength);}));}),
-            });
-    }
 
-    //Add a new label
-    const addLabel = (sentenceId: string, tokenId: string, labelLength: number, label: string) => {
-
-    }
-
-    // Add a new relation to the list.
-    const addRelation = (predicate: string) => {
-        let newRelations = relations.slice();
-        newRelations.push({
-            'predicate': predicate,
-            'subject': relationElements[0],
-            'object': relationElements[1]
-        })
-        setRelations(newRelations);
-
-        sendUpdate(false);
-        resetSelection();
-    }
-
-    // select a relation
-    const selectRelation = (rel: Relation) => {
-        /*
-        resetSelection();
-
-        let newSentences = sentences.slice()
-        if (selectedRelation) {
-            selectedRelation.elements.forEach((ele) => {
-                newSentences[ele.sentenceId][ele.tokenId].relSelected = false;
-            });
-        }
-        rel.elements.forEach((ele) => {
-            newSentences[ele.sentenceId][ele.tokenId].relSelected = true;
-        });
-        setSentences(newSentences);
-        setSelectedRelation(rel);
-
-        setTokenMode(2);
-        */
-    }
-
-    // unselect a relation
-    const unselectRelation = () => {
-        /*
-        if (selectedRelation) {
-            let newSentences = sentences.slice()
-            selectedRelation.elements.forEach((ele) => {
-                newSentences[ele.sentenceId][ele.tokenId].relSelected = false;
-            });
-            setSentences(newSentences);
-            setSelectedRelation(undefined);
-
-            setTokenMode(0);
-        }
-        */
-    }
-
-    // reset the selection.
-    const resetSelection = () => {
-        let newSentences = sentences.slice();
-        selection.forEach ((ele) => {
-            newSentences[ele.sentenceId][ele.tokenId].selected = false;
-        });
-        setSentences(newSentences);
-        setSelection([]);
-        setTwoRelations(false);
-        setRelationElements([]);
+        // send the update
+        annoDocumentContext.onUpdate(projectId, docId, userId, out);
     }
 
     // Return the text, labels and relations.
@@ -171,6 +209,19 @@ export default function AnnoDetailsView(){
                 title = {`${project.name} - ${doc.name}`}
                 extra = {
                     <Space>
+                        <Button
+                            onClick={() => {
+                                setEntities({});
+                                setRelations({});
+                                let newSentenceEntities: string[][] = [];
+                                for (let i = 0; i < doc.sentences.length; i++) {
+                                    newSentenceEntities.push([]);
+                                }
+                                setSentenceEntities(newSentenceEntities);
+                            }}
+                        >
+                            Reset
+                        </Button>
                         <Button
                             type = {'default'}
                             onClick={() => console.log('todo')}
@@ -218,16 +269,15 @@ export default function AnnoDetailsView(){
                         labelSetId={project.labelSetId} 
                         projectId={projectId}
                         userId={userId}
-                        setTwoRelations={setTwoRelations}
-                        relations={relations}
-                        setRelationElements={setRelationElements}
-                        sendUpdate={sendUpdate}
-                        sentences={sentences}
-                        setSentences={setSentences}
-                        selection={selection}
-                        setSelection={setSelection}
-                        resetSelection={resetSelection}
-                        resetRelationSelection={unselectRelation}
+                        entities={entities}
+                        sentenceEntities={sentenceEntities}
+                        addEntity={addEntity}
+                        updateEntity={updateEntity}
+                        removeEntity={removeEntity}
+                        selectedTokens={selectedTokens}
+                        setSelectedTokens={setSelectedTokens}
+                        selectedEntities={selectedEntities}
+                        setSelectedEntities={setSelectedEntities}
                     />
 
                     <Layout.Sider
@@ -240,12 +290,10 @@ export default function AnnoDetailsView(){
                             projectId={projectId}
                             userId={userId}
                             relations={relations}
-                            setRelations={setRelations}
                             addRelation={addRelation}
-                            twoRelations={twoRelations}
-                            selectedRelation={selectedRelation}
-                            setSelectedRelation={setSelectedRelation}
-                            getText={getText}
+                            removeRelation={removeRelation}
+                            selectedEntities={selectedEntities}
+                            setSelectedEntities={setSelectedEntities}
                         />
                     </Layout.Sider>
                 </Layout>

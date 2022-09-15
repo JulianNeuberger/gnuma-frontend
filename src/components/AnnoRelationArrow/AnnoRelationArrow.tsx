@@ -1,6 +1,5 @@
 import Xarrow from "react-xarrows";
-
-import {Relation} from '../../views/AnnoDetailsView'
+import {Relation} from "../../state/anno/annoDocumentReducer";
 
 // props needed for the arrow.
 type AnnoRelationArrowProps = {
@@ -14,8 +13,8 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
     return(
         <>
             <Xarrow
-                start={props.rel.subject.sentenceId + '_' + props.rel.subject.tokenId}
-                end={props.rel.subject.sentenceId + '_' + props.rel.subject.tokenId}
+                start={props.rel.head}
+                end={props.rel.head}
                 startAnchor={[{position: 'bottom', offset: {}}]}
                 endAnchor={[{position: 'bottom', offset: {y: 10}}]}
                 strokeWidth= {2}
@@ -25,8 +24,8 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
                 color = {props.color}
             />
             <Xarrow 
-                start={props.rel.subject.sentenceId + '_' + props.rel.subject.tokenId} 
-                end={props.rel.object.sentenceId + '_' + props.rel.object.tokenId}
+                start={props.rel.head}
+                end={props.rel.tail}
                 startAnchor={[{position: 'bottom', offset: {y: 9}}]}
                 endAnchor={[{position: 'left', offset: {y: 10}}, { position: 'right', offset: {y: 10}}, {position: 'top', offset:{}}, {position: 'bottom', offset:{}}]}
                 strokeWidth= {2}

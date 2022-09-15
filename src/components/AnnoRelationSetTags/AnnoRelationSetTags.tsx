@@ -34,8 +34,8 @@ export default function AnnoRelationSetTags(props: AnnoRelationSetTagsProps){
             {
                 relationSetContext.state.elements[props.id].relationTypes.map(label => {
                     return (
-                        <Tag color={label.color} key={label.predicate}>
-                            {label.predicate}
+                        <Tag color={label.color} key={label.type}>
+                            {label.type}
                         </Tag>
                     );
                 })

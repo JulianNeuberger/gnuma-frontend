@@ -5,7 +5,7 @@ import {GenericPayloadActions} from '../common/actions';
 
 // single relation type
 export type AnnoRelationType = {
-    predicate: string;
+    type: string;
     color: string;
 }
 

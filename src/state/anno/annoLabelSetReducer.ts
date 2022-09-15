@@ -5,7 +5,7 @@ import {GenericPayloadActions} from '../common/actions';
 
 // Define single label.
 export type AnnoLabel = {
-    name: string;
+    type: string;
     color: string;
 }
 

@@ -3,16 +3,40 @@ import {Reducer} from 'react';
 import {genericPayloadReducer, GenericPayloadState} from '../common/reducer';
 import {GenericPayloadActions} from '../common/actions';
 
-import {Relation} from '../../views/AnnoDetailsView'
+// Entity type
+export type Entity = {
+    id: string;
+    sentenceIndex: number;
+    start: number;
+    end: number;
+    type: string;
+    relations: string[];
+}
+
+export type EntityDict = {
+    [key: string]: Entity;
+}
+
+// Relation type
+export type Relation = {
+    id: string;
+    head: string;
+    tail: string;
+    type: string;
+}
+
+export type RelationDict = {
+    [key: string]: Relation;
+}
 
 // Anno document type
 export type AnnoDocument = {
     id: string;
     labeled: boolean;
     labeledBy: string[];
-    labels: string[][];
-    labelLength: number[][];
-    relations: Relation[];
+    sentenceEntities: string[][];
+    entities: EntityDict;
+    relations: RelationDict;
 }
 
 export const initialAnnoDocumentState: GenericPayloadState<AnnoDocument> = {

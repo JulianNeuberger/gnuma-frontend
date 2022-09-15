@@ -42,8 +42,8 @@ export default function AnnoRelationSetSelection(props: AnnoRelationSetSelection
                 {
                     record.relationTypes.map(rel => {
                         return (
-                            <Tag color={rel.color} key={rel.predicate}>
-                                {rel.predicate}
+                            <Tag color={rel.color} key={rel.type}>
+                                {rel.type}
                             </Tag>
                         );
                     })}
