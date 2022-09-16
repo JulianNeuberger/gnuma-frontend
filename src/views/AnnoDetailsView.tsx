@@ -28,6 +28,11 @@ export type TokenSpan = {
     end: number;
 }
 
+// Color dict for label and relation
+export type ColorDict = {
+    [label: string]: string;
+}
+
 // Function of the details view. show document text, entity labels and relations.
 export default function AnnoDetailsView(){
     const [entities, setEntities] = React.useState<EntityDict>({});
@@ -188,6 +193,23 @@ export default function AnnoDetailsView(){
         sendUpdate(false);
     }
 
+    // Returns the text of an entity
+    const getEntityText = (id: string) => {
+        let entity = entities[id];
+
+        // Error is entity does not exist
+        if (entity === undefined) {
+            console.error('Entity with id ' + id + ' does not exist.')
+            return (id);
+        }
+
+        let out: string = doc.sentences[entity.sentenceIndex].tokens[entity.start].token;
+        for (let i = entity.start + 1; i < entity.end; i++) {
+            out = out + ' ' + doc.sentences[entity.sentenceIndex].tokens[i].token;
+        }
+        return (out);
+    }
+
     // send an update to the server
     const sendUpdate = (labeled: boolean) => {
         // add entities, relations and info if labeled
@@ -294,6 +316,9 @@ export default function AnnoDetailsView(){
                             removeRelation={removeRelation}
                             selectedEntities={selectedEntities}
                             setSelectedEntities={setSelectedEntities}
+                            entities={entities}
+                            labelSetId={project.labelSetId}
+                            getEntityText={getEntityText}
                         />
                     </Layout.Sider>
                 </Layout>

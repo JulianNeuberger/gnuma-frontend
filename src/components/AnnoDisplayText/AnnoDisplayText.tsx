@@ -9,7 +9,7 @@ import AnnoEntity from '../AnnoEntity/AnnoEntity'
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 import AnnoEntityRecommendation from "../AnnoEntityRecommendation/AnnoEntityRecommendation";
 import {Entity, EntityDict} from "../../state/anno/annoDocumentReducer";
-import {TokenSpan} from "../../views/AnnoDetailsView";
+import {ColorDict, TokenSpan} from "../../views/AnnoDetailsView";
 import AnnoToken from "../AnnoToken/AnnoToken";
 
 
@@ -34,14 +34,9 @@ type AnnoDisplayTextProps = {
     setSelectedTokens: (x: TokenSpan[]) => void;
 }
 
-// Used for defining a dict that links labels to colors.
-type LabelColorDict = {
-    [label: string]: string;
-}
-
 // Function for displaying the text.
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
-    const [labelColorDict, setLabelColorDict] = React.useState<LabelColorDict>({});
+    const [labelColorDict, setLabelColorDict] = React.useState<ColorDict>({});
 
     const [recEntities, setRecEntities] = React.useState<EntityDict>({'asf' : {'id': 'asf', 'sentenceIndex': 0, 'start': 0, 'end': 1, 'type': 'a', 'relations': []}});
     const [recSentenceEntities, setRecSentnceEntities] = React.useState<string[][]>([['asf'], [], [],[]]);
@@ -52,12 +47,12 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
     React.useEffect(() => {
         documentContext.onFetchOne(props.docId);
-        labelSetContext.onFetchOne(props.labelSetId);
         annoDocumentContext.onFetchOne(props.projectId, props.docId, props.userId);
+        labelSetContext.onFetchOne(props.labelSetId);
     }, []);
 
     // Check that context exists.
-    if(!documentContext.state.elements[props.docId]  || !labelSetContext.state.elements[props.labelSetId] || !annoDocumentContext.state.elements[props.docId]){
+    if(documentContext.state.elements[props.docId] === undefined || labelSetContext.state.elements[props.labelSetId] === undefined || annoDocumentContext.state.elements[props.docId] === undefined){
         return (<>loading...</>);
     }
 
@@ -67,7 +62,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     // Fill the color dict.
     const labelSet = labelSetContext.state.elements[props.labelSetId];
     if (Object.keys(labelColorDict).length === 0) {
-        let newLabelColorDict: LabelColorDict = {};
+        let newLabelColorDict: ColorDict = {};
         labelSet.labels.forEach( (ele) => {
             newLabelColorDict[ele.type] = ele.color
         });
