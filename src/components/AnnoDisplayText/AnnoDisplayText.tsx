@@ -292,17 +292,19 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                             countdown--;
                                         } else {
                                             //display entity
-                                            for (let j = 0; j < props.sentenceEntities[x].length; j++) {
-                                                let entity = props.entities[props.sentenceEntities[x][j]];
+                                            if (props.sentenceEntities[x] !== undefined) {
+                                                for (let j = 0; j < props.sentenceEntities[x].length; j++) {
+                                                    let entity = props.entities[props.sentenceEntities[x][j]];
 
-                                                if (entity !== undefined) {
-                                                    if (entity.start === y) {
-                                                        let text = '';
-                                                        for (let i = y; i < entity.end; i++) {
-                                                            text = text + ' ' + sentence.tokens[i].token;
+                                                    if (entity !== undefined) {
+                                                        if (entity.start === y) {
+                                                            let text = '';
+                                                            for (let i = y; i < entity.end; i++) {
+                                                                text = text + ' ' + sentence.tokens[i].token;
+                                                            }
+                                                            countdown = entity.end - entity.start - 1;
+                                                            return (getAnnoEntity(entity, text));
                                                         }
-                                                        countdown = entity.end - entity.start - 1;
-                                                        return (getAnnoEntity(entity, text));
                                                     }
                                                 }
                                             }
@@ -314,10 +316,12 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                                 if (recEntity.start === y) {
                                                     let interferes = false;
                                                     // not interfering with entities
-                                                    for (let i = 0; i < props.sentenceEntities[x].length; i++) {
-                                                        let entity = props.entities[props.sentenceEntities[x][i]];
-                                                        if (entity.start > recEntity.start && entity.start < recEntity.end) {
-                                                            interferes = true;
+                                                    if (props.sentenceEntities[x] !== undefined) {
+                                                        for (let i = 0; i < props.sentenceEntities[x].length; i++) {
+                                                            let entity = props.entities[props.sentenceEntities[x][i]];
+                                                            if (entity.start > recEntity.start && entity.start < recEntity.end) {
+                                                                interferes = true;
+                                                            }
                                                         }
                                                     }
                                                     //display if not interferes
