@@ -1,7 +1,5 @@
 import React from 'react';
 
-import {presetPalettes} from '@ant-design/colors';
-
 import {Entity, EntityDict, Relation} from "../../state/anno/annoDocumentReducer";
 import { Space } from 'antd';
 import Xarrow from "react-xarrows";
@@ -16,15 +14,39 @@ type AnnoRelationProps = {
     getRelationStyle: (id: string) => string;
 
     getEntityText: (id: string) => string;
+
+    selectRelation: (id: string) => void;
+    ctrlSelectRelation: (id: string) => void;
+
+    selectedRelations: string[];
 }
 
 // Display a relation
 export default function AnnoRelation(props: AnnoRelationProps){
 
+    const getRelStyle = () => {
+        // check if selected
+        if (props.selectedRelations.includes(props.rel.id)) {
+            return {'border': '2px solid black'}
+        }
+
+        // not style if not selected
+        return {};
+    }
+
     // Return the relation.
     return (
-        <div>
-            <span>
+        <div style={getRelStyle()}>
+            <span
+                onClick={(e) => {
+                    // event based on click type
+                    if (e.ctrlKey) {
+                        props.ctrlSelectRelation(props.rel.id);
+                    } else {
+                        props.selectRelation(props.rel.id);
+                    }
+                }}
+            >
                 <Space
                     size={80}
                     style={{'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}

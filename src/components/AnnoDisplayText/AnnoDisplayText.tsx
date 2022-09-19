@@ -11,6 +11,7 @@ import AnnoEntityRecommendation from "../AnnoEntityRecommendation/AnnoEntityReco
 import {Entity, EntityDict} from "../../state/anno/annoDocumentReducer";
 import {ColorDict, TokenSpan} from "../../views/AnnoDetailsView";
 import AnnoToken from "../AnnoToken/AnnoToken";
+import {v4 as uuidv4} from "uuid";
 
 
 // Props containing everything needed for displaying the text and its labels.
@@ -23,9 +24,9 @@ type AnnoDisplayTextProps = {
     entities: EntityDict;
     sentenceEntities: string[][];
 
-    addEntity: (sentenceIndex: number, start: number, end: number, type: string) => void;
-    updateEntity: (id: string, type: string) => void;
-    removeEntity: (id: string) => void
+    addEntity: (ents: Entity[]) => void;
+    updateEntity: (ids: string[], type: string) => void;
+    removeEntity: (ids: string[]) => void
 
     selectedEntities: string[];
     setSelectedEntities: (x: string[]) => void;
@@ -38,8 +39,11 @@ type AnnoDisplayTextProps = {
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     const [labelColorDict, setLabelColorDict] = React.useState<ColorDict>({});
 
-    const [recEntities, setRecEntities] = React.useState<EntityDict>({'asf' : {'id': 'asf', 'sentenceIndex': 0, 'start': 0, 'end': 1, 'type': 'a', 'relations': []}});
-    const [recSentenceEntities, setRecSentnceEntities] = React.useState<string[][]>([['asf'], [], [],[]]);
+    const [recEntities, setRecEntities] = React.useState<EntityDict>({
+        'asf' : {'id': 'asf', 'sentenceIndex': 0, 'start': 0, 'end': 1, 'type': 'a', 'relations': []},
+        'dsf' : {'id': 'dsf', 'sentenceIndex': 0, 'start': 3, 'end': 4, 'type': 'c', 'relations': []}
+    });
+    const [recSentenceEntities, setRecSentnceEntities] = React.useState<string[][]>([['asf', 'dsf'], [], [],[]]);
 
     const documentContext = React.useContext(DocumentsContext);
     const labelSetContext = React.useContext(AnnoLabelSetContext);
@@ -150,7 +154,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
                     if (entity !== undefined) {
                         //check overlapping
-                        if ((entity.start >= new_start && entity.end < new_end) || (entity.end >= new_start && entity.end < new_end) || (entity.start < new_start && entity.end >= new_end)) {
+                        if ((entity.start >= new_start && entity.start < new_end) || (entity.end > new_start && entity.end < new_end) || (entity.start < new_start && entity.end >= new_end)) {
                             overlapping = true;
                         }
                     }
@@ -270,6 +274,8 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                     text={text}
                     style={getEntityStyle(entity.type)}
                     selectToken={selectToken}
+                    ctrlSelectToken={ctrlSelectToken}
+                    shftSelectToken={shftSelectToken}
                     addEntity={props.addEntity}
                     removeRecEntity={removeRecEntity}
                 />
@@ -367,18 +373,27 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     const updateLabels = (type: string) => {
         // Remove entities
         if (type == 'O') {
-            for (let i = 0; i < props.selectedEntities.length; i++) {
-                props.removeEntity(props.selectedEntities[i]);
-            }
+            props.removeEntity(props.selectedEntities);
         } else {
             // Adjust old entities
-            for (let i = 0; i < props.selectedEntities.length; i++) {
-                props.updateEntity(props.selectedEntities[i], type);
-            }
+            props.updateEntity(props.selectedEntities, type);
             // Add new entities
+            let newEnts: Entity[] = [];
             for (let i = 0; i < props.selectedTokens.length; i++) {
-                props.addEntity(props.selectedTokens[i].sentenceIndex, props.selectedTokens[i].start, props.selectedTokens[i].end, type);
+                let tok = props.selectedTokens[i];
+
+                let newEnt: Entity = {
+                    'id': uuidv4(),
+                    'sentenceIndex': tok.sentenceIndex,
+                    'start': tok.start,
+                    'end': tok.end,
+                    'type': type,
+                    'relations': []
+                }
+                newEnts.push(newEnt);
             }
+
+            props.addEntity(newEnts);
         }
 
         // reset selection

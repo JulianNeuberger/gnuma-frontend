@@ -1,5 +1,4 @@
 import React from 'react';
-import {v4 as uuidv4} from 'uuid';
 
 import {DocumentsContext} from '../components/DocumentsContextProvider/DocumentsContextProvider';
 import {AnnoProjectContext} from '../components/AnnoProjectContextProvider/AnnoProjectContextProvider';
@@ -52,6 +51,7 @@ export default function AnnoDetailsView(){
 
     const [selectedEntities, setSelectedEntities] = React.useState<string[]>([]);
     const [selectedTokens, setSelectedTokens] = React.useState<TokenSpan[]>([]);
+    const [selectedRelations, setSelectedRelations] = React.useState<string[]>([]);
 
     //if this works im sad
     const [halp, sendHalp] = React.useState<boolean>(true);
@@ -173,9 +173,6 @@ export default function AnnoDetailsView(){
             newSentenceEntities = annoDoc.sentenceEntities;
         }
 
-        console.log(newEntities);
-        console.log(newSentenceEntities);
-        console.log(newRelations);
         updateHistory(newEntities, newSentenceEntities, newRelations);
     }
 
@@ -192,6 +189,8 @@ export default function AnnoDetailsView(){
             setEntities(history[newCurrentState].entities);
             setSentenceEntities(history[newCurrentState].sentenceEntities);
             setRelations(history[newCurrentState].relations);
+
+            sendUpdate(history[newCurrentState].entities, history[newCurrentState].sentenceEntities, history[newCurrentState].relations, false);
         }
     }
 
@@ -208,109 +207,123 @@ export default function AnnoDetailsView(){
             setEntities(history[newCurrentState].entities);
             setSentenceEntities(history[newCurrentState].sentenceEntities);
             setRelations(history[newCurrentState].relations);
+
+            sendUpdate(history[newCurrentState].entities, history[newCurrentState].sentenceEntities, history[newCurrentState].relations, false);
         }
     }
 
     // Add a new entity to the entity dictionary
-    const addEntity = (sentenceIndex: number, start: number, end: number, label: string) => {
+    const addEntity = (ents: Entity[]) => {
         //todo check for overlapping
 
         let newEntities = JSON.parse(JSON.stringify(entities));
-
-        let newId: string = uuidv4();
-        let newEntity: Entity = {
-            'id': newId,
-            'sentenceIndex': sentenceIndex,
-            'start': start,
-            'end': end,
-            'type': label,
-            'relations': []
-        };
-
-        newEntities[newId] = newEntity;
-
-
         let newSentenceEntities = JSON.parse(JSON.stringify(sentenceEntities));
-        if (newSentenceEntities[sentenceIndex] !== undefined) {
-            newSentenceEntities[sentenceIndex].push(newId);
+
+        for (let i = 0; i < ents.length; i++) {
+            let ent = ents[i];
+
+            newEntities[ent.id] = ent;
+
+            newSentenceEntities[ent.sentenceIndex].push(ent.id);
         }
 
         updateHistory(newEntities, newSentenceEntities, relations);
     }
 
     // Update the label for an entity
-    const updateEntity = (id: string, type: string) => {
+    const updateEntity = (ids: string[], type: string) => {
         let newEntities = JSON.parse(JSON.stringify(entities));
 
-        newEntities[id].type = type;
+        for (let i = 0; i < ids.length; i++) {
+            newEntities[ids[i]].type = type;
+        }
 
+        setSelectedEntities([]);
         updateHistory(newEntities, sentenceEntities, relations);
     }
 
     // Remove an entity and all relations its in
-    const removeEntity = (id: string) => {
+    const removeEntity = (ids: string []) => {
         let newEntities = JSON.parse(JSON.stringify(entities));
         let newSentenceEntities = JSON.parse(JSON.stringify(sentenceEntities));
         let newRelations = JSON.parse(JSON.stringify(relations));
 
-        // remove Relations
-        for (let i = 0; i < entities[id].relations.length; i++) {
-            let rel = newRelations[entities[id].relations[i]];
+        for (let h = 0; h < ids.length; h++) {
+            let id = ids[h];
 
-            if (rel !== undefined) {
-                newEntities[rel.head].relations.splice(newEntities[rel.head].relations.indexOf(rel.id), 1);
-                newEntities[rel.tail].relations.splice(newEntities[rel.tail].relations.indexOf(rel.id), 1);
+            // remove Relations
+            for (let i = 0; i < entities[id].relations.length; i++) {
+                let rel = newRelations[entities[id].relations[i]];
 
-                delete newRelations[rel.id];
+                if (rel !== undefined) {
+                    newEntities[rel.head].relations.splice(newEntities[rel.head].relations.indexOf(rel.id), 1);
+                    newEntities[rel.tail].relations.splice(newEntities[rel.tail].relations.indexOf(rel.id), 1);
+
+                    delete newRelations[rel.id];
+                }
             }
+
+            //remove from sentence list
+            newSentenceEntities[entities[id].sentenceIndex].splice(newSentenceEntities[entities[id].sentenceIndex].indexOf(id), 1);
+
+            // remove the entity
+            delete newEntities[id];
         }
-
-        //remove from sentence list
-        newSentenceEntities[entities[id].sentenceIndex].splice(newSentenceEntities[entities[id].sentenceIndex].indexOf(id), 1);
-
-        // remove the entity
-        delete newEntities[id];
 
         updateHistory(newEntities, newSentenceEntities, newRelations);
     }
 
     // Add a relation
-    const addRelation = (head: string, tail: string, type: string) => {
+    const addRelation = (rels: Relation[]) => {
         // todo check for duplicates
-
         let newRelations = JSON.parse(JSON.stringify(relations));
-
-        let newId = uuidv4();
-        let newRelation: Relation = {
-            'id': newId,
-            'head': head,
-            'tail': tail,
-            'type': type
-        }
-
-        newRelations[newId] = newRelation;
-
-        // add relation to entities
         let newEntities = JSON.parse(JSON.stringify(entities));
-        newEntities[head].relations.push(newId);
-        newEntities[tail].relations.push(newId);
+
+        for (let i = 0; i < rels.length; i++) {
+            let rel = rels[i];
+
+            newRelations[rel.id] = rel;
+
+            // add relation to entities
+            newEntities[rel.head].relations.push(rel.id);
+            newEntities[rel.tail].relations.push(rel.id);
+        }
 
         // clear selection
         setSelectedTokens([]);
         setSelectedEntities([]);
+        setSelectedRelations([]);
 
         updateHistory(newEntities, sentenceEntities, newRelations);
     }
 
-    // Remove a relation
-    const removeRelation = (id: string) => {
-        let newEntities = JSON.parse(JSON.stringify(entities));
-
-        newEntities[relations[id].head].relations.splice(newEntities[relations[id].head].relations.indexOf(id),1);
-        newEntities[relations[id].tail].relations.splice(newEntities[relations[id].tail].relations.indexOf(id),1);
-
+    // Update a relation
+    const updateRelation = (ids: string[], type: string) => {
         let newRelations = JSON.parse(JSON.stringify(relations));
-        delete newRelations[id];
+
+        for (let i = 0; i < ids.length; i++) {
+            newRelations[ids[i]].type = type;
+        }
+
+        setSelectedRelations([]);
+        updateHistory(entities, sentenceEntities, newRelations);
+    }
+
+    // Remove a relation
+    const removeRelation = (ids: string[]) => {
+        let newEntities = JSON.parse(JSON.stringify(entities));
+        let newRelations = JSON.parse(JSON.stringify(relations));
+
+        for (let h = 0; h < ids.length; h++) {
+            let id = ids[h];
+
+            newEntities[relations[id].head].relations.splice(newEntities[relations[id].head].relations.indexOf(id), 1);
+            newEntities[relations[id].tail].relations.splice(newEntities[relations[id].tail].relations.indexOf(id), 1);
+
+            delete newRelations[id];
+        }
+
+        setSelectedRelations([]);
 
         updateHistory(newEntities, sentenceEntities, newRelations);
     }
@@ -419,9 +432,12 @@ export default function AnnoDetailsView(){
                             userId={userId}
                             relations={relations}
                             addRelation={addRelation}
+                            updateRelation={updateRelation}
                             removeRelation={removeRelation}
                             selectedEntities={selectedEntities}
                             setSelectedEntities={setSelectedEntities}
+                            selectedRelations={selectedRelations}
+                            setSelectedRelations={setSelectedRelations}
                             entities={entities}
                             labelSetId={project.labelSetId}
                             getEntityText={getEntityText}

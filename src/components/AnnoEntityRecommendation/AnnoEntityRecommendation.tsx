@@ -1,6 +1,6 @@
 import React from 'react';
-import AnnoEntity from "../AnnoEntity/AnnoEntity";
-import {Button} from "antd";
+import {v4 as uuidv4} from 'uuid';
+import {Button, Divider} from "antd";
 import {CheckCircleTwoTone, CloseCircleTwoTone} from "@ant-design/icons";
 import {Entity} from "../../state/anno/annoDocumentReducer";
 
@@ -11,7 +11,9 @@ type AnnoEntityRecommendationProps = {
     style: React.CSSProperties;
 
     selectToken: (sentenceIndex: number, start: number, end: number) => void;
-    addEntity: (sentenceIndex: number, start: number, end: number, type: string) => void;
+    ctrlSelectToken: (sentenceIndex: number, start: number, end: number) => void;
+    shftSelectToken: (sentenceIndex: number, start: number, end: number) => void;
+    addEntity: (ents: Entity[]) => void;
 
     removeRecEntity: (id: string, sentenceIndex: number) => void;
 }
@@ -20,7 +22,12 @@ type AnnoEntityRecommendationProps = {
 export default function AnnoEntityRecommendation(props: AnnoEntityRecommendationProps){
 
     return (
-        <span style={{'border': '2px solid black'}}>
+        <span
+            style={{
+                ...props.style,
+                'border': '1px dashed black'
+            }}
+        >
             <span
                 id = {props.entity.id}
                 style={{
@@ -28,12 +35,19 @@ export default function AnnoEntityRecommendation(props: AnnoEntityRecommendation
                     'padding': '0.2px'
                 }}
                 onClick={ (e) => {
-                    props.selectToken(props.entity.sentenceIndex, props.entity.start, props.entity.end);
+                    if (e.ctrlKey) {
+                        props.ctrlSelectToken(props.entity.sentenceIndex, props.entity.start, props.entity.end);
+                    } else if (e.shiftKey) {
+                        props.shftSelectToken(props.entity.sentenceIndex, props.entity.start, props.entity.end);
+                    } else {
+                        props.selectToken(props.entity.sentenceIndex, props.entity.start, props.entity.end);
+                    }
                     props.removeRecEntity(props.entity.id, props.entity.sentenceIndex);
                 }}
             >
                 {props.text}
             </span>
+            <Divider type={'vertical'}/>
             <Button
                 icon={
                     <CheckCircleTwoTone
@@ -41,19 +55,28 @@ export default function AnnoEntityRecommendation(props: AnnoEntityRecommendation
                     />
                 }
                 type={'text'}
-                size={'large'}
+                size={'middle'}
                 onClick={() => {
-                    props.addEntity(props.entity.sentenceIndex, props.entity.start, props.entity.end, props.entity.type);
+                    let newEnt: Entity = {
+                        'id': uuidv4(),
+                        'sentenceIndex': props.entity.sentenceIndex,
+                        'start': props.entity.start,
+                        'end': props.entity.end,
+                        'type': props.entity.type,
+                        'relations': []
+                    }
+                    props.addEntity([newEnt]);
                     props.removeRecEntity(props.entity.id, props.entity.sentenceIndex);
                 }}
             />
-            <Button
+            <Divider type={'vertical'}/>
+                <Button
                 icon={
                     <CloseCircleTwoTone
                         twoToneColor={'red'}
                     />}
                 type={'text'}
-                size={'large'}
+                size={'middle'}
                 onClick={() => {
                     props.removeRecEntity(props.entity.id, props.entity.sentenceIndex);
                 }}

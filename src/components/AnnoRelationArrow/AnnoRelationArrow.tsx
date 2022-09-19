@@ -5,10 +5,31 @@ import {Relation} from "../../state/anno/annoDocumentReducer";
 type AnnoRelationArrowProps = {
     rel: Relation;
     color: string;
+
+    selectRelation: (id: string) => void;
+    ctrlSelectRelation: (id: string) => void;
+
+    selectedRelations: string[];
 }
 
 // Return the arrow of a relation from one span to another.
 export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
+
+    // bigger if seleceted
+    const getStrokeWidth = () => {
+        if (props.selectedRelations.includes(props.rel.id)) {
+            return 4;
+        }
+        return 2;
+    }
+
+    // labeled if seleceted
+    const getLabel = () => {
+        if (props.selectedRelations.includes(props.rel.id)) {
+            return props.rel.type;
+        }
+        return '';
+    }
 
     return(
         <>
@@ -17,22 +38,33 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
                 end={props.rel.head}
                 startAnchor={[{position: 'bottom', offset: {}}]}
                 endAnchor={[{position: 'bottom', offset: {y: 10}}]}
-                strokeWidth= {2}
-                headSize={4}
+                strokeWidth= {getStrokeWidth()}
                 path={'straight'}
                 showHead={false}
                 color = {props.color}
+                passProps={
+                    {onClick: () => {
+                        // todo ctrl click impl possible?
+                        props.selectRelation(props.rel.id);
+                    }}
+                }
             />
             <Xarrow 
                 start={props.rel.head}
                 end={props.rel.tail}
                 startAnchor={[{position: 'bottom', offset: {y: 9}}]}
                 endAnchor={[{position: 'left', offset: {y: 10}}, { position: 'right', offset: {y: 10}}, {position: 'top', offset:{}}, {position: 'bottom', offset:{}}]}
-                strokeWidth= {2}
+                strokeWidth= {getStrokeWidth()}
                 headSize={4}
                 path={'straight'}
                 color = {props.color}
-                labels= {<span style= {{color: 'black' }}></span>}
+                labels= {<span style= {{color: 'black', fontSize: 16}}>{getLabel()}</span>}
+                passProps={
+                    {onClick: () => {
+                        // todo ctrl click impl possible?
+                        props.selectRelation(props.rel.id);
+                    }}
+                }
             />
         </>
     );

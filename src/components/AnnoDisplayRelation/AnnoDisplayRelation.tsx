@@ -8,10 +8,11 @@ import {AnnoDocumentContext} from '../../components/AnnoDocumentContextProvider/
 
 import AnnoRelationArrow from '../../components/AnnoRelationArrow/AnnoRelationArrow';
 
-import {EntityDict, RelationDict} from "../../state/anno/annoDocumentReducer";
+import {Entity, EntityDict, Relation, RelationDict} from "../../state/anno/annoDocumentReducer";
 import {ColorDict} from "../../views/AnnoDetailsView";
 import {AnnoLabelSetContext} from "../AnnoLabelSetContextProvider/AnnoLabelSetContextProvider";
 import AnnoRelation from "../AnnoRelation/AnnoRelation";
+import {v4 as uuidv4} from "uuid";
 
 // Props that contain all info needed for displaying relations.
 type AnnoDisplayRelationProps = {
@@ -24,11 +25,15 @@ type AnnoDisplayRelationProps = {
     relations: RelationDict;
     entities: EntityDict;
 
-    addRelation: (head: string, tail: string, type: string) => void;
-    removeRelation: (id: string) => void;
+    addRelation: (rels: Relation[]) => void;
+    removeRelation: (ids: string[]) => void;
+    updateRelation: (ids: string[], type: string) => void;
 
     selectedEntities: string[];
     setSelectedEntities: (x: string[]) => void;
+
+    selectedRelations: string[];
+    setSelectedRelations: (x: string[]) => void;
 
     getEntityText: (id: string) => string;
 }
@@ -73,6 +78,32 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
         });
 
         setLabelColorDict(newLabelColorDict);
+    }
+
+    //Select a relation
+    const selectRelation = (id: string) => {
+        // relation selected => clear all
+        if (props.selectedRelations.includes(id)) {
+            props.setSelectedRelations([]);
+        } else {
+            // else set selected relations to the id
+            props.setSelectedRelations([id]);
+        }
+    }
+
+    // crtl select a relation
+    const ctrlSelectRelation = (id: string) => {
+        let newSelectedRelations = JSON.parse(JSON.stringify(props.selectedRelations));
+
+        // id is contained in seceted => remove
+        if (newSelectedRelations.includes(id)) {
+            newSelectedRelations.splice(newSelectedRelations.indexOf(id), 1);
+        } else {
+            // else add to list
+            newSelectedRelations.push(id);
+        }
+
+        props.setSelectedRelations(newSelectedRelations);
     }
 
     // Returns the style of an entity
@@ -121,29 +152,48 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
         );
     }
 
-    // Displays the Relations of selected entities
-    const displayRelationsForSelectedEntities = (sel: string[]) => {
-        return (
-            props.selectedEntities.map((ent_id) => {
-                let entity = props.entities[ent_id];
-                if (entity !== undefined && entity.relations.length > 0) {
-                    return (
-                        entity.relations.map((rel_id) => {
-                            let relation = props.relations[rel_id];
-                            if (relation !== undefined) {
-                                return (
-                                    <AnnoRelation
-                                        rel={relation}
-                                        entities={props.entities}
-                                        getEntityStyle={getEntityStyle}
-                                        getRelationStyle={getRelationStyle}
-                                        getEntityText={props.getEntityText}
-                                    />
-                                );
-                            }
-                        })
-                    );
+    // Returns the ids of all relation that celong to a selected entity
+    // and all selected relations
+    const getRelationsToBeDisplayed = () => {
+        let relations: string[] = [];
+
+        // Add from selected entities
+        for (let i = 0; i < props.selectedEntities.length; i++) {
+            let entity = props.entities[props.selectedEntities[i]];
+
+            for (let j = 0; j < entity.relations.length; j++) {
+                if (!relations.includes(entity.relations[j])) {
+                    relations.push(entity.relations[j]);
                 }
+            }
+        }
+
+        // Add from sleceted relations
+        for (let i = 0; i < props.selectedRelations.length; i++) {
+            if (!relations.includes(props.selectedRelations[i])) {
+                relations.push(props.selectedRelations[i]);
+            }
+        }
+
+        return relations;
+    }
+
+    // Displays the Relations of selected entities
+    const displayRelationsSide = (sel: string[]) => {
+        return (
+            getRelationsToBeDisplayed().map((rel_id) => {
+                return (
+                    <AnnoRelation
+                        rel={props.relations[rel_id]}
+                        entities={props.entities}
+                        getEntityStyle={getEntityStyle}
+                        getRelationStyle={getRelationStyle}
+                        getEntityText={props.getEntityText}
+                        selectRelation={selectRelation}
+                        ctrlSelectRelation={ctrlSelectRelation}
+                        selectedRelations={props.selectedRelations}
+                    />
+                );
             })
         );
     }
@@ -158,6 +208,9 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                             <AnnoRelationArrow
                                 rel={rel}
                                 color={relationColorDict[rel.type]}
+                                selectRelation={selectRelation}
+                                ctrlSelectRelation={ctrlSelectRelation}
+                                selectedRelations={props.selectedRelations}
                             />
                         );
                     })
@@ -177,8 +230,9 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                         style={getStyle('grey')} 
                         key={'RESET'}
                         onClick={ () => {
+                            props.removeRelation(props.selectedRelations);
                         }}
-                        disabled={props.selectedEntities.length !== 2}
+                        disabled={props.selectedRelations.length === 0}
                     >
                         {'REMOVE'}
                     </Button>
@@ -189,9 +243,21 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                                     style={getStyle(relation.color)} 
                                     key={relation.type}
                                     onClick={ () => {
-                                        props.addRelation(props.selectedEntities[0], props.selectedEntities[1], relation.type)
+                                        // updating relations has first prio
+                                        if (props.selectedRelations.length > 0) {
+                                            props.updateRelation(props.selectedRelations, relation.type);
+                                        } else {
+                                            // adding a new one has second prio
+                                            let newRel: Relation = {
+                                                'id': uuidv4(),
+                                                'head': props.selectedEntities[0],
+                                                'tail': props.selectedEntities[1],
+                                                'type': relation.type
+                                            }
+                                            props.addRelation([newRel])
+                                        }
                                     }}
-                                    disabled={props.selectedEntities.length !== 2}
+                                    disabled={props.selectedEntities.length !== 2 && props.selectedRelations.length === 0}
                                 >
                                     {relation.type}
                                 </Button>
@@ -204,7 +270,7 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
         
             <Layout.Content>
                 <div style = {{'userSelect': 'none'}}>
-                    {displayRelationsForSelectedEntities(props.selectedEntities)}
+                    {displayRelationsSide(props.selectedEntities)}
                     {drawRelations(props.relations)}
                 </div>
             </Layout.Content>
