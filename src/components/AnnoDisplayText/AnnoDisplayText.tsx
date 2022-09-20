@@ -7,7 +7,7 @@ import {DocumentsContext} from '../../components/DocumentsContextProvider/Docume
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 import AnnoEntity from '../AnnoEntity/AnnoEntity'
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
-import AnnoEntityRecommendation from "../AnnoEntityRecommendation/AnnoEntityRecommendation";
+import AnnoRecEntity from "../AnnoRecEntity/AnnoRecEntity";
 import {Entity, EntityDict, RecEntityDict} from "../../state/anno/annoDocumentReducer";
 import {ColorDict, TokenSpan} from "../../views/AnnoDetailsView";
 import AnnoToken from "../AnnoToken/AnnoToken";
@@ -257,7 +257,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         return (
             <span>
                 {' '}
-                <AnnoEntityRecommendation
+                <AnnoRecEntity
                     entity={entity}
                     text={text}
                     style={getEntityStyle(entity.type)}

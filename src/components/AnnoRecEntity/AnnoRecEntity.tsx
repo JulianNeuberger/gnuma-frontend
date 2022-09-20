@@ -1,12 +1,11 @@
 import React from 'react';
-import {v4 as uuidv4} from 'uuid';
 import {Button, Divider} from "antd";
 import {CheckCircleTwoTone, CloseCircleTwoTone} from "@ant-design/icons";
-import {Entity} from "../../state/anno/annoDocumentReducer";
+import {RecEntity} from "../../state/anno/annoDocumentReducer";
 
 // props needed for a token recommendation
 type AnnoEntityRecommendationProps = {
-    entity: Entity;
+    entity: RecEntity;
     text: string;
     style: React.CSSProperties;
 
@@ -19,7 +18,7 @@ type AnnoEntityRecommendationProps = {
 }
 
 //REturn token rec component
-export default function AnnoEntityRecommendation(props: AnnoEntityRecommendationProps){
+export default function AnnoRecEntity(props: AnnoEntityRecommendationProps){
 
     return (
         <span
@@ -61,7 +60,7 @@ export default function AnnoEntityRecommendation(props: AnnoEntityRecommendation
                 }}
             />
             <Divider type={'vertical'}/>
-                <Button
+            <Button
                 icon={
                     <CloseCircleTwoTone
                         twoToneColor={'red'}

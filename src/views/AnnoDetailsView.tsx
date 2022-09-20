@@ -521,11 +521,13 @@ export default function AnnoDetailsView(){
     // Returns the text of an entity
     const getEntityText = (id: string) => {
         let entity = entities[id];
-
-        // Error is entity does not exist
         if (entity === undefined) {
-            console.error('Entity with id ' + id + ' does not exist.')
-            return (id);
+            if (Object.keys(recEntities).includes(id)) {
+                entity = recEntities[id];
+            } else {
+                console.error('Entity with id ' + id + ' does not exist.')
+                return (id);
+            }
         }
 
         let out: string = doc.sentences[entity.sentenceIndex].tokens[entity.start].token;
@@ -639,6 +641,10 @@ export default function AnnoDetailsView(){
                                     entities={entities}
                                     labelSetId={project.labelSetId}
                                     getEntityText={getEntityText}
+                                    recRelations={recRelations}
+                                    recEntities={recEntities}
+                                    acceptRecRelation={acceptRecRelation}
+                                    declineRecRelation={declineRecRelation}
                                 />
                             </Col>
                         </Row>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Layout, Button, Space, Card} from 'antd';
+import {Layout, Button, Space, Row, Col} from 'antd';
 import {presetPalettes} from '@ant-design/colors';
 
 import {AnnoRelationSetContext} from '../../components/AnnoRelationSetContextProvider/AnnoRelationSetContextProvider'
@@ -8,11 +8,21 @@ import {AnnoDocumentContext} from '../../components/AnnoDocumentContextProvider/
 
 import AnnoRelationArrow from '../../components/AnnoRelationArrow/AnnoRelationArrow';
 
-import {Entity, EntityDict, Relation, RelationDict} from "../../state/anno/annoDocumentReducer";
+import {
+    EntityDict,
+    RecEntityDict,
+    RecRelationDict,
+    Relation,
+    RelationDict
+} from "../../state/anno/annoDocumentReducer";
+
 import {ColorDict} from "../../views/AnnoDetailsView";
 import {AnnoLabelSetContext} from "../AnnoLabelSetContextProvider/AnnoLabelSetContextProvider";
 import AnnoRelation from "../AnnoRelation/AnnoRelation";
 import {v4 as uuidv4} from "uuid";
+import AnnoRecRelationArrow from "../AnnoRecRelationArrow/AnnoRecRelationArrow";
+import {Divider} from "antd/es";
+import AnnoRecRelation from '../AnnoRecRelation/AnnoRecRelation';
 
 // Props that contain all info needed for displaying relations.
 type AnnoDisplayRelationProps = {
@@ -25,6 +35,9 @@ type AnnoDisplayRelationProps = {
     relations: RelationDict;
     entities: EntityDict;
 
+    recRelations: RecRelationDict;
+    recEntities: RecEntityDict;
+
     addRelation: (rels: Relation[]) => void;
     removeRelation: (ids: string[]) => void;
     updateRelation: (ids: string[], type: string) => void;
@@ -36,6 +49,9 @@ type AnnoDisplayRelationProps = {
     setSelectedRelations: (x: string[]) => void;
 
     getEntityText: (id: string) => string;
+
+    acceptRecRelation: (id: string) => void;
+    declineRecRelation: (id: string) => void;
 }
 
 // Displays relations.
@@ -109,12 +125,19 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
     // Returns the style of an entity
     const getEntityStyle = (id: string) => {
         let entity = props.entities[id];
+        let style: React.CSSProperties = {}
+        if (entity === undefined && Object.keys(props.recEntities).includes(id)) {
+            entity = props.recEntities[id];
+            style = {...style, 'border': '1px dashed black'}
+        }
 
         if (entity !== undefined) {
             let col = labelColorDict[entity.type];
+
             if (col !== undefined) {
                 return (
                     {
+                        ...style,
                         'color': presetPalettes[col][7],
                         'background': presetPalettes[col][1]
                     }
@@ -122,13 +145,17 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
             }
         }
 
+
         console.error('Style error for entity with id: ' + id);
-        return ({});
+        return (style);
     }
 
     // Returns the style for a relation arrow based on id
     const getRelationStyle = (id: string) => {
         let relation = props.relations[id];
+        if (relation === undefined && Object.keys(props.recRelations).includes(id)) {
+            relation = props.recRelations[id];
+        }
 
         if (relation !== undefined) {
             let col = relationColorDict[relation.type];
@@ -198,6 +225,24 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
         );
     }
 
+    // Displays the Relations of selected entities
+    const displayRecRelationsSide = (rels: RecRelationDict) => {
+        return (
+            Object.values(rels).map((rel) => {
+                return (
+                    <AnnoRecRelation
+                        rel={rel}
+                        getEntityStyle={getEntityStyle}
+                        getRelationStyle={getRelationStyle}
+                        getEntityText={props.getEntityText}
+                        acceptRecRelation={props.acceptRecRelation}
+                        declineRecRelation={props.declineRecRelation}
+                    />
+                );
+            })
+        );
+    }
+
     // Function that draws the relation arrows.
     const drawRelations = (rels: RelationDict) => {
         return (
@@ -211,6 +256,24 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                                 selectRelation={selectRelation}
                                 ctrlSelectRelation={ctrlSelectRelation}
                                 selectedRelations={props.selectedRelations}
+                            />
+                        );
+                    })
+                }
+            </div>
+        );
+    }
+
+    // Function that draws the recrelation arrows.
+    const drawRecRelations = (rels: RecRelationDict) => {
+        return (
+            <div>
+                {
+                    Object.values(rels).map((rel) => {
+                        return(
+                            <AnnoRecRelationArrow
+                                rel={rel}
+                                color={relationColorDict[rel.type]}
                             />
                         );
                     })
@@ -270,8 +333,17 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
         
             <Layout.Content>
                 <div style = {{userSelect: 'none'}}>
-                    {displayRelationsSide(props.selectedEntities)}
+                    <Row>
+                        <Col flex={2}>
+                            {displayRelationsSide(props.selectedEntities)}
+                        </Col>
+                        <Divider/>
+                        <Col flex={3}>
+                            {displayRecRelationsSide(props.recRelations)}
+                        </Col>
+                    </Row>
                     {drawRelations(props.relations)}
+                    {drawRecRelations(props.recRelations)}
                 </div>
             </Layout.Content>
         </Layout>
