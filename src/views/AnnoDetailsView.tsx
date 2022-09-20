@@ -7,12 +7,19 @@ import {AnnoDocumentContext} from '../components/AnnoDocumentContextProvider/Ann
 import AnnoDisplayText from '../components/AnnoDisplayText/AnnoDisplayText';
 import AnnoDisplayRelation from '../components/AnnoDisplayRelation/AnnoDisplayRelation';
 
-import {Button, Space, Card, Layout} from 'antd';
+import {Button, Space, Card, Layout, Row, Col} from 'antd';
 import {UpOutlined, CheckOutlined, UndoOutlined, RedoOutlined, UserOutlined} from '@ant-design/icons';
 
 import {Link, useParams} from 'react-router-dom';
 import {getUserIdCookie} from "./AnnoView";
-import {Entity, EntityDict, Relation, RelationDict} from "../state/anno/annoDocumentReducer";
+import {
+    Entity,
+    EntityDict,
+    RecEntityDict,
+    RecRelationDict,
+    Relation,
+    RelationDict
+} from "../state/anno/annoDocumentReducer";
 
 // document params
 type AnnoDetailsParams = {
@@ -37,6 +44,9 @@ type HistoryElement = {
     'entities': EntityDict;
     'sentenceEntities': string[][];
     'relations': RelationDict;
+    'recEntities': RecEntityDict;
+    'recSentenceEntities': string[][];
+    'recRelations': RecRelationDict;
 }
 
 // Function of the details view. show document text, entity labels and relations.
@@ -44,6 +54,10 @@ export default function AnnoDetailsView(){
     const [entities, setEntities] = React.useState<EntityDict>({});
     const [sentenceEntities, setSentenceEntities] = React.useState<string[][]>([]);
     const [relations, setRelations] = React.useState<RelationDict>({});
+
+    const [recEntities, setRecEntities] = React.useState<RecEntityDict>({});
+    const [recSentenceEntities, setRecSentenceEntities] = React.useState<string[][]>([]);
+    const [recRelations, setRecRelations] = React.useState<RecRelationDict>({});
 
     const [history, setHistory] = React.useState<HistoryElement[]>([]);
 
@@ -82,7 +96,7 @@ export default function AnnoDetailsView(){
     const annoDoc = annoDocumentContext.state.elements[docId];
 
     // send an update to the server
-    const sendUpdate = async (newEntities: EntityDict, newSentenceEntities: string[][], newRelations: RelationDict, labeled: boolean) => {
+    const sendUpdate = async (newEntities: EntityDict, newSentenceEntities: string[][], newRelations: RelationDict, newRecEntities: RecEntityDict, newRecSentenceEntities: string [][], newRecRelations: RecRelationDict, labeled: boolean) => {
         // add entities, relations and info if labeled
         let out = {
             'entities': newEntities,
@@ -96,7 +110,7 @@ export default function AnnoDetailsView(){
     }
 
     // Updates the history and current states
-    const updateHistory = (newEntities: EntityDict, newSentenceEntities: string[][], newRelations: RelationDict) => {
+    const updateHistory = (newEntities: EntityDict, newSentenceEntities: string[][], newRelations: RelationDict, newRecEntities: RecEntityDict, newRecSentenceEntities: string [][], newRecRelations: RecRelationDict) => {
         let update = true;
         if (history.length === 0) {
             update = false;
@@ -108,6 +122,12 @@ export default function AnnoDetailsView(){
         }
         if (newRelations === undefined) {
             newRelations = {};
+        }
+        if (newRecEntities === undefined) {
+            newRecEntities = {};
+        }
+        if (newRecRelations === undefined) {
+            newRecRelations = {};
         }
 
         let newHistory = history.slice();
@@ -127,7 +147,10 @@ export default function AnnoDetailsView(){
         newHistory.push({
             'entities': newEntities,
             'sentenceEntities': newSentenceEntities,
-            'relations': newRelations
+            'relations': newRelations,
+            'recEntities': newRecEntities,
+            'recSentenceEntities': newRecSentenceEntities,
+            'recRelations': newRecRelations
         });
 
         //update history
@@ -140,40 +163,56 @@ export default function AnnoDetailsView(){
         setEntities(newEntities);
         setRelations(newRelations);
         setSentenceEntities(newSentenceEntities);
+        setRecEntities(newRecEntities);
+        setRecRelations(newRecRelations);
+        setRecSentenceEntities(newRecSentenceEntities);
 
         // send an update
         if (update) {
-            sendUpdate(newEntities, newSentenceEntities, newRelations, false);
+            sendUpdate(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations, false);
         }
     }
 
     // This is why i hate react ...
-    // Prevents indinite loop....
+    // Prevents infinite loop....
     if (halp) {
         sendHalp(false);
 
         let newSentenceEntities: string[][] = [];
+        let newRecSentenceEntities: string[][] = [];
         for (let i = 0; i < doc.sentences.length; i++) {
             newSentenceEntities.push([]);
+            newRecSentenceEntities.push([]);
         }
 
         let newEntities = {};
         let newRelations = {};
+        let newRecEntities = {};
+        let newRecRelations = {};
 
         // load relations
-        console.log(annoDoc.relations);
         if (annoDoc.relations !== undefined && Object.keys(relations).length === 0 && Object.keys(annoDoc.relations).length > 0) {
             newRelations = annoDoc.relations;
         }
 
         // load entities
-        newEntities = annoDoc.entities;
         if (annoDoc.entities !== undefined && sentenceEntities.length === 0 && Object.keys(entities).length === 0 && Object.keys(annoDoc.entities).length > 0) {
-            console.log(annoDoc.entities);
+            newEntities = annoDoc.entities;
             newSentenceEntities = annoDoc.sentenceEntities;
         }
 
-        updateHistory(newEntities, newSentenceEntities, newRelations);
+        // load rec relations
+        if (annoDoc.recRelations !== undefined && Object.keys(recRelations).length === 0 && Object.keys(annoDoc.recRelations).length > 0) {
+            newRecRelations = annoDoc.recRelations;
+        }
+
+        // load rec entities
+        if (annoDoc.recEntities !== undefined && recSentenceEntities.length === 0 && Object.keys(recEntities).length === 0 && Object.keys(annoDoc.recEntities).length > 0) {
+            newRecEntities = annoDoc.recEntities;
+            newRecSentenceEntities = annoDoc.recSentenceEntities;
+        }
+
+        updateHistory(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations);
     }
 
     // Handles the undo Operation
@@ -190,7 +229,7 @@ export default function AnnoDetailsView(){
             setSentenceEntities(history[newCurrentState].sentenceEntities);
             setRelations(history[newCurrentState].relations);
 
-            sendUpdate(history[newCurrentState].entities, history[newCurrentState].sentenceEntities, history[newCurrentState].relations, false);
+            sendUpdate(history[newCurrentState].entities, history[newCurrentState].sentenceEntities, history[newCurrentState].relations, history[newCurrentState].recEntities, history[newCurrentState].recSentenceEntities, history[newCurrentState].recRelations, false);
         }
     }
 
@@ -208,7 +247,7 @@ export default function AnnoDetailsView(){
             setSentenceEntities(history[newCurrentState].sentenceEntities);
             setRelations(history[newCurrentState].relations);
 
-            sendUpdate(history[newCurrentState].entities, history[newCurrentState].sentenceEntities, history[newCurrentState].relations, false);
+            sendUpdate(history[newCurrentState].entities, history[newCurrentState].sentenceEntities, history[newCurrentState].relations, history[newCurrentState].recEntities, history[newCurrentState].recSentenceEntities, history[newCurrentState].recRelations, false);
         }
     }
 
@@ -227,7 +266,7 @@ export default function AnnoDetailsView(){
             newSentenceEntities[ent.sentenceIndex].push(ent.id);
         }
 
-        updateHistory(newEntities, newSentenceEntities, relations);
+        updateHistory(newEntities, newSentenceEntities, relations, recEntities, recSentenceEntities, recRelations);
     }
 
     // Update the label for an entity
@@ -239,7 +278,7 @@ export default function AnnoDetailsView(){
         }
 
         setSelectedEntities([]);
-        updateHistory(newEntities, sentenceEntities, relations);
+        updateHistory(newEntities, sentenceEntities, relations, recEntities, recSentenceEntities, recRelations);
     }
 
     // Remove an entity and all relations its in
@@ -270,7 +309,7 @@ export default function AnnoDetailsView(){
             delete newEntities[id];
         }
 
-        updateHistory(newEntities, newSentenceEntities, newRelations);
+        updateHistory(newEntities, newSentenceEntities, newRelations, recEntities, recSentenceEntities, recRelations);
     }
 
     // Add a relation
@@ -294,7 +333,7 @@ export default function AnnoDetailsView(){
         setSelectedEntities([]);
         setSelectedRelations([]);
 
-        updateHistory(newEntities, sentenceEntities, newRelations);
+        updateHistory(newEntities, sentenceEntities, newRelations, recEntities, recSentenceEntities, recRelations);
     }
 
     // Update a relation
@@ -306,7 +345,7 @@ export default function AnnoDetailsView(){
         }
 
         setSelectedRelations([]);
-        updateHistory(entities, sentenceEntities, newRelations);
+        updateHistory(entities, sentenceEntities, newRelations, recEntities, recSentenceEntities, recRelations);
     }
 
     // Remove a relation
@@ -325,7 +364,158 @@ export default function AnnoDetailsView(){
 
         setSelectedRelations([]);
 
-        updateHistory(newEntities, sentenceEntities, newRelations);
+        updateHistory(newEntities, sentenceEntities, newRelations, recEntities, recSentenceEntities, recRelations);
+    }
+
+    // accepts a recommended entity
+    const acceptRecEntity = (id: string) => {
+        //check is a rec entity
+        if (Object.keys(recEntities).includes(id)) {
+            let newEntities = JSON.parse(JSON.stringify(entities));
+            let newRecEntities = JSON.parse(JSON.stringify(recEntities));
+            let newSentenceEntities = JSON.parse(JSON.stringify(sentenceEntities));
+            let newRecSentenceEntities = JSON.parse(JSON.stringify(recSentenceEntities));
+
+            let recEnt = newRecEntities[id];
+            let ent: Entity = {
+                'id': id,
+                'sentenceIndex': recEnt.sentenceIndex,
+                'start': recEnt.start,
+                'end': recEnt.end,
+                'type': recEnt.type,
+                'relations': []
+            };
+
+            // Add to entities
+            newEntities[id] = ent;
+            newSentenceEntities[ent.sentenceIndex].push(id);
+
+            // Remove from recs
+            delete newRecEntities[id];
+            newRecSentenceEntities[ent.sentenceIndex].splice(newRecSentenceEntities.indexOf(id), 1);
+
+            updateHistory(newEntities, newSentenceEntities, relations, newRecEntities, newRecSentenceEntities, recRelations);
+        }
+    }
+
+    // decline Recommended entity
+    const declineRecEntity = (id: string) => {
+        //check is a rec entity
+        if (Object.keys(recEntities).includes(id)) {
+            let newRecEntities = JSON.parse(JSON.stringify(recEntities));
+            let newRecSentenceEntities = JSON.parse(JSON.stringify(recSentenceEntities));
+
+            // Remove from recs
+            delete newRecEntities[id];
+            newRecSentenceEntities.splice(newRecSentenceEntities.indexOf(id), 1);
+
+            updateHistory(entities, sentenceEntities, relations, newRecEntities, newRecSentenceEntities, recRelations);
+        }
+    }
+
+    // Accept Relation
+    const acceptRecRelation = (id: string) => {
+        // check if Relation exists
+        if (Object.keys(recRelations).includes(id)) {
+            let newEntities = JSON.parse(JSON.stringify(entities));
+            let newRecEntities = JSON.parse(JSON.stringify(recEntities));
+            let newSentenceEntities = JSON.parse(JSON.stringify(sentenceEntities));
+            let newRecSentenceEntities = JSON.parse(JSON.stringify(recSentenceEntities));
+            let newRelations = JSON.parse(JSON.stringify(relations));
+            let newRecRelations = JSON.parse(JSON.stringify(recRelations));
+
+            let recRel = recRelations[id];
+
+            //Accept head entity if recommended
+            if (Object.keys(newRecEntities).includes(recRel.head)) {
+                let recEnt = newRecEntities[recRel.head];
+                let ent: Entity = {
+                    'id': recRel.head,
+                    'sentenceIndex': recEnt.sentenceIndex,
+                    'start': recEnt.start,
+                    'end': recEnt.end,
+                    'type': recEnt.type,
+                    'relations': [recRel.id]
+                };
+
+                // Add to entities
+                newEntities[recRel.head] = ent;
+                newSentenceEntities[ent.sentenceIndex].push(recRel.head);
+
+                // Remove from recs
+                delete newRecEntities[recRel.head];
+                newRecSentenceEntities[ent.sentenceIndex].splice(newRecSentenceEntities.indexOf(recRel.head), 1);
+            } else if (Object.keys(newEntities).includes(recRel.head)){
+                // Add rel to entity
+                newSentenceEntities[newEntities[recRel.head].sentenceIndex].push(recRel.head);
+            }
+
+            // Accept tail entity if recommended
+            if (Object.keys(newRecEntities).includes(recRel.tail)) {
+                let recEnt = newRecEntities[recRel.tail];
+                let ent: Entity = {
+                    'id': recRel.tail,
+                    'sentenceIndex': recEnt.sentenceIndex,
+                    'start': recEnt.start,
+                    'end': recEnt.end,
+                    'type': recEnt.type,
+                    'relations': [recRel.id]
+                };
+
+                // Add to entities
+                newEntities[recRel.tail] = ent;
+                newSentenceEntities[ent.sentenceIndex].push(recRel.tail);
+
+                // Remove from recs
+                delete newRecEntities[recRel.tail];
+                newRecSentenceEntities[ent.sentenceIndex].splice(newRecSentenceEntities.indexOf(recRel.tail), 1);
+            } else if (Object.keys(newEntities).includes(recRel.tail)){
+                // Add rel to entity
+                newSentenceEntities[newEntities[recRel.tail].sentenceIndex].push(recRel.tail);
+            }
+
+            //Add the relation
+            let newRel: Relation = {
+                'id': recRel.id,
+                'head': recRel.head,
+                'tail': recRel.tail,
+                'type': recRel.type
+            }
+            newRelations[recRel.id] = newRel;
+            delete newRecRelations[id];
+
+            updateHistory(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations);
+        }
+    }
+
+    // Decline recommended relation
+    const declineRecRelation = (id: string) => {
+        if (Object.keys(recRelations).includes(id)) {
+            let newRecRelations = JSON.parse(JSON.stringify(recRelations));
+            let newEntities = JSON.parse(JSON.stringify(entities));
+            let newRecEntities = JSON.parse(JSON.stringify(recEntities));
+
+            let recRel = newRecRelations[id];
+
+            // delete rel from head
+            if (Object.keys(newEntities).includes(recRel.head)) {
+                newEntities[recRel.head].relations.splice(newEntities[recRel.head].relations.indexOf(id), 1);
+            } else if (Object.keys(newRecEntities).includes(recRel.head)) {
+                newRecEntities[recRel.head].relations.splice(newRecEntities[recRel.head].relations.indexOf(id), 1);
+            }
+
+            // delete rel from tail
+            if (Object.keys(newEntities).includes(recRel.tail)) {
+                newEntities[recRel.tail].relations.splice(newEntities[recRel.tail].relations.indexOf(id), 1);
+            } else if (Object.keys(newRecEntities).includes(recRel.tail)) {
+                newRecEntities[recRel.tail].relations.splice(newRecEntities[recRel.tail].relations.indexOf(id), 1);
+            }
+
+            // delete rec rel
+            delete newRecRelations[id];
+
+            updateHistory(newEntities, sentenceEntities, relations, newRecEntities, recSentenceEntities, newRecRelations);
+        }
     }
 
     // Returns the text of an entity
@@ -354,11 +544,12 @@ export default function AnnoDetailsView(){
                     <Space>
                         <Button
                             onClick={() => {
+                                //todo how should this work?
                                 let newSentenceEntities: string[][] = [];
                                 for (let i = 0; i < doc.sentences.length; i++) {
                                     newSentenceEntities.push([]);
                                 }
-                                updateHistory({}, newSentenceEntities, {});
+                                updateHistory({}, newSentenceEntities, {}, recEntities, recSentenceEntities, recRelations);
                             }}
                         >
                             Reset
@@ -380,7 +571,7 @@ export default function AnnoDetailsView(){
 
                         <Button
                             type = {'primary'}
-                            onClick={() => sendUpdate(entities, sentenceEntities, relations, true)}
+                            onClick={() => sendUpdate(entities, sentenceEntities, relations, recEntities, recSentenceEntities, recRelations, true)}
                             icon= {<CheckOutlined/>}
                             disabled={annoDocumentContext.state.elements[docId].labeled && (annoDocumentContext.state.elements[docId].labeledBy.includes(userId))}
                         >
@@ -419,29 +610,38 @@ export default function AnnoDetailsView(){
                         setSelectedTokens={setSelectedTokens}
                         selectedEntities={selectedEntities}
                         setSelectedEntities={setSelectedEntities}
+                        recEntities={recEntities}
+                        recSentenceEntities={recSentenceEntities}
+                        acceptRecEntity={acceptRecEntity}
+                        declineRecEntity={declineRecEntity}
                     />
 
                     <Layout.Sider
                         style={{backgroundColor: 'white', color: 'black'}}
                         width={400}
                     >
-                        <AnnoDisplayRelation
-                            docId={docId} 
-                            relationSetId={project.relationSetId} 
-                            projectId={projectId}
-                            userId={userId}
-                            relations={relations}
-                            addRelation={addRelation}
-                            updateRelation={updateRelation}
-                            removeRelation={removeRelation}
-                            selectedEntities={selectedEntities}
-                            setSelectedEntities={setSelectedEntities}
-                            selectedRelations={selectedRelations}
-                            setSelectedRelations={setSelectedRelations}
-                            entities={entities}
-                            labelSetId={project.labelSetId}
-                            getEntityText={getEntityText}
-                        />
+                        <Row>
+                            <Col flex={'20px'}></Col>
+                            <Col flex={'auto'}>
+                                <AnnoDisplayRelation
+                                    docId={docId}
+                                    relationSetId={project.relationSetId}
+                                    projectId={projectId}
+                                    userId={userId}
+                                    relations={relations}
+                                    addRelation={addRelation}
+                                    updateRelation={updateRelation}
+                                    removeRelation={removeRelation}
+                                    selectedEntities={selectedEntities}
+                                    setSelectedEntities={setSelectedEntities}
+                                    selectedRelations={selectedRelations}
+                                    setSelectedRelations={setSelectedRelations}
+                                    entities={entities}
+                                    labelSetId={project.labelSetId}
+                                    getEntityText={getEntityText}
+                                />
+                            </Col>
+                        </Row>
                     </Layout.Sider>
                 </Layout>
             </Card>

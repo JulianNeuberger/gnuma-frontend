@@ -13,9 +13,9 @@ type AnnoEntityRecommendationProps = {
     selectToken: (sentenceIndex: number, start: number, end: number) => void;
     ctrlSelectToken: (sentenceIndex: number, start: number, end: number) => void;
     shftSelectToken: (sentenceIndex: number, start: number, end: number) => void;
-    addEntity: (ents: Entity[]) => void;
 
-    removeRecEntity: (id: string, sentenceIndex: number) => void;
+    acceptRecEntity: (id: string) => void;
+    declineRecEntity: (id: string) => void;
 }
 
 //REturn token rec component
@@ -35,6 +35,7 @@ export default function AnnoEntityRecommendation(props: AnnoEntityRecommendation
                     'padding': '0.2px'
                 }}
                 onClick={ (e) => {
+                    props.declineRecEntity(props.entity.id);
                     if (e.ctrlKey) {
                         props.ctrlSelectToken(props.entity.sentenceIndex, props.entity.start, props.entity.end);
                     } else if (e.shiftKey) {
@@ -42,7 +43,6 @@ export default function AnnoEntityRecommendation(props: AnnoEntityRecommendation
                     } else {
                         props.selectToken(props.entity.sentenceIndex, props.entity.start, props.entity.end);
                     }
-                    props.removeRecEntity(props.entity.id, props.entity.sentenceIndex);
                 }}
             >
                 {props.text}
@@ -57,16 +57,7 @@ export default function AnnoEntityRecommendation(props: AnnoEntityRecommendation
                 type={'text'}
                 size={'middle'}
                 onClick={() => {
-                    let newEnt: Entity = {
-                        'id': uuidv4(),
-                        'sentenceIndex': props.entity.sentenceIndex,
-                        'start': props.entity.start,
-                        'end': props.entity.end,
-                        'type': props.entity.type,
-                        'relations': []
-                    }
-                    props.addEntity([newEnt]);
-                    props.removeRecEntity(props.entity.id, props.entity.sentenceIndex);
+                    props.acceptRecEntity(props.entity.id);
                 }}
             />
             <Divider type={'vertical'}/>
@@ -78,7 +69,7 @@ export default function AnnoEntityRecommendation(props: AnnoEntityRecommendation
                 type={'text'}
                 size={'middle'}
                 onClick={() => {
-                    props.removeRecEntity(props.entity.id, props.entity.sentenceIndex);
+                    props.declineRecEntity(props.entity.id);
                 }}
             />
         </span>

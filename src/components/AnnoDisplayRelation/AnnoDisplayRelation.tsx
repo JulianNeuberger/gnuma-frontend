@@ -269,7 +269,7 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
             </Layout.Header>
         
             <Layout.Content>
-                <div style = {{'userSelect': 'none'}}>
+                <div style = {{userSelect: 'none'}}>
                     {displayRelationsSide(props.selectedEntities)}
                     {drawRelations(props.relations)}
                 </div>

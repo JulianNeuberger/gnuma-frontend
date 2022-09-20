@@ -8,7 +8,7 @@ import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/
 import AnnoEntity from '../AnnoEntity/AnnoEntity'
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 import AnnoEntityRecommendation from "../AnnoEntityRecommendation/AnnoEntityRecommendation";
-import {Entity, EntityDict} from "../../state/anno/annoDocumentReducer";
+import {Entity, EntityDict, RecEntityDict} from "../../state/anno/annoDocumentReducer";
 import {ColorDict, TokenSpan} from "../../views/AnnoDetailsView";
 import AnnoToken from "../AnnoToken/AnnoToken";
 import {v4 as uuidv4} from "uuid";
@@ -33,17 +33,17 @@ type AnnoDisplayTextProps = {
 
     selectedTokens: TokenSpan[];
     setSelectedTokens: (x: TokenSpan[]) => void;
+
+    recEntities: RecEntityDict;
+    recSentenceEntities: string[][];
+
+    acceptRecEntity: (id: string) => void;
+    declineRecEntity: (id: string) => void;
 }
 
 // Function for displaying the text.
 export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     const [labelColorDict, setLabelColorDict] = React.useState<ColorDict>({});
-
-    const [recEntities, setRecEntities] = React.useState<EntityDict>({
-        'asf' : {'id': 'asf', 'sentenceIndex': 0, 'start': 0, 'end': 1, 'type': 'a', 'relations': []},
-        'dsf' : {'id': 'dsf', 'sentenceIndex': 0, 'start': 3, 'end': 4, 'type': 'c', 'relations': []}
-    });
-    const [recSentenceEntities, setRecSentnceEntities] = React.useState<string[][]>([['asf', 'dsf'], [], [],[]]);
 
     const documentContext = React.useContext(DocumentsContext);
     const labelSetContext = React.useContext(AnnoLabelSetContext);
@@ -72,18 +72,6 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         });
 
         setLabelColorDict(newLabelColorDict);
-    }
-    
-    //remove rec entity
-    const removeRecEntity = (id: string, sentenceIndex: number) => {
-        let newRecSentenceEntities = recSentenceEntities.slice();
-        let newRecEntities = {...recEntities};
-        
-        delete newRecEntities[id];
-        newRecSentenceEntities[sentenceIndex].splice(newRecSentenceEntities[sentenceIndex].indexOf(id), 1);
-        
-        setRecEntities(newRecEntities);
-        setRecSentnceEntities(newRecSentenceEntities);
     }
 
     // select a token.
@@ -276,8 +264,8 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                     selectToken={selectToken}
                     ctrlSelectToken={ctrlSelectToken}
                     shftSelectToken={shftSelectToken}
-                    addEntity={props.addEntity}
-                    removeRecEntity={removeRecEntity}
+                    acceptRecEntity={props.acceptRecEntity}
+                    declineRecEntity={props.declineRecEntity}
                 />
             </span>
         );
@@ -316,28 +304,30 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                             }
 
                                             // display recommendations
-                                            for (let j = 0; j < recSentenceEntities[x].length; j++) {
-                                                let recEntity = recEntities[recSentenceEntities[x][j]];
+                                            if (props.recSentenceEntities[x] !== undefined) {
+                                                for (let j = 0; j < props.recSentenceEntities[x].length; j++) {
+                                                    let recEntity = props.recEntities[props.recSentenceEntities[x][j]];
 
-                                                if (recEntity.start === y) {
-                                                    let interferes = false;
-                                                    // not interfering with entities
-                                                    if (props.sentenceEntities[x] !== undefined) {
-                                                        for (let i = 0; i < props.sentenceEntities[x].length; i++) {
-                                                            let entity = props.entities[props.sentenceEntities[x][i]];
-                                                            if (entity.start > recEntity.start && entity.start < recEntity.end) {
-                                                                interferes = true;
+                                                    if (recEntity !== undefined && recEntity.start === y) {
+                                                        let interferes = false;
+                                                        // not interfering with entities
+                                                        if (props.sentenceEntities[x] !== undefined) {
+                                                            for (let i = 0; i < props.sentenceEntities[x].length; i++) {
+                                                                let entity = props.entities[props.sentenceEntities[x][i]];
+                                                                if (entity.start > recEntity.start && entity.start < recEntity.end) {
+                                                                    interferes = true;
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                                    //display if not interferes
-                                                    if (!interferes) {
-                                                        let text = '';
-                                                        for (let i = y; i < recEntity.end; i++) {
-                                                            text = text + ' ' + sentence.tokens[i].token;
+                                                        //display if not interferes
+                                                        if (!interferes) {
+                                                            let text = '';
+                                                            for (let i = y; i < recEntity.end; i++) {
+                                                                text = text + ' ' + sentence.tokens[i].token;
+                                                            }
+                                                            countdown = recEntity.end - recEntity.start - 1;
+                                                            return (getAnnoEntityRecommendation(recEntity, text));
                                                         }
-                                                        countdown = recEntity.end - recEntity.start - 1;
-                                                        return (getAnnoEntityRecommendation(recEntity, text));
                                                     }
                                                 }
                                             }
