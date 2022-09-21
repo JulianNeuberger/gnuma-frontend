@@ -23,14 +23,6 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
         return 2;
     }
 
-    // labeled if seleceted
-    const getLabel = () => {
-        if (props.selectedRelations.includes(props.rel.id)) {
-            return props.rel.type;
-        }
-        return '';
-    }
-
     return(
         <>
             <Xarrow
@@ -58,7 +50,6 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
                 headSize={4}
                 path={'straight'}
                 color = {props.color}
-                labels= {<span style= {{color: 'black', fontSize: 16}}>{getLabel()}</span>}
                 passProps={
                     {onClick: () => {
                         // todo ctrl click impl possible?

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Entity, EntityDict, Relation} from "../../state/anno/annoDocumentReducer";
+import {EntityDict, Relation} from "../../state/anno/annoDocumentReducer";
 import { Space } from 'antd';
 import Xarrow from "react-xarrows";
 
@@ -27,7 +27,7 @@ export default function AnnoRelation(props: AnnoRelationProps){
     const getRelStyle = () => {
         // check if selected
         if (props.selectedRelations.includes(props.rel.id)) {
-            return {'border': '2px solid black'}
+            return {'border': '1px solid black', 'background': '#d9d9d9'}
         }
 
         // not style if not selected

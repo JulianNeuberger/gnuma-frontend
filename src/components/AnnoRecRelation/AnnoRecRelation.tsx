@@ -16,19 +16,32 @@ type AnnoRelationProps = {
 
     acceptRecRelation: (id: string) => void;
     declineRecRelation: (id: string) => void;
+
+    selectedRecRelation: string;
+    selectRecRelation: (id: string) => void;
 }
 
 // Display a relation
 export default function AnnoRelation(props: AnnoRelationProps){
 
+    const getRelStyle = () => {
+        // check if selected
+        if (props.rel.id === props.selectedRecRelation) {
+            return {'border': '1px solid black', 'background': '#d9d9d9'}
+        }
+
+        // not style if not selected
+        return {};
+    }
+
     // Return the relation.
     return (
         <div>
-            <span
-            >
+            <span>
                 <Space
                     size={80}
-                    style={{'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}
+                    style={{...getRelStyle(), 'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}
+                    onClick={() => {props.selectRecRelation(props.rel.id)}}
                 >
                     <span
                         id={props.rel.id + '_' + props.rel.head}

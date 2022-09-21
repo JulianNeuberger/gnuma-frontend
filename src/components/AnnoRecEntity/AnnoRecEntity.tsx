@@ -28,7 +28,7 @@ export default function AnnoRecEntity(props: AnnoEntityRecommendationProps){
             }}
         >
             <span
-                id = {props.entity.id}
+                id = {'rec_' + props.entity.id}
                 style={{
                     ...props.style,
                     'padding': '0.2px'

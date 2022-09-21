@@ -51,7 +51,11 @@ type AnnoDisplayRelationProps = {
     getEntityText: (id: string) => string;
 
     acceptRecRelation: (id: string) => void;
+    acceptChangedRecRelation: (id: string, type: string) => void;
     declineRecRelation: (id: string) => void;
+
+    selectedRecRelation: string;
+    setSelectedRecRelation: (id: string) => void;
 }
 
 // Displays relations.
@@ -98,6 +102,7 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
 
     //Select a relation
     const selectRelation = (id: string) => {
+        props.setSelectedRecRelation('');
         // relation selected => clear all
         if (props.selectedRelations.includes(id)) {
             props.setSelectedRelations([]);
@@ -109,6 +114,8 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
 
     // crtl select a relation
     const ctrlSelectRelation = (id: string) => {
+        props.setSelectedRecRelation('');
+
         let newSelectedRelations = JSON.parse(JSON.stringify(props.selectedRelations));
 
         // id is contained in seceted => remove
@@ -120,6 +127,17 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
         }
 
         props.setSelectedRelations(newSelectedRelations);
+    }
+
+    // select a rec relation
+    const selectRecRelation = (id: string) => {
+        props.setSelectedRelations([]);
+
+        if (props.selectedRecRelation === id) {
+            props.setSelectedRecRelation('');
+        } else {
+            props.setSelectedRecRelation(id);
+        }
     }
 
     // Returns the style of an entity
@@ -139,7 +157,8 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                     {
                         ...style,
                         'color': presetPalettes[col][7],
-                        'background': presetPalettes[col][1]
+                        'background': presetPalettes[col][1],
+                        'padding': '0.2px'
                     }
                 );
             }
@@ -166,6 +185,11 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
 
         console.error('Style error for relation with id: ' + id);
         return ('black');
+    }
+
+    // Returns if the given entity belongs to a rec entity
+    const isRecEntity = (id: string) => {
+        return (Object.keys(props.recEntities).includes(id));
     }
 
     // Returns the style for a relation arrow of specific color.
@@ -237,6 +261,8 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                         getEntityText={props.getEntityText}
                         acceptRecRelation={props.acceptRecRelation}
                         declineRecRelation={props.declineRecRelation}
+                        selectedRecRelation={props.selectedRecRelation}
+                        selectRecRelation={selectRecRelation}
                     />
                 );
             })
@@ -274,6 +300,9 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                             <AnnoRecRelationArrow
                                 rel={rel}
                                 color={relationColorDict[rel.type]}
+                                isRecEntity={isRecEntity}
+                                selectRecRelation={selectRecRelation}
+                                selectedRecRelation={props.selectedRecRelation}
                             />
                         );
                     })
@@ -306,8 +335,11 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                                     style={getStyle(relation.color)} 
                                     key={relation.type}
                                     onClick={ () => {
-                                        // updating relations has first prio
-                                        if (props.selectedRelations.length > 0) {
+                                        // updating relations or accepting relation with different type have highest prio
+                                        // only one can occur due to selection methods
+                                        if (props.selectedRecRelation !== '') {
+                                            props.acceptChangedRecRelation(props.selectedRecRelation, relation.type);
+                                        } else if (props.selectedRelations.length > 0) {
                                             props.updateRelation(props.selectedRelations, relation.type);
                                         } else {
                                             // adding a new one has second prio
@@ -320,7 +352,7 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                                             props.addRelation([newRel])
                                         }
                                     }}
-                                    disabled={props.selectedEntities.length !== 2 && props.selectedRelations.length === 0}
+                                    disabled={props.selectedEntities.length !== 2 && props.selectedRelations.length === 0 && props.selectedRecRelation === ''}
                                 >
                                     {relation.type}
                                 </Button>

@@ -5,34 +5,64 @@ import {RecRelation} from "../../state/anno/annoDocumentReducer";
 type AnnoRecRelationArrowProps = {
     rel: RecRelation;
     color: string;
+
+    isRecEntity: (id: string) => boolean;
+    selectRecRelation: (id: string) => void;
+
+    selectedRecRelation: string;
 }
 
 // Return the arrow of a relation from one span to another.
 export default function AnnoRecRelationArrow(props: AnnoRecRelationArrowProps) {
 
+    const getId = (id: string) => {
+        if (props.isRecEntity(id)) {
+            return 'rec_' + id;
+        }
+        return id;
+    }
+
+    // bigger if seleceted
+    const getStrokeWidth = () => {
+        if (props.rel.id === props.selectedRecRelation) {
+            return 4;
+        }
+        return 2;
+    }
+
     return(
         <>
             <Xarrow
-                start={props.rel.head}
-                end={props.rel.head}
+                start={getId(props.rel.head)}
+                end={getId(props.rel.head)}
                 startAnchor={[{position: 'bottom', offset: {}}]}
                 endAnchor={[{position: 'bottom', offset: {y: 10}}]}
-                strokeWidth= {2}
+                strokeWidth= {getStrokeWidth()}
                 path={'straight'}
                 showHead={false}
                 color = {props.color}
                 dashness={true}
+                passProps={
+                    {onClick: () => {
+                            props.selectRecRelation(props.rel.id);
+                        }}
+                }
             />
             <Xarrow
-                start={props.rel.head}
-                end={props.rel.tail}
+                start={getId(props.rel.head)}
+                end={getId(props.rel.tail)}
                 startAnchor={[{position: 'bottom', offset: {y: 9}}]}
                 endAnchor={[{position: 'left', offset: {y: 10}}, { position: 'right', offset: {y: 10}}, {position: 'top', offset:{}}, {position: 'bottom', offset:{}}]}
-                strokeWidth= {2}
+                strokeWidth= {getStrokeWidth()}
                 headSize={4}
                 path={'straight'}
                 color = {props.color}
                 dashness={true}
+                passProps={
+                    {onClick: () => {
+                            props.selectRecRelation(props.rel.id);
+                        }}
+                }
             />
         </>
     );

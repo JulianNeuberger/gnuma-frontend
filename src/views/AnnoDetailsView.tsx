@@ -66,6 +66,7 @@ export default function AnnoDetailsView(){
     const [selectedEntities, setSelectedEntities] = React.useState<string[]>([]);
     const [selectedTokens, setSelectedTokens] = React.useState<TokenSpan[]>([]);
     const [selectedRelations, setSelectedRelations] = React.useState<string[]>([]);
+    const [selectedRecRelation, setSelectedRecRelation] = React.useState<string>('');
 
     //if this works im sad
     const [halp, sendHalp] = React.useState<boolean>(true);
@@ -228,6 +229,9 @@ export default function AnnoDetailsView(){
             setEntities(history[newCurrentState].entities);
             setSentenceEntities(history[newCurrentState].sentenceEntities);
             setRelations(history[newCurrentState].relations);
+            setRecEntities(history[newCurrentState].recEntities);
+            setRecSentenceEntities(history[newCurrentState].recSentenceEntities);
+            setRecRelations(history[newCurrentState].recRelations);
 
             sendUpdate(history[newCurrentState].entities, history[newCurrentState].sentenceEntities, history[newCurrentState].relations, history[newCurrentState].recEntities, history[newCurrentState].recSentenceEntities, history[newCurrentState].recRelations, false);
         }
@@ -246,6 +250,9 @@ export default function AnnoDetailsView(){
             setEntities(history[newCurrentState].entities);
             setSentenceEntities(history[newCurrentState].sentenceEntities);
             setRelations(history[newCurrentState].relations);
+            setRecEntities(history[newCurrentState].recEntities);
+            setRecSentenceEntities(history[newCurrentState].recSentenceEntities);
+            setRecRelations(history[newCurrentState].recRelations);
 
             sendUpdate(history[newCurrentState].entities, history[newCurrentState].sentenceEntities, history[newCurrentState].relations, history[newCurrentState].recEntities, history[newCurrentState].recSentenceEntities, history[newCurrentState].recRelations, false);
         }
@@ -414,7 +421,7 @@ export default function AnnoDetailsView(){
     }
 
     // Accept Relation
-    const acceptRecRelation = (id: string) => {
+    const acceptRecRelation = (id: string, type: string = '') => {
         // check if Relation exists
         if (Object.keys(recRelations).includes(id)) {
             let newEntities = JSON.parse(JSON.stringify(entities));
@@ -474,12 +481,17 @@ export default function AnnoDetailsView(){
                 newSentenceEntities[newEntities[recRel.tail].sentenceIndex].push(recRel.tail);
             }
 
+            // different type?
+            if (type === '') {
+                type = recRel.type
+            }
+
             //Add the relation
             let newRel: Relation = {
                 'id': recRel.id,
                 'head': recRel.head,
                 'tail': recRel.tail,
-                'type': recRel.type
+                'type': type
             }
             newRelations[recRel.id] = newRel;
             delete newRecRelations[id];
@@ -645,6 +657,9 @@ export default function AnnoDetailsView(){
                                     recEntities={recEntities}
                                     acceptRecRelation={acceptRecRelation}
                                     declineRecRelation={declineRecRelation}
+                                    selectedRecRelation={selectedRecRelation}
+                                    setSelectedRecRelation={setSelectedRecRelation}
+                                    acceptChangedRecRelation={acceptRecRelation}
                                 />
                             </Col>
                         </Row>
