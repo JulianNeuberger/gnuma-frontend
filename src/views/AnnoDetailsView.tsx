@@ -399,7 +399,7 @@ export default function AnnoDetailsView(){
 
             // Remove from recs
             delete newRecEntities[id];
-            newRecSentenceEntities[ent.sentenceIndex].splice(newRecSentenceEntities.indexOf(id), 1);
+            newRecSentenceEntities[ent.sentenceIndex].splice(newRecSentenceEntities[ent.sentenceIndex].indexOf(id), 1);
 
             updateHistory(newEntities, newSentenceEntities, relations, newRecEntities, newRecSentenceEntities, recRelations);
         }
@@ -411,12 +411,18 @@ export default function AnnoDetailsView(){
         if (Object.keys(recEntities).includes(id)) {
             let newRecEntities = JSON.parse(JSON.stringify(recEntities));
             let newRecSentenceEntities = JSON.parse(JSON.stringify(recSentenceEntities));
+            let newRecRelations = JSON.parse(JSON.stringify(recRelations));
+
+            //remove rec relations
+            for (let i = 0; i < newRecEntities[id].relations.length; i++) {
+                delete newRecRelations[newRecEntities[id].relations[i]]
+            }
 
             // Remove from recs
             delete newRecEntities[id];
             newRecSentenceEntities.splice(newRecSentenceEntities.indexOf(id), 1);
 
-            updateHistory(entities, sentenceEntities, relations, newRecEntities, newRecSentenceEntities, recRelations);
+            updateHistory(entities, sentenceEntities, relations, newRecEntities, newRecSentenceEntities, newRecRelations);
         }
     }
 
@@ -549,6 +555,14 @@ export default function AnnoDetailsView(){
         return (out);
     }
 
+    // Returns the text for the send update button
+    const getUpdateButtonText = () => {
+        if (annoDocumentContext.state.elements[docId].labeled && (annoDocumentContext.state.elements[docId].labeledBy.includes(userId))) {
+            return('Update Labels');
+        }
+        return('Mark as labeled');
+    }
+
     // Return the text, labels and relations.
     return(
         <div key={'anno-details-view'}  style = {{'userSelect': 'none'}}>
@@ -587,9 +601,10 @@ export default function AnnoDetailsView(){
                             type = {'primary'}
                             onClick={() => sendUpdate(entities, sentenceEntities, relations, recEntities, recSentenceEntities, recRelations, true)}
                             icon= {<CheckOutlined/>}
-                            disabled={annoDocumentContext.state.elements[docId].labeled && (annoDocumentContext.state.elements[docId].labeledBy.includes(userId))}
                         >
-                            Mark as labeled
+                            {
+                                getUpdateButtonText()
+                            }
                         </Button>
 
                         <Link
