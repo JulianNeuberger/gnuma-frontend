@@ -20,7 +20,7 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
     const [name, setName] = React.useState<string>('');
     const [relationName, setRelationName] = React.useState<string>('');
     const [relationTypes, setRelationTypes] = React.useState<AnnoRelationType[]>([]);
-    const [colors, setColors] = React.useState<string[]>(['red', 'green', 'blue', 'yellow', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano']);
+    const [colors, setColors] = React.useState<string[]>(['red', 'green', 'blue', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano', 'yellow']);
 
     // Add a relation type to the state.
     const addRelationType = () => {
@@ -42,7 +42,7 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
         setName('');
         setRelationName('');
         setRelationTypes([]);
-        setColors(['red', 'green', 'blue', 'yellow', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano'])
+        setColors(['red', 'green', 'blue', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano', 'yellow'])
         props.setModalVisible(false);
     }
 

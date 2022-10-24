@@ -49,6 +49,13 @@ type HistoryElement = {
     'recRelations': RecRelationDict;
 }
 
+function useForceUpdate(){
+    const [value, setValue] = React.useState(0); // integer state
+    return () => setValue(value => value + 1); // update state to force render
+    // An function that increment the previous state like here
+    // is better than directly setting `value + 1`
+}
+
 // Function of the details view. show document text, entity labels and relations.
 export default function AnnoDetailsView(){
     const [entities, setEntities] = React.useState<EntityDict>({});
@@ -67,6 +74,10 @@ export default function AnnoDetailsView(){
     const [selectedTokens, setSelectedTokens] = React.useState<TokenSpan[]>([]);
     const [selectedRelations, setSelectedRelations] = React.useState<string[]>([]);
     const [selectedRecRelation, setSelectedRecRelation] = React.useState<string>('');
+
+    // rerender relation arrows
+    const [rerenderRelations, updateState] = React.useState(0);
+    const forceUpdate = useForceUpdate();
 
     //if this works im sad
     const [halp, sendHalp] = React.useState<boolean>(true);
@@ -643,11 +654,12 @@ export default function AnnoDetailsView(){
                         recSentenceEntities={recSentenceEntities}
                         acceptRecEntity={acceptRecEntity}
                         declineRecEntity={declineRecEntity}
+                        forceUpdate={forceUpdate}
                     />
 
                     <Layout.Sider
                         style={{backgroundColor: 'white', color: 'black'}}
-                        width={400}
+                        width={500}
                     >
                         <Row>
                             <Col flex={'20px'}></Col>
@@ -675,6 +687,7 @@ export default function AnnoDetailsView(){
                                     selectedRecRelation={selectedRecRelation}
                                     setSelectedRecRelation={setSelectedRecRelation}
                                     acceptChangedRecRelation={acceptRecRelation}
+                                    forceUpdate={forceUpdate}
                                 />
                             </Col>
                         </Row>

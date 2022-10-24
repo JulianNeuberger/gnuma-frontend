@@ -4,6 +4,7 @@ import {EntityDict, RecEntityDict, RecRelation} from "../../state/anno/annoDocum
 import {Button, Divider, Space} from 'antd';
 import Xarrow from "react-xarrows";
 import {CheckCircleTwoTone, CloseCircleTwoTone} from "@ant-design/icons";
+import {elementsOverlap} from "../AnnoDisplayRelation/AnnoDisplayRelation";
 
 // Props needed for displaying a relation
 type AnnoRelationProps = {
@@ -34,12 +35,29 @@ export default function AnnoRelation(props: AnnoRelationProps){
         return {};
     }
 
+    const giveArrowIfVisible = () => {
+        if (elementsOverlap(props.rel.id + '_' + props.rel.head, 'recRelationDiv') && elementsOverlap(props.rel.id + '_' + props.rel.tail, 'recRelationDiv')) {
+            return (
+                <Xarrow
+                    start={props.rel.id + '_' + props.rel.head}
+                    end={props.rel.id + '_' + props.rel.tail}
+                    strokeWidth= {4}
+                    headSize={4}
+                    path={'straight'}
+                    dashness={true}
+                    showHead={true}
+                    color = {props.getRelationStyle(props.rel.id)}
+                />
+            );
+        }
+    }
+
     // Return the relation.
     return (
         <div>
             <span>
                 <Space
-                    size={80}
+                    size={40}
                     style={{...getRelStyle(), 'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}
                     onClick={() => {props.selectRecRelation(props.rel.id)}}
                 >
@@ -88,16 +106,7 @@ export default function AnnoRelation(props: AnnoRelationProps){
                 }}
             />
             </span>
-            <Xarrow
-                start={props.rel.id + '_' + props.rel.head}
-                end={props.rel.id + '_' + props.rel.tail}
-                strokeWidth= {2}
-                headSize={4}
-                path={'straight'}
-                dashness={true}
-                showHead={true}
-                color = {props.getRelationStyle(props.rel.id)}
-            />
+            {giveArrowIfVisible()}
         </div>
     );
 }

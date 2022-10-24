@@ -39,6 +39,8 @@ type AnnoDisplayTextProps = {
 
     acceptRecEntity: (id: string) => void;
     declineRecEntity: (id: string) => void;
+
+    forceUpdate: () => void;
 }
 
 // Function for displaying the text.
@@ -274,7 +276,10 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     // Handles the display of the all tokens.
     const display = (xxx: EntityDict, yyy: string[][]) => {
         return(
-            <span>
+            <div
+                style={{'overflowY': 'auto', 'height': '650px'}}
+                onScroll={() => {props.forceUpdate()}}
+            >
                 {
                     doc.sentences.map((sentence, x) => {
                         let countdown = 0;
@@ -355,7 +360,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                         )
                     })
                 }
-            </span>
+            </div>
         );
     }
 
@@ -397,54 +402,53 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             {
                 'color': presetPalettes[color][7],
                 'background': presetPalettes[color][1],
-                'borderColor': presetPalettes[color][3]
+                'borderColor': presetPalettes[color][3],
+                'margin': '5px'
             }
         );
     }
 
     // Displays text and the labeling buttons.
     return (
-        <Layout>
-            <Layout.Header
-                style={{backgroundColor: 'White'}}
+        <div
+            style={{backgroundColor: 'White'}}
+        >
+            <div
+                style={{'margin': '10px', 'background': '#EFF0EF'}}
             >
-                <Space>
-                    <Button 
-                        style={getButtonStyle('grey', 'O')} 
-                        key={'RESET'}
-                        onClick={ () => {
-                            updateLabels('O');
-                        }}
-                    >
-                        {'NO LABEL'}
-                    </Button>
-                    {
-                        labelSet.labels.map(label => {
-                            return (
-                                <Button 
-                                    style={getButtonStyle(label.color, label.type)}
-                                    key={label.type}
-                                    onClick={ () => {
-                                        updateLabels(label.type);
-                                    }}
-                                >
-                                    {label.type.toUpperCase()}
-                                </Button>
-                                
-                            );
-                        })
-                    }
-                </Space> 
-            </Layout.Header> 
-            <Layout.Content
-                style={{backgroundColor: 'White'}}
-            >
-                <div
-                    style={{'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}
+                <Button
+                    style={getButtonStyle('grey', 'O')}
+                    key={'RESET'}
+                    onClick={ () => {
+                        updateLabels('O');
+                    }}
                 >
-                    {display(props.entities, props.sentenceEntities)}
-                </div>
-            </Layout.Content>
-        </Layout>
+                    {'NO LABEL'}
+                </Button>
+                {
+                    labelSet.labels.map(label => {
+                        return (
+                            <Button
+                                style={getButtonStyle(label.color, label.type)}
+                                key={label.type}
+                                onClick={ () => {
+                                    updateLabels(label.type);
+                                }}
+                            >
+                                {label.type.toUpperCase()}
+                            </Button>
+
+                        );
+                    })
+                }
+            </div>
+            <div
+                style={{'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}
+                id={'displayTextDiv'}
+            >
+                {display(props.entities, props.sentenceEntities)}
+            </div>
+        </div>
+
     );
 }

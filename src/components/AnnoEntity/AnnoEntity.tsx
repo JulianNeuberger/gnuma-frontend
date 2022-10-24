@@ -19,7 +19,8 @@ export default function AnnoEntity(props: AnnoEntityProps){
             id = {props.entity.id}
             style={{
                 ...props.style,
-                'padding': '0.2px'
+                'padding': '0.2px',
+                'whiteSpace': 'pre'
             }}
             onClick={ (e) => {
                 // event based on click type

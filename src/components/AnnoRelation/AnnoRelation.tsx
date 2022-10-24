@@ -3,6 +3,7 @@ import React from 'react';
 import {EntityDict, Relation} from "../../state/anno/annoDocumentReducer";
 import { Space } from 'antd';
 import Xarrow from "react-xarrows";
+import {elementsOverlap} from "../AnnoDisplayRelation/AnnoDisplayRelation";
 
 // Props needed for displaying a relation
 type AnnoRelationProps = {
@@ -34,9 +35,25 @@ export default function AnnoRelation(props: AnnoRelationProps){
         return {};
     }
 
+    const giveArrowIfVisible = () => {
+        if (elementsOverlap(props.rel.id + '_' + props.rel.head, 'relationDiv') && elementsOverlap(props.rel.id + '_' + props.rel.tail, 'relationDiv')) {
+            return (
+                <Xarrow
+                    start={props.rel.id + '_' + props.rel.head}
+                    end={props.rel.id + '_' + props.rel.tail}
+                    strokeWidth= {4}
+                    headSize={4}
+                    path={'straight'}
+                    showHead={true}
+                    color = {props.getRelationStyle(props.rel.id)}
+                />
+            );
+        }
+    }
+
     // Return the relation.
     return (
-        <div style={getRelStyle()}>
+        <div style={{...getRelStyle(), 'margin': '10px'}}>
             <span
                 onClick={(e) => {
                     // event based on click type
@@ -48,13 +65,13 @@ export default function AnnoRelation(props: AnnoRelationProps){
                 }}
             >
                 <Space
-                    size={80}
-                    style={{'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}
+                    size={40}
+                    style={{'fontSize': 22, 'lineHeight': 1.2, 'userSelect': 'none'}}
                 >
                     <span
                         id={props.rel.id + '_' + props.rel.head}
                         style={{
-                            ...props.getEntityStyle(props.rel.head)
+                            ...props.getEntityStyle(props.rel.head),
                         }}
                     >
                         {
@@ -71,15 +88,9 @@ export default function AnnoRelation(props: AnnoRelationProps){
                     </span>
                 </Space>
             </span>
-            <Xarrow
-                start={props.rel.id + '_' + props.rel.head}
-                end={props.rel.id + '_' + props.rel.tail}
-                strokeWidth= {2}
-                headSize={4}
-                path={'straight'}
-                showHead={true}
-                color = {props.getRelationStyle(props.rel.id)}
-            />
+            {
+                giveArrowIfVisible()
+            }
         </div>
     );
 }

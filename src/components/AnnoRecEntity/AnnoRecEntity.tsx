@@ -24,7 +24,8 @@ export default function AnnoRecEntity(props: AnnoEntityRecommendationProps){
         <span
             style={{
                 ...props.style,
-                'border': '1px dashed black'
+                'border': '1px dashed black',
+                'whiteSpace': 'pre'
             }}
         >
             <span

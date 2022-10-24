@@ -23,6 +23,7 @@ import {v4 as uuidv4} from "uuid";
 import AnnoRecRelationArrow from "../AnnoRecRelationArrow/AnnoRecRelationArrow";
 import {Divider} from "antd/es";
 import AnnoRecRelation from '../AnnoRecRelation/AnnoRecRelation';
+import {factorDpathStr} from "react-xarrows/lib/Xarrow/utils";
 
 // Props that contain all info needed for displaying relations.
 type AnnoDisplayRelationProps = {
@@ -56,6 +57,24 @@ type AnnoDisplayRelationProps = {
 
     selectedRecRelation: string;
     setSelectedRecRelation: (id: string) => void;
+
+    forceUpdate: () => void;
+}
+
+// function return true if two elements intersect
+export function elementsOverlap(id1: string, id2: string) {
+    const doc1 = document.getElementById(id1);
+    const doc2 = document.getElementById(id2);
+    if (doc1 !== null && doc2 !== null) {
+        const domRect1 = doc1.getBoundingClientRect();
+        const domRect2 = doc2.getBoundingClientRect();
+
+        return !(
+            domRect1.top > domRect2.bottom ||
+            domRect1.bottom < domRect2.top
+        );
+    }
+    return(true);
 }
 
 // Displays relations.
@@ -198,7 +217,8 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
             {
                 'color': presetPalettes[color][7],
                 'background': presetPalettes[color][1],
-                'borderColor': presetPalettes[color][3]
+                'borderColor': presetPalettes[color][3],
+                'margin': '5px'
             }
         );
     }
@@ -275,15 +295,17 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
             <div>
                 {
                     Object.values(rels).map((rel) => {
-                        return(
-                            <AnnoRelationArrow
-                                rel={rel}
-                                color={relationColorDict[rel.type]}
-                                selectRelation={selectRelation}
-                                ctrlSelectRelation={ctrlSelectRelation}
-                                selectedRelations={props.selectedRelations}
-                            />
-                        );
+                        if (elementsOverlap(rel.head, 'displayTextDiv') && elementsOverlap(rel.tail, 'displayTextDiv')) {
+                            return (
+                                <AnnoRelationArrow
+                                    rel={rel}
+                                    color={relationColorDict[rel.type]}
+                                    selectRelation={selectRelation}
+                                    ctrlSelectRelation={ctrlSelectRelation}
+                                    selectedRelations={props.selectedRelations}
+                                />
+                            );
+                        }
                     })
                 }
             </div>
@@ -296,15 +318,17 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
             <div>
                 {
                     Object.values(rels).map((rel) => {
-                        return(
-                            <AnnoRecRelationArrow
-                                rel={rel}
-                                color={relationColorDict[rel.type]}
-                                isRecEntity={isRecEntity}
-                                selectRecRelation={selectRecRelation}
-                                selectedRecRelation={props.selectedRecRelation}
-                            />
-                        );
+                        if (elementsOverlap(rel.head, 'displayTextDiv') && elementsOverlap(rel.tail, 'displayTextDiv')) {
+                            return (
+                                <AnnoRecRelationArrow
+                                    rel={rel}
+                                    color={relationColorDict[rel.type]}
+                                    isRecEntity={isRecEntity}
+                                    selectRecRelation={selectRecRelation}
+                                    selectedRecRelation={props.selectedRecRelation}
+                                />
+                            );
+                        }
                     })
                 }
             </div>
@@ -313,71 +337,72 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
 
     // Fill the Relation specific sider and draws the arrows over the text.
     return (
-        <Layout>
-            <Layout.Header
-                style={{backgroundColor: 'White'}}
-            >
-                <Space>
-                    <Button 
-                        style={getStyle('grey')} 
-                        key={'RESET'}
-                        onClick={ () => {
-                            props.removeRelation(props.selectedRelations);
-                        }}
-                        disabled={props.selectedRelations.length === 0}
-                    >
-                        {'REMOVE'}
-                    </Button>
-                    {
-                        relationSet.relationTypes.map(relation => {
-                            return (
-                                <Button 
-                                    style={getStyle(relation.color)} 
-                                    key={relation.type}
-                                    onClick={ () => {
-                                        // updating relations or accepting relation with different type have highest prio
-                                        // only one can occur due to selection methods
-                                        if (props.selectedRecRelation !== '') {
-                                            props.acceptChangedRecRelation(props.selectedRecRelation, relation.type);
-                                        } else if (props.selectedRelations.length > 0) {
-                                            props.updateRelation(props.selectedRelations, relation.type);
-                                        } else {
-                                            // adding a new one has second prio
-                                            let newRel: Relation = {
-                                                'id': uuidv4(),
-                                                'head': props.selectedEntities[0],
-                                                'tail': props.selectedEntities[1],
-                                                'type': relation.type
-                                            }
-                                            props.addRelation([newRel])
+        <div style = {{userSelect: 'none', 'background': '#FFFFFF'}}>
+            <div style={{'margin': '10px', 'background': '#EFF0EF'}}>
+                <Button
+                    style={getStyle('grey')}
+                    key={'RESET'}
+                    onClick={ () => {
+                        props.removeRelation(props.selectedRelations);
+                    }}
+                    disabled={props.selectedRelations.length === 0}
+                >
+                    {'REMOVE'}
+                </Button>
+                {
+                    relationSet.relationTypes.map(relation => {
+                        return (
+                            <Button
+                                style={getStyle(relation.color)}
+                                key={relation.type}
+                                onClick={ () => {
+                                    // updating relations or accepting relation with different type have highest prio
+                                    // only one can occur due to selection methods
+                                    if (props.selectedRecRelation !== '') {
+                                        props.acceptChangedRecRelation(props.selectedRecRelation, relation.type);
+                                    } else if (props.selectedRelations.length > 0) {
+                                        props.updateRelation(props.selectedRelations, relation.type);
+                                    } else {
+                                        // adding a new one has second prio
+                                        let newRel: Relation = {
+                                            'id': uuidv4(),
+                                            'head': props.selectedEntities[0],
+                                            'tail': props.selectedEntities[1],
+                                            'type': relation.type
                                         }
-                                    }}
-                                    disabled={props.selectedEntities.length !== 2 && props.selectedRelations.length === 0 && props.selectedRecRelation === ''}
-                                >
-                                    {relation.type}
-                                </Button>
-                                
-                            );
-                        })
-                    }
-                </Space> 
-            </Layout.Header>
-        
-            <Layout.Content>
-                <div style = {{userSelect: 'none'}}>
-                    <Row>
-                        <Col flex={2}>
-                            {displayRelationsSide(props.selectedEntities)}
-                        </Col>
-                        <Divider/>
-                        <Col flex={3}>
-                            {displayRecRelationsSide(props.recRelations)}
-                        </Col>
-                    </Row>
-                    {drawRelations(props.relations)}
-                    {drawRecRelations(props.recRelations)}
-                </div>
-            </Layout.Content>
-        </Layout>
+                                        props.addRelation([newRel])
+                                    }
+                                }}
+                                disabled={props.selectedEntities.length !== 2 && props.selectedRelations.length === 0 && props.selectedRecRelation === ''}
+                            >
+                                {relation.type}
+                            </Button>
+
+                        );
+                    })
+                }
+            </div>
+
+
+            <div
+                style={{'overflowY': 'auto', 'height': '250px', 'margin': '10px', 'background': '#EFF0EF'}}
+                onScroll={props.forceUpdate}
+                id={'relationDiv'}
+            >
+                {displayRelationsSide(props.selectedEntities)}
+            </div>
+
+
+            <div
+                style={{'overflowY': 'auto', 'height': '350px', 'margin': '10px', 'background': '#EFF0EF'}}
+                onScroll={props.forceUpdate}
+                id={'recRelationDiv'}
+            >
+                {displayRecRelationsSide(props.recRelations)}
+            </div>
+
+            {drawRelations(props.relations)}
+            {drawRecRelations(props.recRelations)}
+        </div>
     );
 }
