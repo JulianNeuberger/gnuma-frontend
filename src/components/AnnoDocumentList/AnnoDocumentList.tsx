@@ -9,11 +9,9 @@ import {DeleteOutlined, CheckCircleFilled, CloseCircleFilled} from '@ant-design/
 import {AnnoDocument} from '../../state/anno/annoDocumentReducer';
 import {DocumentsContext} from '../DocumentsContextProvider/DocumentsContextProvider';
 
-import {Document} from '../../state/documents/reducer'
-
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
-type AnnoDocumentColumn = 'name' | 'labeled' | 'labeledBy' | 'actions';
+type AnnoDocumentColumn = 'name' | 'labelled' | 'labelledBy' | 'actions';
 
 
 // props for the list.
@@ -27,6 +25,8 @@ export type AnnoDocumentListProps = {
     selected?: string[];
 
     onSelectionChanged?: (documents: string[]) => void;
+
+    gimme: (docId: string) => void;
 }
 
 // Returns a list displaying the anno documents
@@ -36,7 +36,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
 
 
     // visible columns in the list.
-    const visibleColumns = props.visibleColumns || ['name', 'labeled', 'labeledBy'];
+    const visibleColumns = props.visibleColumns || ['name', 'labelled', 'labelledBy'];
     if (props.showActions) {
         visibleColumns.push('actions');
     }
@@ -59,6 +59,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
                     return(
                         <Link
                             to={`/annotation/${props.projectId}/${record.id}/`}
+                            onClick={() => props.gimme(record.id)}
                         >
                             <a>{documentContext.state.elements[record.id].name}</a>
                         </Link>
@@ -67,31 +68,32 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
                 return(
                         <Link
                             to={`/annotation/${props.projectId}/${record.id}/`}
+                            onClick={() => props.gimme(record.id)}
                         >
                             <a>{record.id}</a>
                         </Link>
                     )
             }
         },
-        labeled: {
-            title: 'Labeled',
+        labelled: {
+            title: 'labelled',
             dataIndex: '',
-            key: 'labeled',
+            key: 'labelled',
             render: (_, record) => {
-                if(record.labeled) {
+                if(record.labelled) {
                     return(<CheckCircleFilled style={{color: 'green', fontSize: '24px'}}/>);
                 }
                 return(<CloseCircleFilled style={{color: 'red', fontSize: '24px'}}/>);
             }
         },
-        labeledBy: {
-            title: 'Labeled by',
+        labelledBy: {
+            title: 'labelled by',
             dataIndex: '',
-            key: 'labeled',
+            key: 'labelled',
             render: (_, record) => {
-                if(record.labeled){
+                if(record.labelled){
                     let str = ''
-                    record.labeledBy.forEach((x, i) => {
+                    record.labelledBy.forEach((x, i) => {
                         if (i !== 0) {
                             str = str + ', ';
                         }

@@ -318,7 +318,7 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
             <div>
                 {
                     Object.values(rels).map((rel) => {
-                        if (elementsOverlap(rel.head, 'displayTextDiv') && elementsOverlap(rel.tail, 'displayTextDiv')) {
+                        if (elementsOverlap('rec_' + rel.head, 'displayTextDiv') && elementsOverlap('rec_' + rel.tail, 'displayTextDiv')) {
                             return (
                                 <AnnoRecRelationArrow
                                     rel={rel}

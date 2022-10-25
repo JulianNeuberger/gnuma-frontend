@@ -54,6 +54,11 @@ export default function AnnoProjectView(){
         cancelAdd();
     }
 
+    // send request for AI prdictions when opening a document
+    const gimme = async (docId: string) => {
+        await documentContext.onGimme(projectId, docId, userId)
+    }
+
     // Return the view displaying a list of documents in the project.
     return (
         <div key={'anno-project-view'}>
@@ -114,7 +119,11 @@ export default function AnnoProjectView(){
                         />
                     </div>
                 </Modal>
-                <AnnoDocumentList projectId={projectId} showActions={true}/>
+                <AnnoDocumentList
+                    projectId={projectId}
+                    showActions={true}
+                    gimme={gimme}
+                />
             </Card>
         </div>
     );

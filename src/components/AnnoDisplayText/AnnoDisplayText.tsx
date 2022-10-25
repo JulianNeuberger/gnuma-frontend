@@ -435,7 +435,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                     updateLabels(label.type);
                                 }}
                             >
-                                {label.type.toUpperCase()}
+                                {label.type}
                             </Button>
 
                         );

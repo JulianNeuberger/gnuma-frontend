@@ -34,6 +34,25 @@ export function buildGenericCreate<T, P>(dispatch: Dispatch<GenericPayloadAction
     }
 }
 
+export function buildGenericGimme<T>(dispatch: Dispatch<GenericPayloadActions<T>>, creator: (projectId: string, docId: string, userId: string) => Promise<T>) {
+    return async (projectId: string, docId: string, userId: string) => {
+        try {
+            message.loading({content: 'Gimme...'});
+            const newElement = await creator(projectId, docId, userId);
+            dispatch({
+                type: 'SET_ONE',
+                payload: newElement
+            });
+            message.success({content: 'Creation successful!'});
+        } catch (e) {
+            dispatch({
+                type: 'FAIL_FETCH'
+            });
+            defaultErrorMessage(e);
+        }
+    }
+}
+
 // generic update for three ids.
 export function buildGenericUpdate<T>(dispatch: Dispatch<GenericPayloadActions<T>>, updater: (projectId: string, docId: string, userId: string, changes: Partial<T>) => Promise<T>) {
     return async (projectId: string, docId: string, userId: string, changes: Partial<T>) => {

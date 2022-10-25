@@ -1,8 +1,22 @@
 import React, {createContext, useReducer} from 'react';
 
 import DocumentReducer, {AnnoDocument, initialAnnoDocumentState} from '../../state/anno/annoDocumentReducer'
-import {getAllAnnoDocuments, addAnnoDocument, getSingleAnnoDocument, deleteAnnoDocument, updateAnnoDocument} from '../../service/annoService'
-import {buildGenericFetchAll, buildGenericCreate, buildGenericFetchOne, buildGenericDeleteSingle, buildGenericUpdate} from '../../util/AnnoUtil/annoDocumentPresentation'
+import {
+    getAllAnnoDocuments,
+    addAnnoDocument,
+    getSingleAnnoDocument,
+    deleteAnnoDocument,
+    updateAnnoDocument,
+    gimmeAnnoDocument
+} from '../../service/annoService'
+import {
+    buildGenericFetchAll,
+    buildGenericCreate,
+    buildGenericFetchOne,
+    buildGenericDeleteSingle,
+    buildGenericUpdate,
+    buildGenericGimme
+} from '../../util/AnnoUtil/annoDocumentPresentation'
 import {GenericPayloadState} from '../../state/common/reducer'
 
 // Define the context type
@@ -13,6 +27,7 @@ type AnnoDocumentContextType = {
     onFetchOne: (projectId: string, docId: string, userId: string) => void;
     onDelete: (projectId: string, docId: string) => void;
     onUpdate: (projectId: string, docId: string, userId: string, document: Partial<AnnoDocument>) => void;
+    onGimme: (projectId: string, docId: string, userId: string) => void;
 }
 
 // Displayed when providor is mising.
@@ -29,7 +44,8 @@ export const AnnoDocumentContext = createContext<AnnoDocumentContextType>({
     onCreate: missingProviderError('onCreate'),
     onFetchOne: missingProviderError('onFetchOne'),
     onDelete: missingProviderError('onDelete'),
-    onUpdate: missingProviderError('onUpdate')
+    onUpdate: missingProviderError('onUpdate'),
+    onGimme: missingProviderError('onGimme')
 })
 
 type AnnoDocumentContextProviderProps = {
@@ -45,6 +61,7 @@ const AnnoDocumentContextProvider = (props: AnnoDocumentContextProviderProps) =>
     const fetchOne = buildGenericFetchOne(dispatch, getSingleAnnoDocument);
     const deleteSingle = buildGenericDeleteSingle(dispatch, deleteAnnoDocument);
     const update = buildGenericUpdate(dispatch, updateAnnoDocument);
+    const gimme = buildGenericGimme(dispatch, gimmeAnnoDocument);
 
     const context: AnnoDocumentContextType = {
         state: documents as GenericPayloadState<AnnoDocument>,
@@ -52,7 +69,8 @@ const AnnoDocumentContextProvider = (props: AnnoDocumentContextProviderProps) =>
         onCreate: create,
         onFetchOne: fetchOne,
         onDelete: deleteSingle,
-        onUpdate: update
+        onUpdate: update,
+        onGimme: gimme
     }
 
     return (

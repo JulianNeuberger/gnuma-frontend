@@ -52,7 +52,7 @@ export default function AnnoRecRelationArrow(props: AnnoRecRelationArrowProps) {
                 start={getId(props.rel.head)}
                 end={getId(props.rel.tail)}
                 startAnchor={[{position: 'bottom', offset: {y: 9}}]}
-                endAnchor={[{position: 'left', offset: {y: 10}}, { position: 'right', offset: {y: 10}}, {position: 'top', offset:{}}, {position: 'bottom', offset:{}}]}
+                endAnchor={[{position: 'left', offset: {y: 10}}, { position: 'right', offset: {y: 10}}, {position: 'left', offset: {y: -10}}, { position: 'right', offset: {y: -10}}, {position: 'top', offset:{}}, {position: 'bottom', offset:{}}]}
                 strokeWidth= {getStrokeWidth()}
                 headSize={4}
                 path={'straight'}

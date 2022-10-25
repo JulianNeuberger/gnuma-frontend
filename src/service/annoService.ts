@@ -105,6 +105,8 @@ export const addAnnoDocument = async (projectId: string, docId: string): Promise
     return getSingleAnnoDocument(projectId, docId, getUserIdCookie());
 }
 
+
+
 // Delete a document.
 export const deleteAnnoDocument = async (projectId: string, docId: string): Promise<void> => {
     const endpoint = getApiUrl(`projects/${projectId}/docs`)
@@ -134,6 +136,17 @@ export const updateAnnoDocument = async (projectId: string, docId: string, userI
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(document)
+    });
+    checkResponse(response);
+
+    return await getSingleAnnoDocument(projectId, docId, userId);
+}
+
+// Send for AI prediction.
+export const gimmeAnnoDocument = async (projectId: string, docId: string, userId: string): Promise<AnnoDocument> => {
+    const endpoint = getApiUrl(`projects/${projectId}/docs/${docId}/user/${userId}`);
+    const response = await fetch(endpoint, {
+        method: 'POST'
     });
     checkResponse(response);
 

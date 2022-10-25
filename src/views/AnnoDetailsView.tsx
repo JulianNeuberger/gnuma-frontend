@@ -108,13 +108,13 @@ export default function AnnoDetailsView(){
     const annoDoc = annoDocumentContext.state.elements[docId];
 
     // send an update to the server
-    const sendUpdate = async (newEntities: EntityDict, newSentenceEntities: string[][], newRelations: RelationDict, newRecEntities: RecEntityDict, newRecSentenceEntities: string [][], newRecRelations: RecRelationDict, labeled: boolean) => {
-        // add entities, relations and info if labeled
+    const sendUpdate = async (newEntities: EntityDict, newSentenceEntities: string[][], newRelations: RelationDict, newRecEntities: RecEntityDict, newRecSentenceEntities: string [][], newRecRelations: RecRelationDict, labelled: boolean) => {
+        // add entities, relations and info if labelled
         let out = {
             'entities': newEntities,
             'sentenceEntities': newSentenceEntities,
             'relations': newRelations,
-            'labeled': labeled
+            'labelled': labelled
         }
 
         // send the update
@@ -187,7 +187,7 @@ export default function AnnoDetailsView(){
 
     // This is why i hate react ...
     // Prevents infinite loop....
-    if (halp) {
+    if (halp && Object.keys(recEntities).length === 0 && Object.keys(annoDoc.recEntities).length > 0) {
         sendHalp(false);
 
         let newSentenceEntities: string[][] = [];
@@ -225,6 +225,7 @@ export default function AnnoDetailsView(){
         }
 
         updateHistory(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations);
+        forceUpdate();
     }
 
     // Handles the undo Operation
@@ -568,10 +569,10 @@ export default function AnnoDetailsView(){
 
     // Returns the text for the send update button
     const getUpdateButtonText = () => {
-        if (annoDocumentContext.state.elements[docId].labeled && (annoDocumentContext.state.elements[docId].labeledBy.includes(userId))) {
+        if (annoDocumentContext.state.elements[docId].labelled && (annoDocumentContext.state.elements[docId].labelledBy.includes(userId))) {
             return('Update Labels');
         }
-        return('Mark as labeled');
+        return('Mark as labelled');
     }
 
     // Return the text, labels and relations.
@@ -581,6 +582,14 @@ export default function AnnoDetailsView(){
                 title = {`${project.name} - ${doc.name}`}
                 extra = {
                     <Space>
+                        <Button
+                            onClick={() => {
+
+                                //updateHistory({}, newSentenceEntities, {}, recEntities, recSentenceEntities, recRelations);
+                            }}
+                        >
+                            Accept all
+                        </Button>
                         <Button
                             onClick={() => {
                                 //todo how should this work?

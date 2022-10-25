@@ -29,7 +29,7 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
                 start={props.rel.head}
                 end={props.rel.tail}
                 startAnchor={[{position: 'bottom', offset: {y: 9}}]}
-                endAnchor={[{position: 'left', offset: {y: 10}}, { position: 'right', offset: {y: 10}}, {position: 'top', offset:{}}, {position: 'bottom', offset:{}}]}
+                endAnchor={[{position: 'left', offset: {y: 10}}, { position: 'right', offset: {y: 10}}, {position: 'left', offset: {y: -10}}, { position: 'right', offset: {y: -10}}, {position: 'top', offset:{}}, {position: 'bottom', offset:{}}]}
                 strokeWidth= {getStrokeWidth()}
                 headSize={4}
                 path={'straight'}

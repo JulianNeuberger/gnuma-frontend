@@ -58,8 +58,8 @@ export type RecRelationDict = {
 // Anno document type
 export type AnnoDocument = {
     id: string;
-    labeled: boolean;
-    labeledBy: string[];
+    labelled: boolean;
+    labelledBy: string[];
     sentenceEntities: string[][];
     entities: EntityDict;
     relations: RelationDict;

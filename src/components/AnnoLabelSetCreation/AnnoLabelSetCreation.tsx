@@ -131,7 +131,7 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
                         labels.map(label => {
                             return (
                                 <Tag color={label.color} key={label.type}>
-                                    {label.type.toUpperCase()}
+                                    {label.type}
                                 </Tag>
                             );
                         })
