@@ -274,7 +274,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     }
 
     // Handles the display of the all tokens.
-    const display = (xxx: EntityDict, yyy: string[][]) => {
+    const display = (xxx: EntityDict, yyy: string[][], aaa: RecEntityDict, bbb: string[][]) => {
         return(
             <div
                 style={{'overflowY': 'auto', 'height': '650px'}}
@@ -446,7 +446,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 style={{'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}
                 id={'displayTextDiv'}
             >
-                {display(props.entities, props.sentenceEntities)}
+                {display(props.entities, props.sentenceEntities, props.recEntities, props.recSentenceEntities)}
             </div>
         </div>
 

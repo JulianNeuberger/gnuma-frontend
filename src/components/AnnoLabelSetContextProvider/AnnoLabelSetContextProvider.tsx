@@ -1,16 +1,16 @@
 import React, {createContext, useReducer} from 'react';
 
-import AnnoLabelSetReducer, {AnnoLabelSet, initialAnnoLabelSetState, UnPersistedAnnoLabelSet} from '../../state/anno/annoLabelSetReducer'
-import {getAllAnnoLabelSets, getSingleAnnoLabelSet, createAnnoLabelSet} from '../../service/annoService'
+import AnnoEntitySetReducer, {AnnoEntitySet, initialAnnoLabelSetState, UnPersistedAnnoEntitySet} from '../../state/anno/annoEntitySetReducer'
+import {getAllAnnoEntitySets, getSingleAnnoEntitySet, createAnnoEntitySet} from '../../service/annoService'
 import {buildGenericFetchAll, buildGenericFetchOne, buildGenericCreate} from '../../util/presentation'
 import {GenericPayloadState} from '../../state/common/reducer'
 
 // Type for label set context
 type AnnoLabelSetContextType = {
-	state: GenericPayloadState<AnnoLabelSet>;
+	state: GenericPayloadState<AnnoEntitySet>;
 	onFetchAll: () => void;
 	onFetchOne: (id: string) => void;
-	onCreate: (labelSet: UnPersistedAnnoLabelSet) => void;
+	onCreate: (labelSet: UnPersistedAnnoEntitySet) => void;
 }
 
 const missingProviderError = (name: string) => {
@@ -33,11 +33,11 @@ type AnnoLabelSetContextProviderProps = {
 
 // define the context provider.
 const AnnoLabelSetContextProvider = (props: AnnoLabelSetContextProviderProps) => {
-	const [projects, dispatch] = useReducer(AnnoLabelSetReducer, initialAnnoLabelSetState);
+	const [projects, dispatch] = useReducer(AnnoEntitySetReducer, initialAnnoLabelSetState);
 
-	const fetchAll = buildGenericFetchAll(dispatch, getAllAnnoLabelSets);
-	const fetchOne = buildGenericFetchOne(dispatch, getSingleAnnoLabelSet);
-	const create = buildGenericCreate(dispatch, createAnnoLabelSet);
+	const fetchAll = buildGenericFetchAll(dispatch, getAllAnnoEntitySets);
+	const fetchOne = buildGenericFetchOne(dispatch, getSingleAnnoEntitySet);
+	const create = buildGenericCreate(dispatch, createAnnoEntitySet);
 
 	const context: AnnoLabelSetContextType = {
 		state: projects,

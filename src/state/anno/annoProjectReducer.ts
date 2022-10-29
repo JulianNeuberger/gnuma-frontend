@@ -11,6 +11,7 @@ export type AnnoProject = {
     creator: string;
     labelSetId: string;
     relationSetId: string;
+    documents: string[];
 }
 
 // un persisted project for creation

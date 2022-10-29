@@ -10,7 +10,7 @@ import {Document} from '../../state/documents/reducer';
 import {DocumentsContext} from '../DocumentsContextProvider/DocumentsContextProvider';
 
 
-type DocumentColumn = 'source' | 'domain' | 'text' | 'actions';
+type DocumentColumn = 'source' | 'domain' | 'text' | 'actions' | 'name';
 
 export type DocumentListProps = {
     showActions?: boolean;
@@ -42,6 +42,10 @@ export default function DocumentsList(props: DocumentListProps) {
         source: {
             title: 'Source',
             dataIndex: 'source'
+        },
+        name: {
+            title: 'Name',
+            dataIndex: 'name'
         },
         text: {
             title: 'Content',

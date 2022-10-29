@@ -1,7 +1,7 @@
 import React, {useContext, useEffect} from 'react';
 
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
-import {AnnoLabelSet} from '../../state/anno/annoLabelSetReducer'
+import {AnnoEntitySet} from '../../state/anno/annoEntitySetReducer'
 
 import {Table, Tag, TableColumnProps, Modal} from 'antd'
 import {TableRowSelection} from 'antd/es/table/interface';
@@ -29,7 +29,7 @@ export default function AnnoLabelSetSelection(props: AnnoLabelSelectionProps){
     }, []);
 
     // define what the columns display.
-    const columns: {[key: string]: TableColumnProps<AnnoLabelSet>} = {
+    const columns: {[key: string]: TableColumnProps<AnnoEntitySet>} = {
         name: {
             title: 'Name',
             dataIndex: 'name',
@@ -45,7 +45,7 @@ export default function AnnoLabelSetSelection(props: AnnoLabelSelectionProps){
                     record.labels.map(label => {
                         return (
                             <Tag color={label.color} key={label.type}>
-                                {label.type.toUpperCase()}
+                                {label.type}
                             </Tag>
                         );
                     })}
@@ -55,7 +55,7 @@ export default function AnnoLabelSetSelection(props: AnnoLabelSelectionProps){
     }
 
     // the selection process for a row. Only select one at a time.
-    const rowSelection = (): TableRowSelection<AnnoLabelSet> | undefined => {
+    const rowSelection = (): TableRowSelection<AnnoEntitySet> | undefined => {
         if(!props.showSelection) {
             return undefined;
         }

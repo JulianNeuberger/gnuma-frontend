@@ -7,7 +7,7 @@ import {TableRowSelection} from 'antd/es/table/interface';
 import {DeleteOutlined, EditOutlined} from '@ant-design/icons';
 
 import {AnnoProject} from '../../state/anno/annoProjectReducer';
-import {AnnoLabelSet} from '../../state/anno/annoLabelSetReducer';
+import {AnnoEntitySet} from '../../state/anno/annoEntitySetReducer';
 
 import AnnoLabelSetTags from '../../components/AnnoLabelSetTags/AnnoLabelSetTags';
 import AnnoRelationSetTags from '../../components/AnnoRelationSetTags/AnnoRelationSetTags';
@@ -23,7 +23,6 @@ type AnnoProjectColumn = 'name' | 'date' | 'creator' | 'labelSet' | 'relationSet
 // project meta data.
 export type MetaData = {
     name: string;
-    creator: string;
     [key: string]: any;
 }
 
@@ -46,13 +45,12 @@ export default function AnnoProjectList(props: AnnoProjectListProps){
     const [modalVisible, setModalVisible] = React.useState(false);
     const [projectId, setProjectId] = React.useState<string>();
     const [metaData, setMetaData] = React.useState<MetaData>({
-        name: '',
-        creator: ''
+        name: ''
     });
 
     // Reset the meta data
     const resetMetaData = () => {
-        setMetaData({name: '', creator: ''});
+        setMetaData({name: ''});
     }
 
     const onFieldsChanged = (changedFields: FieldData[], _: FieldData[]) => {
@@ -93,7 +91,7 @@ export default function AnnoProjectList(props: AnnoProjectListProps){
             key: 'creator'
         },
         labelSet: {
-            title: 'Label Set',
+            title: 'Entity Type Set',
             dataIndex: '',
             key: 'labelSet',
             render: (_, record) => {
@@ -104,7 +102,7 @@ export default function AnnoProjectList(props: AnnoProjectListProps){
             }
         },
         relationSet: {
-            title: 'Relation Set',
+            title: 'Relation Type Set',
             dataIndex: '',
             key: 'relationSet',
             render: (_, record) => {
@@ -144,7 +142,6 @@ export default function AnnoProjectList(props: AnnoProjectListProps){
                                 let newMetaData = {...metaData};
 
                                 newMetaData['name'] = record.name;
-                                newMetaData['creator'] = record.creator;
 
                                 setMetaData(newMetaData);
 
@@ -223,16 +220,6 @@ export default function AnnoProjectList(props: AnnoProjectListProps){
                             <Input
                                 type={'text'}
                                 defaultValue={metaData['name']}
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label = {'Created by'}
-                            name = {'creator'}
-                            required = {true}
-                        >
-                            <Input
-                                type={'text'}
-                                defaultValue={metaData['creator']}
                             />
                         </Form.Item>
                     </Form>

@@ -48,7 +48,9 @@ export default function AnnoProjectView(){
     // execute adding documents to the project
     const executeAdd = async() => {
         for (const ele of documents) {
-            await documentContext.onCreate(projectId, ele);
+            if (projectContext.state.elements[projectId].documents.indexOf(ele) === -1) {
+                await documentContext.onCreate(projectId, ele);
+            }
         }
 
         cancelAdd();
@@ -115,7 +117,7 @@ export default function AnnoProjectView(){
                                     setDocuments(docs);
                                 } 
                             }
-                            visibleColumns = {['text', 'domain']}
+                            visibleColumns = {['name', 'domain']}
                         />
                     </div>
                 </Modal>

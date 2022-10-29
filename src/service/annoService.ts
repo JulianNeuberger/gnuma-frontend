@@ -3,7 +3,7 @@ import assert from 'assert';
 import {apiUrlBuilder, checkResponse} from './common';
 import {AnnoProject, UnPersistedAnnoProject} from  '../state/anno/annoProjectReducer';
 import {AnnoDocument} from '../state/anno/annoDocumentReducer';
-import {AnnoLabelSet, UnPersistedAnnoLabelSet} from '../state/anno/annoLabelSetReducer'
+import {AnnoEntitySet, UnPersistedAnnoEntitySet} from '../state/anno/annoEntitySetReducer'
 import {AnnoRelationSet, UnPersistedAnnoRelationSet} from '../state/anno/annoRelationSetReducer'
 import {getUserIdCookie} from "../views/AnnoView";
 
@@ -121,8 +121,8 @@ export const deleteAnnoDocument = async (projectId: string, docId: string): Prom
 }
 
 // Get list of all label sets.
-export const getAllAnnoLabelSets = async (): Promise<AnnoLabelSet[]> => {
-    const response = await fetch(getApiUrl('labels'));
+export const getAllAnnoEntitySets = async (): Promise<AnnoEntitySet[]> => {
+    const response = await fetch(getApiUrl('entities'));
     checkResponse(response);
     return await response.json();
 }
@@ -154,8 +154,8 @@ export const gimmeAnnoDocument = async (projectId: string, docId: string, userId
 }
 
 // Create a new label set.
-export const createAnnoLabelSet = async (labelSet: UnPersistedAnnoLabelSet): Promise<AnnoLabelSet> => {
-    const endpoint = getApiUrl('labels');
+export const createAnnoEntitySet = async (labelSet: UnPersistedAnnoEntitySet): Promise<AnnoEntitySet> => {
+    const endpoint = getApiUrl('entities');
     const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -166,12 +166,12 @@ export const createAnnoLabelSet = async (labelSet: UnPersistedAnnoLabelSet): Pro
     checkResponse(response);
 
     const data = await response.json();
-    return getSingleAnnoLabelSet(data);
+    return getSingleAnnoEntitySet(data);
 }
 
 // Get single lable set.
-export const getSingleAnnoLabelSet = async (labelSetId: string): Promise<AnnoLabelSet> => {
-    const endpoint = getApiUrl(`labels/${labelSetId}`);
+export const getSingleAnnoEntitySet = async (entitySetId: string): Promise<AnnoEntitySet> => {
+    const endpoint = getApiUrl(`entities/${entitySetId}`);
     const response = await fetch(endpoint);
     checkResponse(response);
     return await response.json();

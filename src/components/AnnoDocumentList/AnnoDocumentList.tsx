@@ -11,7 +11,7 @@ import {DocumentsContext} from '../DocumentsContextProvider/DocumentsContextProv
 
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
-type AnnoDocumentColumn = 'name' | 'labelled' | 'labelledBy' | 'actions';
+type AnnoDocumentColumn = 'name' | 'labelled' | 'labelledBy' | 'actions' | 'ner' | 'rel';
 
 
 // props for the list.
@@ -36,7 +36,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
 
 
     // visible columns in the list.
-    const visibleColumns = props.visibleColumns || ['name', 'labelled', 'labelledBy'];
+    const visibleColumns = props.visibleColumns || ['name', 'labelled', 'labelledBy', 'ner', 'rel'];
     if (props.showActions) {
         visibleColumns.push('actions');
     }
@@ -50,7 +50,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
     // Define how the document columns are displayed in the list.
     const columns: { [key: string]: TableColumnProps<AnnoDocument>} = {
         name: {
-            title: 'name',
+            title: 'Name',
             dataIndex: '',
             key: 'name',
             render: (_, record) => {
@@ -76,7 +76,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
             }
         },
         labelled: {
-            title: 'labelled',
+            title: 'Labelled',
             dataIndex: '',
             key: 'labelled',
             render: (_, record) => {
@@ -87,7 +87,7 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
             }
         },
         labelledBy: {
-            title: 'labelled by',
+            title: 'Labelled by',
             dataIndex: '',
             key: 'labelled',
             render: (_, record) => {
@@ -102,6 +102,36 @@ export default function AnnoDocumentList(props: AnnoDocumentListProps) {
                     return(str);
                 }
                 return('');
+            }
+        },
+        ner:{
+            title: 'NER F1-Score',
+            dataIndex: '',
+            key: 'ner',
+            render: (_, record) => {
+                if (!record.labelled || record.aiStats === undefined || record.aiStats.ner_f1 < 0){
+                    return(<></>);
+                }
+                return(
+                    <span>
+                        {record.aiStats.ner_f1.toFixed(2) + '%'}
+                    </span>
+                );
+            }
+        },
+        rel:{
+            title: 'RE F1-Score',
+            dataIndex: '',
+            key: 'rel',
+            render: (_, record) => {
+                if (!record.labelled || record.aiStats === undefined || record.aiStats.rel_f1 < 0){
+                    return(<></>);
+                }
+                return(
+                    <span>
+                        {record.aiStats.rel_f1.toFixed(2) + '%'}
+                    </span>
+                );
             }
         },
         actions: {

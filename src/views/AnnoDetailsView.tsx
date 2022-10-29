@@ -81,6 +81,8 @@ export default function AnnoDetailsView(){
 
     //if this works im sad
     const [halp, sendHalp] = React.useState<boolean>(true);
+    const [halp2, sendHalp2] = React.useState<boolean>(true);
+    const [halp3, sendHalp3] = React.useState<boolean>(true);
 
     const [userId, setUserId] = React.useState<string>(getUserIdCookie());
 
@@ -96,6 +98,15 @@ export default function AnnoDetailsView(){
         documentContext.onFetchOne(docId);
         projectContext.onFetchOne(projectId);
         annoDocumentContext.onFetchOne(projectId, docId, userId);
+    }, []);
+
+    React.useEffect(() => {
+        if (halp2 || halp3){
+            const interval = setInterval(() => {
+                annoDocumentContext.onFetchOne(projectId, docId, userId);
+            }, 5000);
+            return () => clearInterval(interval);
+        }
     }, []);
 
     // check if data got loaded
@@ -114,6 +125,9 @@ export default function AnnoDetailsView(){
             'entities': newEntities,
             'sentenceEntities': newSentenceEntities,
             'relations': newRelations,
+            'recEntities': newRecEntities,
+            'recSentenceEntities': newRecSentenceEntities,
+            'recRelations': newRecRelations,
             'labelled': labelled
         }
 
@@ -122,12 +136,7 @@ export default function AnnoDetailsView(){
     }
 
     // Updates the history and current states
-    const updateHistory = (newEntities: EntityDict, newSentenceEntities: string[][], newRelations: RelationDict, newRecEntities: RecEntityDict, newRecSentenceEntities: string [][], newRecRelations: RecRelationDict) => {
-        let update = true;
-        if (history.length === 0) {
-            update = false;
-        }
-
+    const updateHistory = (newEntities: EntityDict, newSentenceEntities: string[][], newRelations: RelationDict, newRecEntities: RecEntityDict, newRecSentenceEntities: string [][], newRecRelations: RecRelationDict, update: boolean = true) => {
         //prevent undefined entities/ relations
         if (newEntities === undefined) {
             newEntities = {};
@@ -147,6 +156,7 @@ export default function AnnoDetailsView(){
         //Current State is the newest state
         if (currentState === history.length - 1) {
             //Remove the oldest element if history is full
+            // change number here for longer history
             if (newHistory.length === 10) {
                 newHistory.shift();
             }
@@ -183,11 +193,14 @@ export default function AnnoDetailsView(){
         if (update) {
             sendUpdate(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations, false);
         }
+
+        // force visual update cause im bad at react
+        forceUpdate();
     }
 
     // This is why i hate react ...
     // Prevents infinite loop....
-    if (halp && Object.keys(recEntities).length === 0 && Object.keys(annoDoc.recEntities).length > 0) {
+    if (halp) {
         sendHalp(false);
 
         let newSentenceEntities: string[][] = [];
@@ -202,30 +215,95 @@ export default function AnnoDetailsView(){
         let newRecEntities = {};
         let newRecRelations = {};
 
-        // load relations
-        if (annoDoc.relations !== undefined && Object.keys(relations).length === 0 && Object.keys(annoDoc.relations).length > 0) {
-            newRelations = annoDoc.relations;
+        // only update with labels if the anno doc corresponds to current user and project.
+        if (annoDoc.projectId === projectId && annoDoc.userId === userId) {
+            // load relations
+            if (annoDoc.relations !== undefined && Object.keys(relations).length === 0 && Object.keys(annoDoc.relations).length > 0) {
+                newRelations = annoDoc.relations;
+            }
+
+            // load entities
+            if (annoDoc.entities !== undefined && sentenceEntities.length === 0 && Object.keys(entities).length === 0 && Object.keys(annoDoc.entities).length > 0) {
+                newEntities = annoDoc.entities;
+                newSentenceEntities = annoDoc.sentenceEntities;
+            }
+
+            // load rec relations
+            if (annoDoc.recRelations !== undefined && Object.keys(recRelations).length === 0 && Object.keys(annoDoc.recRelations).length > 0) {
+                newRecRelations = annoDoc.recRelations;
+            }
+
+            // load rec entities
+            if (annoDoc.recEntities !== undefined && recSentenceEntities.length === 0 && Object.keys(recEntities).length === 0 && Object.keys(annoDoc.recEntities).length > 0) {
+                newRecEntities = annoDoc.recEntities;
+                newRecSentenceEntities = annoDoc.recSentenceEntities;
+            }
         }
 
-        // load entities
-        if (annoDoc.entities !== undefined && sentenceEntities.length === 0 && Object.keys(entities).length === 0 && Object.keys(annoDoc.entities).length > 0) {
-            newEntities = annoDoc.entities;
-            newSentenceEntities = annoDoc.sentenceEntities;
-        }
+        updateHistory(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations, false);
+    }
 
-        // load rec relations
-        if (annoDoc.recRelations !== undefined && Object.keys(recRelations).length === 0 && Object.keys(annoDoc.recRelations).length > 0) {
-            newRecRelations = annoDoc.recRelations;
-        }
-
+    if (halp2) {
         // load rec entities
-        if (annoDoc.recEntities !== undefined && recSentenceEntities.length === 0 && Object.keys(recEntities).length === 0 && Object.keys(annoDoc.recEntities).length > 0) {
-            newRecEntities = annoDoc.recEntities;
-            newRecSentenceEntities = annoDoc.recSentenceEntities;
-        }
+        if (annoDoc.recEntities !== undefined && Object.keys(recEntities).length === 0 && Object.keys(annoDoc.recEntities).length > 0) {
+            sendHalp2(false);
+            // only update with labels if the anno doc corresponds to current user and project.
+            if (annoDoc.projectId === projectId && annoDoc.userId === userId) {
 
-        updateHistory(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations);
-        forceUpdate();
+                let newRecEntities = recEntities;
+                let newRecSentenceEntities = recSentenceEntities;
+                let newRecRelations = recRelations
+
+                newRecEntities = annoDoc.recEntities;
+                newRecSentenceEntities = annoDoc.recSentenceEntities;
+
+                // load rec relations
+                if (annoDoc.recRelations !== undefined && Object.keys(recRelations).length === 0 && Object.keys(annoDoc.recRelations).length > 0) {
+                    newRecRelations = annoDoc.recRelations;
+                }
+
+                updateHistory(entities, sentenceEntities, relations, newRecEntities, newRecSentenceEntities, newRecRelations, false);
+            }
+        }
+    }
+
+    // label update
+    if (halp3) {
+        // load rec entities
+        if (annoDoc.entities !== undefined && Object.keys(entities).length < Object.keys(annoDoc.entities).length) {
+            // only update with labels if the anno doc corresponds to current user and project.
+            if (annoDoc.projectId === projectId && annoDoc.userId === userId) {
+                sendHalp3(false);
+
+                let newEntities = entities;
+                let newSentenceEntities = sentenceEntities;
+                let newRelations = relations
+                let newRecEntities = recEntities;
+                let newRecSentenceEntities = recSentenceEntities;
+                let newRecRelations = recRelations
+
+                newEntities = annoDoc.entities;
+                newSentenceEntities = annoDoc.sentenceEntities;
+
+                // load rec relations
+                if (annoDoc.relations !== undefined) {
+                    newRelations = annoDoc.relations;
+                }
+
+                // load rec relations
+                if (annoDoc.recRelations !== undefined && Object.keys(recRelations).length === 0 && Object.keys(annoDoc.recRelations).length > 0) {
+                    newRecRelations = annoDoc.recRelations;
+                }
+
+                // load rec entities
+                if (annoDoc.recEntities !== undefined && Object.keys(recEntities).length === 0 && Object.keys(annoDoc.recEntities).length > 0) {
+                    newRecEntities = annoDoc.recEntities;
+                    newRecSentenceEntities = annoDoc.recSentenceEntities;
+                }
+
+                updateHistory(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations, false);
+            }
+        }
     }
 
     // Handles the undo Operation
@@ -431,8 +509,10 @@ export default function AnnoDetailsView(){
             }
 
             // Remove from recs
+            console.log(newRecSentenceEntities)
+            newRecSentenceEntities[newRecEntities[id].sentenceIndex].splice(newRecSentenceEntities.indexOf(id), 1);
+            console.log(newRecSentenceEntities)
             delete newRecEntities[id];
-            newRecSentenceEntities.splice(newRecSentenceEntities.indexOf(id), 1);
 
             updateHistory(entities, sentenceEntities, relations, newRecEntities, newRecSentenceEntities, newRecRelations);
         }
@@ -548,6 +628,52 @@ export default function AnnoDetailsView(){
         }
     }
 
+    // Accept all recommended entities and relations
+    const acceptAll = () => {
+        let newEntities = JSON.parse(JSON.stringify(entities));
+        let newSentenceEntities = JSON.parse(JSON.stringify(sentenceEntities));
+        let newRelations = JSON.parse(JSON.stringify(relations));
+
+        // entities
+        for (let i = 0; i < Object.keys(recEntities).length; i++) {
+            let recEnt = recEntities[Object.keys(recEntities)[i]];
+            let ent: Entity = {
+                'id': recEnt.id,
+                'sentenceIndex': recEnt.sentenceIndex,
+                'start': recEnt.start,
+                'end': recEnt.end,
+                'type': recEnt.type,
+                'relations': recEnt.relations
+            };
+            newEntities[recEnt.id] = ent;
+        }
+
+        // sentence entities
+        let newRecSentenceEntities = []
+        for (let i = 0; i < newSentenceEntities.length; i++) {
+            console.log(i)
+            console.log(recSentenceEntities)
+            console.log(newSentenceEntities)
+            newSentenceEntities[i].push(...recSentenceEntities[i]);
+            newRecSentenceEntities.push([]);
+        }
+
+        // relations
+        for (let i = 0; i < Object.keys(recRelations).length; i++) {
+            let recRel = recRelations[Object.keys(recRelations)[i]];
+            let newRel: Relation = {
+                'id': recRel.id,
+                'head': recRel.head,
+                'tail': recRel.tail,
+                'type': recRel.type
+            };
+            newRelations[recRel.id] = newRel;
+        }
+
+        // update
+        updateHistory(newEntities, newSentenceEntities, newRelations, {}, newRecSentenceEntities, {})
+    }
+
     // Returns the text of an entity
     const getEntityText = (id: string) => {
         let entity = entities[id];
@@ -583,10 +709,7 @@ export default function AnnoDetailsView(){
                 extra = {
                     <Space>
                         <Button
-                            onClick={() => {
-
-                                //updateHistory({}, newSentenceEntities, {}, recEntities, recSentenceEntities, recRelations);
-                            }}
+                            onClick={acceptAll}
                         >
                             Accept all
                         </Button>

@@ -43,6 +43,11 @@ export type RelationDict = {
     [key: string]: Relation;
 }
 
+export type AiStats = {
+    ner_f1: number;
+    rel_f1: number;
+}
+
 // Recommended Relation; own class so specific funcionality might be added later e.g. the confidence of the ai
 export  type RecRelation = {
     id: string;
@@ -66,6 +71,9 @@ export type AnnoDocument = {
     recEntities: EntityDict;
     recSentenceEntities: string[][];
     recRelations: RelationDict;
+    aiStats: AiStats;
+    projectId: string;
+    userId: string;
 }
 
 export const initialAnnoDocumentState: GenericPayloadState<AnnoDocument> = {

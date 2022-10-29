@@ -15,7 +15,7 @@ import AnnoRelationSetSelection from '../components/AnnoRelationSetSelection/Ann
 import AnnoRelationSetCreation from '../components/AnnoRelationSetCreation/AnnoRelationSetCreation'
 
 
-import {AnnoLabel} from '../state/anno/annoLabelSetReducer'
+import {AnnoEntity} from '../state/anno/annoEntitySetReducer'
 import {AnnoRelationType} from '../state/anno/annoRelationSetReducer'
 
 // Set a cookie with the userId so it does not have to be entered every time
@@ -99,6 +99,8 @@ export default function AnnoView(){
         let newMetaData = {...metaData};
         newMetaData['date'] = date;
 
+        newMetaData['creator'] = userId
+
         await projectContext.onCreate(newMetaData);
 
         cancelCreate();
@@ -164,24 +166,12 @@ export default function AnnoView(){
                             defaultValue={metaData['name']}
                         />
                     </Form.Item>
-                    <Form.Item
-                        label={'Created by'}
-                        name={'creator'}
-                        required={true}
-                    >
-                        <Input 
-                            type='text' 
-                            placeholder='Your name' 
-                            value={metaData['creator']}
-                            defaultValue={metaData['name']}
-                        />
-                    </Form.Item>
                 </Form>
                 ),
-            action: (<Button onClick={nextStep} type={'primary'} disabled={!metaData['name'] || !metaData['creator']}>Next</Button>)
+            action: (<Button onClick={nextStep} type={'primary'} disabled={!metaData['name']}>Next</Button>)
         },
         {
-            title: 'Choose Label Set',
+            title: 'Choose Entity Type Set',
             content: (
                 <AnnoLabelSetSelection 
                     showSelection={true}
@@ -200,7 +190,7 @@ export default function AnnoView(){
                 </>)
         },
         {
-            title: 'Choose Relation Set',
+            title: 'Choose Relation Type Set',
             content: (
                 <AnnoRelationSetSelection 
                     showSelection={true}

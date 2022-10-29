@@ -58,7 +58,7 @@ export default function AnnoRelation(props: AnnoRelationProps){
             <span>
                 <Space
                     size={40}
-                    style={{...getRelStyle(), 'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}
+                    style={{...getRelStyle(), 'fontSize': 22, 'lineHeight': 1.2, 'userSelect': 'none', 'width': '350px'}}
                     onClick={() => {props.selectRecRelation(props.rel.id)}}
                 >
                     <span
