@@ -200,6 +200,7 @@ export default function AnnoDetailsView(){
 
     // This is why i hate react ...
     // Prevents infinite loop....
+    // used to set initial empty entity and relations dicts/arrays
     if (halp) {
         sendHalp(false);
 
@@ -215,40 +216,17 @@ export default function AnnoDetailsView(){
         let newRecEntities = {};
         let newRecRelations = {};
 
-        // only update with labels if the anno doc corresponds to current user and project.
-        if (annoDoc.projectId === projectId && annoDoc.userId === userId) {
-            // load relations
-            if (annoDoc.relations !== undefined && Object.keys(relations).length === 0 && Object.keys(annoDoc.relations).length > 0) {
-                newRelations = annoDoc.relations;
-            }
-
-            // load entities
-            if (annoDoc.entities !== undefined && sentenceEntities.length === 0 && Object.keys(entities).length === 0 && Object.keys(annoDoc.entities).length > 0) {
-                newEntities = annoDoc.entities;
-                newSentenceEntities = annoDoc.sentenceEntities;
-            }
-
-            // load rec relations
-            if (annoDoc.recRelations !== undefined && Object.keys(recRelations).length === 0 && Object.keys(annoDoc.recRelations).length > 0) {
-                newRecRelations = annoDoc.recRelations;
-            }
-
-            // load rec entities
-            if (annoDoc.recEntities !== undefined && recSentenceEntities.length === 0 && Object.keys(recEntities).length === 0 && Object.keys(annoDoc.recEntities).length > 0) {
-                newRecEntities = annoDoc.recEntities;
-                newRecSentenceEntities = annoDoc.recSentenceEntities;
-            }
-        }
-
         updateHistory(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations, false);
     }
 
+    // check for new recommendation updates if no recommendations exist
     if (halp2) {
         // load rec entities
         if (annoDoc.recEntities !== undefined && Object.keys(recEntities).length === 0 && Object.keys(annoDoc.recEntities).length > 0) {
-            sendHalp2(false);
             // only update with labels if the anno doc corresponds to current user and project.
             if (annoDoc.projectId === projectId && annoDoc.userId === userId) {
+                sendHalp2(false);
+                sendHalp3(false);
 
                 let newRecEntities = recEntities;
                 let newRecSentenceEntities = recSentenceEntities;
@@ -267,7 +245,7 @@ export default function AnnoDetailsView(){
         }
     }
 
-    // label update
+    // look for existing labels (and recommendation)
     if (halp3) {
         // load rec entities
         if (annoDoc.entities !== undefined && Object.keys(entities).length < Object.keys(annoDoc.entities).length) {
@@ -299,6 +277,7 @@ export default function AnnoDetailsView(){
                 if (annoDoc.recEntities !== undefined && Object.keys(recEntities).length === 0 && Object.keys(annoDoc.recEntities).length > 0) {
                     newRecEntities = annoDoc.recEntities;
                     newRecSentenceEntities = annoDoc.recSentenceEntities;
+                    sendHalp2(false);
                 }
 
                 updateHistory(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations, false);
@@ -383,6 +362,7 @@ export default function AnnoDetailsView(){
         let newEntities = JSON.parse(JSON.stringify(entities));
         let newSentenceEntities = JSON.parse(JSON.stringify(sentenceEntities));
         let newRelations = JSON.parse(JSON.stringify(relations));
+        let newRecRelations = JSON.parse(JSON.stringify(recRelations));
 
         for (let h = 0; h < ids.length; h++) {
             let id = ids[h];
@@ -399,6 +379,14 @@ export default function AnnoDetailsView(){
                 }
             }
 
+            // remove rec relation. Could add a recrelations save to enity in the future to make this cleaner
+            for (let i = 0; i < Object.keys(newRecRelations).length; i++){
+                let rec_rel = newRecRelations[Object.keys(newRecRelations)[i]];
+                if (rec_rel.head === id || rec_rel.tail === id) {
+                    delete newRecRelations[Object.keys(newRecRelations)[i]];
+                }
+            }
+
             //remove from sentence list
             newSentenceEntities[entities[id].sentenceIndex].splice(newSentenceEntities[entities[id].sentenceIndex].indexOf(id), 1);
 
@@ -406,7 +394,7 @@ export default function AnnoDetailsView(){
             delete newEntities[id];
         }
 
-        updateHistory(newEntities, newSentenceEntities, newRelations, recEntities, recSentenceEntities, recRelations);
+        updateHistory(newEntities, newSentenceEntities, newRelations, recEntities, recSentenceEntities, newRecRelations);
     }
 
     // Add a relation
@@ -505,12 +493,22 @@ export default function AnnoDetailsView(){
 
             //remove rec relations
             for (let i = 0; i < newRecEntities[id].relations.length; i++) {
+                //remove from entities
+                let rec_rel = newRecRelations[newRecEntities[id].relations[i]];
+                if (rec_rel.head !== id && Object.keys(newRecEntities).includes(rec_rel.head)){
+                    newRecEntities[rec_rel.head].relations.splice(newRecEntities[rec_rel.head].relations.indexOf(rec_rel.id), 1)
+                }
+                if (rec_rel.tail !== id && Object.keys(newRecEntities).includes(rec_rel.tail)){
+                    newRecEntities[rec_rel.tail].relations.splice(newRecEntities[rec_rel.tail].relations.indexOf(rec_rel.id), 1)
+                }
+
+                // remove rec rel
                 delete newRecRelations[newRecEntities[id].relations[i]]
             }
 
             // Remove from recs
             console.log(newRecSentenceEntities)
-            newRecSentenceEntities[newRecEntities[id].sentenceIndex].splice(newRecSentenceEntities.indexOf(id), 1);
+            newRecSentenceEntities[newRecEntities[id].sentenceIndex].splice(newRecSentenceEntities[newRecEntities[id].sentenceIndex].indexOf(id), 1);
             console.log(newRecSentenceEntities)
             delete newRecEntities[id];
 
@@ -549,10 +547,10 @@ export default function AnnoDetailsView(){
 
                 // Remove from recs
                 delete newRecEntities[recRel.head];
-                newRecSentenceEntities[ent.sentenceIndex].splice(newRecSentenceEntities.indexOf(recRel.head), 1);
+                newRecSentenceEntities[ent.sentenceIndex].splice(newRecSentenceEntities[ent.sentenceIndex].indexOf(recRel.head), 1);
             } else if (Object.keys(newEntities).includes(recRel.head)){
                 // Add rel to entity
-                newSentenceEntities[newEntities[recRel.head].sentenceIndex].push(recRel.head);
+                newEntities[recRel.head].relations.push(recRel.id);
             }
 
             // Accept tail entity if recommended
@@ -573,10 +571,10 @@ export default function AnnoDetailsView(){
 
                 // Remove from recs
                 delete newRecEntities[recRel.tail];
-                newRecSentenceEntities[ent.sentenceIndex].splice(newRecSentenceEntities.indexOf(recRel.tail), 1);
+                newRecSentenceEntities[ent.sentenceIndex].splice(newRecSentenceEntities[ent.sentenceIndex].indexOf(recRel.tail), 1);
             } else if (Object.keys(newEntities).includes(recRel.tail)){
                 // Add rel to entity
-                newSentenceEntities[newEntities[recRel.tail].sentenceIndex].push(recRel.tail);
+                newEntities[recRel.tail].relations.push(recRel.id);
             }
 
             // different type?
