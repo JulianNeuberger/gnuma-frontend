@@ -28,8 +28,8 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "env-cmd -e development react-scripts start --host 0.0.0.0",
-    "build": "env-cmd -e production react-scripts build",
+    "start": "env-cmd -e development react-scripts --openssl-legacy-provider start --host 0.0.0.0",
+    "build": "env-cmd -e production react-scripts --openssl-legacy-provider build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

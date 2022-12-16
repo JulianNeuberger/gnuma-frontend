@@ -789,7 +789,7 @@ export default function AnnoDetailsView(){
 
                     <Layout.Sider
                         style={{backgroundColor: 'white', color: 'black'}}
-                        width={500}
+                        width={'33%'}
                     >
                         <Row>
                             <Col flex={'20px'}></Col>
