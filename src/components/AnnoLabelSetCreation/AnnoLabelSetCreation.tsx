@@ -1,9 +1,10 @@
 import React from 'react'
 
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
-import {UnPersistedAnnoEntitySet, AnnoEntity} from '../../state/anno/annoEntitySetReducer'
+import {UnPersistedAnnoEntitySet, AnnoEntity, AnnoColor} from '../../state/anno/annoEntitySetReducer'
 
 import {Form, Input, Divider, Button, Tag, Modal} from 'antd'
+import {getButtonStyle, getRandomColor} from "../../util/AnnoUtil/anno_util";
 
 // Props for defining a new label set
 export type AnnoLabelSetCreationProps = {
@@ -22,19 +23,16 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
     const [state, setState] = React.useState<any>();
     const [labelName, setLabelName] = React.useState<string>('');
     const [labels, setLabels] = React.useState<AnnoEntity[]>([]);
-    const [colors, setColors] = React.useState<string[]>(['red', 'green', 'blue', 'yellow', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano']);
 
     // add new label to list
     const addLabel = () => {
-        let newColors = colors;
         let newLabels = labels;
 
         newLabels.push({
             'type': labelName,
-            'color': newColors.shift()!
+            'color': getRandomColor()
         })
 
-        setColors(newColors);
         setLabels(newLabels);
         setLabelName('');
     }
@@ -44,7 +42,6 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
         setName('');
         setLabelName('');
         setLabels([]);
-        setColors(['red', 'green', 'blue', 'yellow', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano'])
         props.setModalVisible(false);
     }
 
@@ -130,9 +127,9 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
                     {
                         labels.map(label => {
                             return (
-                                <Tag color={label.color} key={label.type}>
+                                <Button style={getButtonStyle(label.color)} key={label.type}>
                                     {label.type}
-                                </Tag>
+                                </Button>
                             );
                         })
                     }

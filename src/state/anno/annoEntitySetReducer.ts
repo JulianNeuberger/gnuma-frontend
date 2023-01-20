@@ -3,10 +3,17 @@ import {Reducer} from 'react';
 import {genericPayloadReducer, GenericPayloadState} from '../common/reducer';
 import {GenericPayloadActions} from '../common/actions';
 
+
+// Define color. Has main and background color.
+export type AnnoColor = {
+    main: string;
+    background: string;
+}
+
 // Define single label.
 export type AnnoEntity = {
     type: string;
-    color: string;
+    color: AnnoColor;
 }
 
 // Define label set.

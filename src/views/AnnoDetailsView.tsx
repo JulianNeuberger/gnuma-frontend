@@ -20,6 +20,8 @@ import {
     Relation,
     RelationDict
 } from "../state/anno/annoDocumentReducer";
+import {AnnoColor} from "../state/anno/annoEntitySetReducer";
+import AnnoRelationPicker from "../components/AnnoRelationPicker/AnnoRelationPicker";
 
 // document params
 type AnnoDetailsParams = {
@@ -36,7 +38,7 @@ export type TokenSpan = {
 
 // Color dict for label and relation
 export type ColorDict = {
-    [label: string]: string;
+    [label: string]: AnnoColor;
 }
 
 // HistoryElement for undo and redo
@@ -72,7 +74,7 @@ export default function AnnoDetailsView(){
 
     const [selectedEntities, setSelectedEntities] = React.useState<string[]>([]);
     const [selectedTokens, setSelectedTokens] = React.useState<TokenSpan[]>([]);
-    const [selectedRelations, setSelectedRelations] = React.useState<string[]>([]);
+    const [selectedRelation, setSelectedRelation] = React.useState<string>('');
     const [selectedRecRelation, setSelectedRecRelation] = React.useState<string>('');
 
     // rerender relation arrows
@@ -416,7 +418,7 @@ export default function AnnoDetailsView(){
         // clear selection
         setSelectedTokens([]);
         setSelectedEntities([]);
-        setSelectedRelations([]);
+        setSelectedRelation('');
 
         updateHistory(newEntities, sentenceEntities, newRelations, recEntities, recSentenceEntities, recRelations);
     }
@@ -429,7 +431,7 @@ export default function AnnoDetailsView(){
             newRelations[ids[i]].type = type;
         }
 
-        setSelectedRelations([]);
+        setSelectedRelation('');
         updateHistory(entities, sentenceEntities, newRelations, recEntities, recSentenceEntities, recRelations);
     }
 
@@ -447,7 +449,7 @@ export default function AnnoDetailsView(){
             delete newRelations[id];
         }
 
-        setSelectedRelations([]);
+        setSelectedRelation('');
 
         updateHistory(newEntities, sentenceEntities, newRelations, recEntities, recSentenceEntities, recRelations);
     }
@@ -805,8 +807,8 @@ export default function AnnoDetailsView(){
                                     removeRelation={removeRelation}
                                     selectedEntities={selectedEntities}
                                     setSelectedEntities={setSelectedEntities}
-                                    selectedRelations={selectedRelations}
-                                    setSelectedRelations={setSelectedRelations}
+                                    selectedRelation={selectedRelation}
+                                    setSelectedRelation={setSelectedRelation}
                                     entities={entities}
                                     labelSetId={project.labelSetId}
                                     getEntityText={getEntityText}

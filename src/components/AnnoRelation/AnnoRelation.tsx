@@ -17,9 +17,8 @@ type AnnoRelationProps = {
     getEntityText: (id: string) => string;
 
     selectRelation: (id: string) => void;
-    ctrlSelectRelation: (id: string) => void;
 
-    selectedRelations: string[];
+    selectedRelation: string;
 }
 
 // Display a relation
@@ -27,7 +26,7 @@ export default function AnnoRelation(props: AnnoRelationProps){
 
     const getRelStyle = () => {
         // check if selected
-        if (props.selectedRelations.includes(props.rel.id)) {
+        if (props.selectedRelation === props.rel.id) {
             return {'border': '1px solid black', 'background': '#d9d9d9'}
         }
 
@@ -57,11 +56,8 @@ export default function AnnoRelation(props: AnnoRelationProps){
             <span
                 onClick={(e) => {
                     // event based on click type
-                    if (e.ctrlKey) {
-                        props.ctrlSelectRelation(props.rel.id);
-                    } else {
-                        props.selectRelation(props.rel.id);
-                    }
+                    props.selectRelation(props.rel.id);
+
                 }}
             >
                 <Space

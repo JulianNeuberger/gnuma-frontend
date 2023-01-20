@@ -3,8 +3,9 @@ import React, {useContext, useEffect} from 'react';
 import {AnnoRelationSetContext} from '../../components/AnnoRelationSetContextProvider/AnnoRelationSetContextProvider'
 import {AnnoRelationSet} from '../../state/anno/annoRelationSetReducer'
 
-import {Table, Tag, TableColumnProps, Modal} from 'antd'
+import {Table, TableColumnProps, Button} from 'antd'
 import {TableRowSelection} from 'antd/es/table/interface';
+import {getButtonStyle} from "../../util/AnnoUtil/anno_util";
 
 // Props of the list
 export type AnnoRelationSetSelectionProps = {
@@ -42,9 +43,9 @@ export default function AnnoRelationSetSelection(props: AnnoRelationSetSelection
                 {
                     record.relationTypes.map(rel => {
                         return (
-                            <Tag color={rel.color} key={rel.type}>
+                            <Button style={getButtonStyle(rel.color)} key={rel.type}>
                                 {rel.type}
-                            </Tag>
+                            </Button>
                         );
                     })}
                 </>

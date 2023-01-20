@@ -1,8 +1,9 @@
 import React from 'react';
 
-import {Tag} from 'antd'
+import {Button} from 'antd'
 
 import {AnnoRelationSetContext} from '../../components/AnnoRelationSetContextProvider/AnnoRelationSetContextProvider';
+import {getButtonStyle} from "../../util/AnnoUtil/anno_util";
 
 // props
 export type AnnoRelationSetTagsProps = {
@@ -34,9 +35,9 @@ export default function AnnoRelationSetTags(props: AnnoRelationSetTagsProps){
             {
                 relationSetContext.state.elements[props.id].relationTypes.map(label => {
                     return (
-                        <Tag color={label.color} key={label.type}>
+                        <Button style={getButtonStyle(label.color)} key={label.type}>
                             {label.type}
-                        </Tag>
+                        </Button>
                     );
                 })
             }

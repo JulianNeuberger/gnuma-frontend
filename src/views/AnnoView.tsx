@@ -257,7 +257,7 @@ export default function AnnoView(){
                 <Modal
                     title={'Set UserId'}
                     width={600}
-                    visible={setUserIdVisible}
+                    visible={setUserIdVisible || userId === ''}
                     onCancel={() => {
                         setSetUserIdVisible(false);
                         setUserIdInput('');

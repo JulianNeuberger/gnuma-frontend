@@ -1,8 +1,9 @@
 import React from 'react';
 
-import {Tag} from 'antd'
+import {Button} from 'antd'
 
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider';
+import {getButtonStyle} from "../../util/AnnoUtil/anno_util";
 
 // Props
 export type AnnoLabelSetTagsProps = {
@@ -34,9 +35,9 @@ export default function AnnoLabelSetTags(props: AnnoLabelSetTagsProps){
             {
                 labelSetContext.state.elements[props.id].labels.map(label => {
                     return (
-                        <Tag color={label.color} key={label.type}>
+                        <Button style={getButtonStyle(label.color)} key={label.type}>
                             {label.type}
-                        </Tag>
+                        </Button>
                     );
                 })
             }

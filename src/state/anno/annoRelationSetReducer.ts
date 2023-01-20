@@ -2,11 +2,12 @@ import {Reducer} from 'react';
 
 import {genericPayloadReducer, GenericPayloadState} from '../common/reducer';
 import {GenericPayloadActions} from '../common/actions';
+import {AnnoColor} from "./annoEntitySetReducer";
 
 // single relation type
 export type AnnoRelationType = {
     type: string;
-    color: string;
+    color: AnnoColor;
 }
 
 // relation set type

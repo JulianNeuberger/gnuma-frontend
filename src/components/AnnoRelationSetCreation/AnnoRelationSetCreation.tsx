@@ -3,6 +3,7 @@ import {AnnoRelationSetContext} from '../../components/AnnoRelationSetContextPro
 import {UnPersistedAnnoRelationSet, AnnoRelationType} from '../../state/anno/annoRelationSetReducer'
 
 import {Form, Input, Divider, Button, Tag, Modal} from 'antd'
+import {getButtonStyle, getRandomColor} from "../../util/AnnoUtil/anno_util";
 
 // props for the creation
 export type AnnoRelationSetCreationProps = {
@@ -20,21 +21,20 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
     const [name, setName] = React.useState<string>('');
     const [relationName, setRelationName] = React.useState<string>('');
     const [relationTypes, setRelationTypes] = React.useState<AnnoRelationType[]>([]);
-    const [colors, setColors] = React.useState<string[]>(['red', 'green', 'blue', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano', 'yellow']);
 
     // Add a relation type to the state.
     const addRelationType = () => {
-        let newColors = colors;
-        let newRelationTypes = relationTypes;
+        if (relationName !== undefined && relationName !== '') {
+            let newRelationTypes = relationTypes;
 
-        newRelationTypes.push({
-            'type': relationName,
-            'color': newColors.shift()!
-        })
+            newRelationTypes.push({
+                'type': relationName,
+                'color': getRandomColor()
+            })
 
-        setColors(newColors);
-        setRelationTypes(newRelationTypes);
-        setRelationName('');
+            setRelationTypes(newRelationTypes);
+            setRelationName('');
+        }
     }
 
     // cancel the creation
@@ -42,7 +42,6 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
         setName('');
         setRelationName('');
         setRelationTypes([]);
-        setColors(['red', 'green', 'blue', 'magenta', 'orange', 'cyan', 'purple', 'lime', 'greekblue', 'gold', 'volcano', 'yellow'])
         props.setModalVisible(false);
     }
 
@@ -126,9 +125,9 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
                     {
                         relationTypes.map(rel => {
                             return (
-                                <Tag color={rel.color} key={rel.type}>
+                                <Button style={getButtonStyle(rel.color)} key={rel.type}>
                                     {rel.type}
-                                </Tag>
+                                </Button>
                             );
                         })
                     }

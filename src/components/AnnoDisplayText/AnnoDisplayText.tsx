@@ -1,7 +1,6 @@
 import React from 'react';
 
-import {Layout, Button, Space} from 'antd';
-import {presetPalettes} from '@ant-design/colors';
+import {Button} from 'antd';
 
 import {DocumentsContext} from '../../components/DocumentsContextProvider/DocumentsContextProvider'
 import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
@@ -12,6 +11,7 @@ import {Entity, EntityDict, RecEntityDict} from "../../state/anno/annoDocumentRe
 import {ColorDict, TokenSpan} from "../../views/AnnoDetailsView";
 import AnnoToken from "../AnnoToken/AnnoToken";
 import {v4 as uuidv4} from "uuid";
+import {getButtonStyle} from "../../util/AnnoUtil/anno_util";
 
 
 // Props containing everything needed for displaying the text and its labels.
@@ -192,14 +192,14 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
             if (selected === true) {
                 return ({
-                    'color': presetPalettes[col][1],
-                    'background': presetPalettes[col][7]
+                    'color': col.background,
+                    'background': col.main
                 });
             }
 
             return ({
-                'color': presetPalettes[col][7],
-                'background': presetPalettes[col][1]
+                'color': col.main,
+                'background': col.background
             });
         }
         console.log(type + ' sadge');
@@ -214,9 +214,9 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         }
         return (
             <span>
-                    {' '}
+                {' '}
                 {getAnnoTokenSecret(sentenceIndex, start, end, text, selected)}
-                </span>
+            </span>
         );
     }
 
@@ -277,7 +277,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
     const display = (xxx: EntityDict, yyy: string[][], aaa: RecEntityDict, bbb: string[][]) => {
         return(
             <div
-                style={{'overflowY': 'auto', 'height': '650px'}}
+                style={{'overflowY': 'auto', 'height': '600px'}}
                 onScroll={() => {props.forceUpdate()}}
             >
                 {
@@ -396,18 +396,6 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         props.setSelectedTokens([]);
     }
 
-    // Get the style of a label button
-    const getButtonStyle = (color: string, label: string) => {
-        return (
-            {
-                'color': presetPalettes[color][7],
-                'background': presetPalettes[color][1],
-                'borderColor': presetPalettes[color][3],
-                'margin': '5px'
-            }
-        );
-    }
-
     // Displays text and the labeling buttons.
     return (
         <div
@@ -416,20 +404,16 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             <div
                 style={{'margin': '10px', 'background': '#EFF0EF'}}
             >
-                <Button
-                    style={getButtonStyle('grey', 'O')}
-                    key={'RESET'}
-                    onClick={ () => {
-                        updateLabels('O');
-                    }}
+                <span
+                    style={{fontWeight: 'bold'}}
                 >
-                    {'NO LABEL'}
-                </Button>
+                    Enitiy Types:
+                </span>
                 {
                     labelSet.labels.map(label => {
                         return (
                             <Button
-                                style={getButtonStyle(label.color, label.type)}
+                                style={getButtonStyle(label.color)}
                                 key={label.type}
                                 onClick={ () => {
                                     updateLabels(label.type);
@@ -441,6 +425,18 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                         );
                     })
                 }
+                <Button
+                    style={getButtonStyle({
+                        main: '#4D4D4D',
+                        background: '#B3B3B3'
+                    })}
+                    key={'RESET'}
+                    onClick={ () => {
+                        updateLabels('O');
+                    }}
+                >
+                    {'REMOVE'}
+                </Button>
             </div>
             <div
                 style={{'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}

@@ -5,11 +5,9 @@ import {Relation} from "../../state/anno/annoDocumentReducer";
 type AnnoRelationArrowProps = {
     rel: Relation;
     color: string;
-
     selectRelation: (id: string) => void;
-    ctrlSelectRelation: (id: string) => void;
-
-    selectedRelations: string[];
+    selectedRelation: string;
+    selectedEntities: string[];
 }
 
 // Return the arrow of a relation from one span to another.
@@ -17,8 +15,8 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
 
     // bigger if seleceted
     const getStrokeWidth = () => {
-        if (props.selectedRelations.includes(props.rel.id)) {
-            return 4;
+        if (props.selectedEntities.includes(props.rel.head) || props.selectedEntities.includes(props.rel.tail)) {
+            return 5;
         }
         return 2;
     }
