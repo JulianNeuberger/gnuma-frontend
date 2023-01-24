@@ -4,6 +4,8 @@ import {UnPersistedAnnoRelationSet, AnnoRelationType} from '../../state/anno/ann
 
 import {Form, Input, Divider, Button, Tag, Modal} from 'antd'
 import {getButtonStyle, getRandomColor} from "../../util/AnnoUtil/anno_util";
+import AnnoColorPicker from "../AnnoColorPicker/AnnoColorPicker";
+import {AnnoColor, AnnoEntity} from "../../state/anno/annoEntitySetReducer";
 
 // props for the creation
 export type AnnoRelationSetCreationProps = {
@@ -21,6 +23,24 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
     const [name, setName] = React.useState<string>('');
     const [relationName, setRelationName] = React.useState<string>('');
     const [relationTypes, setRelationTypes] = React.useState<AnnoRelationType[]>([]);
+
+    //states for modal
+    const [pickerType, setPickerType] = React.useState<string>('');
+    const [pickerColor, setPickerColor] = React.useState<AnnoColor>({main: '#FFFFFF', background: '#FFFFFF'});
+
+    const setLabelColor = (type: string, color: AnnoColor) => {
+        let newLabels: AnnoEntity[] = [];
+
+        relationTypes.map((ent) => {
+            if (ent.type === type) {
+                newLabels.push({type: type, color: color})
+            } else {
+                newLabels.push(ent)
+            }
+        })
+
+        setRelationTypes(newLabels);
+    }
 
     // Add a relation type to the state.
     const addRelationType = () => {
@@ -69,6 +89,7 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
 
     // Return the creation modal.
     return (
+        <>
         <Modal
             title={'Create A New Relation Set'}
             width={650}
@@ -106,7 +127,7 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
                             id='rel_type'
                             onChange={(e) => setRelationName(e.target.value)}
                             value={relationName}
-                            style={{width: '395px'}}
+                            style={{width: '350px'}}
                             placeholder='Add a Relation Type'
                         />
                         <Divider type={'vertical'}/>
@@ -125,7 +146,14 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
                     {
                         relationTypes.map(rel => {
                             return (
-                                <Button style={getButtonStyle(rel.color)} key={rel.type}>
+                                <Button
+                                    style={getButtonStyle(rel.color)}
+                                    key={rel.type}
+                                    onClick={() => {
+                                        setPickerType(rel.type);
+                                        setPickerColor(rel.color);
+                                    }}
+                                >
                                     {rel.type}
                                 </Button>
                             );
@@ -133,6 +161,15 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
                     }
                 </>
             </div>
+
+            <AnnoColorPicker
+                type={pickerType}
+                color={pickerColor}
+                setPickerType={setPickerType}
+                setAnnoColor={setLabelColor}
+            />
+
         </Modal>
+        </>
         );
 }

@@ -5,6 +5,7 @@ import {UnPersistedAnnoEntitySet, AnnoEntity, AnnoColor} from '../../state/anno/
 
 import {Form, Input, Divider, Button, Tag, Modal} from 'antd'
 import {getButtonStyle, getRandomColor} from "../../util/AnnoUtil/anno_util";
+import AnnoColorPicker from "../AnnoColorPicker/AnnoColorPicker";
 
 // Props for defining a new label set
 export type AnnoLabelSetCreationProps = {
@@ -23,6 +24,24 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
     const [state, setState] = React.useState<any>();
     const [labelName, setLabelName] = React.useState<string>('');
     const [labels, setLabels] = React.useState<AnnoEntity[]>([]);
+
+    //states for modal
+    const [pickerType, setPickerType] = React.useState<string>('');
+    const [pickerColor, setPickerColor] = React.useState<AnnoColor>({main: '#FFFFFF', background: '#FFFFFF'});
+
+    const setLabelColor = (type: string, color: AnnoColor) => {
+        let newLabels: AnnoEntity[] = [];
+
+        labels.map((ent) => {
+            if (ent.type === type) {
+                newLabels.push({type: type, color: color})
+            } else {
+                newLabels.push(ent)
+            }
+        })
+
+        setLabels(newLabels);
+    }
 
     // add new label to list
     const addLabel = () => {
@@ -71,6 +90,7 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
 
     // Return the modal with its input fields.
     return (
+        <>
         <Modal
             title={'Create A New Label Set'}
             width={650}
@@ -86,9 +106,9 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
                         name={'name'}
                         required={true}
                     >
-                        <Input 
+                        <Input
                             type='text'
-                            placeholder='Name of the project' 
+                            placeholder='Name of the project'
                             onChange={(e) => setName(e.target.value)}
                             value={name}
                             defaultValue={name}
@@ -127,7 +147,14 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
                     {
                         labels.map(label => {
                             return (
-                                <Button style={getButtonStyle(label.color)} key={label.type}>
+                                <Button
+                                    style={getButtonStyle(label.color)}
+                                    key={label.type}
+                                    onClick={() => {
+                                        setPickerType(label.type);
+                                        setPickerColor(label.color);
+                                    }}
+                                >
                                     {label.type}
                                 </Button>
                             );
@@ -135,6 +162,16 @@ export default function AnnoLabelSetCreation(props: AnnoLabelSetCreationProps){
                     }
                 </>
             </div>
+
+            <AnnoColorPicker
+                type={pickerType}
+                color={pickerColor}
+                setPickerType={setPickerType}
+                setAnnoColor={setLabelColor}
+            />
+
         </Modal>
-        );
+
+    </>
+    );
 }

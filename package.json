@@ -53,6 +53,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-color": "^3.0.6",
     "@types/react-native": "^0.68.2",
     "@types/react-router-dom": "^5.3.1",
     "@types/react-router-transition": "^2.1.1",
