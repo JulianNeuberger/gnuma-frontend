@@ -396,6 +396,47 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         props.setSelectedTokens([]);
     }
 
+    const getEntityButtons = () => {
+        if (props.selectedEntities.length > 0 || props.selectedTokens.length > 0) {
+            return(
+                <>
+                    <Button
+                        style={getButtonStyle({
+                            main: '#4D4D4D',
+                            background: '#B3B3B3'
+                        })}
+                        key={'RESET'}
+                        onClick={ () => {
+                            updateLabels('O');
+                        }}
+                    >
+                        {'REMOVE'}
+                    </Button>
+
+                    {
+                        labelSet.labels.map(label => {
+                            return (
+                                <Button
+                                    style={getButtonStyle(label.color)}
+                                    key={label.type}
+                                    onClick={ () => {
+                                        updateLabels(label.type);
+                                    }}
+                                >
+                                    {label.type}
+                                </Button>
+
+                            );
+                        })
+                    }
+                </>
+            );
+        }
+        return (
+            <></>
+        );
+    }
+
     // Displays text and the labeling buttons.
     return (
         <div
@@ -404,39 +445,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
             <div
                 style={{'margin': '10px', 'background': '#EFF0EF'}}
             >
-                <span
-                    style={{fontWeight: 'bold'}}
-                >
-                    Enitiy Types:
-                </span>
-                {
-                    labelSet.labels.map(label => {
-                        return (
-                            <Button
-                                style={getButtonStyle(label.color)}
-                                key={label.type}
-                                onClick={ () => {
-                                    updateLabels(label.type);
-                                }}
-                            >
-                                {label.type}
-                            </Button>
-
-                        );
-                    })
-                }
-                <Button
-                    style={getButtonStyle({
-                        main: '#4D4D4D',
-                        background: '#B3B3B3'
-                    })}
-                    key={'RESET'}
-                    onClick={ () => {
-                        updateLabels('O');
-                    }}
-                >
-                    {'REMOVE'}
-                </Button>
+                {getEntityButtons()}
             </div>
             <div
                 style={{'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}

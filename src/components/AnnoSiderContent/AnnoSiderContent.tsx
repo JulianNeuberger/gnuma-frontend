@@ -86,7 +86,7 @@ export default function AnnoSiderContent(props: AnnoSiderContentProps) {
                                                     'padding': '0.5px'
                                                 }}
                                             >
-                                                {relation.type}
+                                                {' ' + relation.type + ' '}
                                             </span>
                                         )}}
                                 />
