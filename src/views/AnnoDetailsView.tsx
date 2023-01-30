@@ -22,6 +22,7 @@ import {
 } from "../state/anno/annoDocumentReducer";
 import {AnnoColor} from "../state/anno/annoEntitySetReducer";
 import AnnoRelationPicker from "../components/AnnoRelationPicker/AnnoRelationPicker";
+import AnnoSiderContent from "../components/AnnoSiderContent/AnnoSiderContent";
 
 // document params
 type AnnoDetailsParams = {
@@ -791,35 +792,16 @@ export default function AnnoDetailsView(){
 
                     <Layout.Sider
                         style={{backgroundColor: 'white', color: 'black'}}
-                        width={'33%'}
+                        width={'350px'}
+                        collapsible={true}
+                        collapsedWidth={0}
                     >
                         <Row>
                             <Col flex={'20px'}></Col>
                             <Col flex={'auto'}>
-                                <AnnoDisplayRelation
-                                    docId={docId}
-                                    relationSetId={project.relationSetId}
-                                    projectId={projectId}
-                                    userId={userId}
-                                    relations={relations}
-                                    addRelation={addRelation}
-                                    updateRelation={updateRelation}
-                                    removeRelation={removeRelation}
-                                    selectedEntities={selectedEntities}
-                                    setSelectedEntities={setSelectedEntities}
-                                    selectedRelation={selectedRelation}
-                                    setSelectedRelation={setSelectedRelation}
-                                    entities={entities}
+                                <AnnoSiderContent
                                     labelSetId={project.labelSetId}
-                                    getEntityText={getEntityText}
-                                    recRelations={recRelations}
-                                    recEntities={recEntities}
-                                    acceptRecRelation={acceptRecRelation}
-                                    declineRecRelation={declineRecRelation}
-                                    selectedRecRelation={selectedRecRelation}
-                                    setSelectedRecRelation={setSelectedRecRelation}
-                                    acceptChangedRecRelation={acceptRecRelation}
-                                    forceUpdate={forceUpdate}
+                                    relationSetId={project.relationSetId}
                                 />
                             </Col>
                         </Row>
