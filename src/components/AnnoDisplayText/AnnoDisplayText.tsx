@@ -12,6 +12,7 @@ import {ColorDict, TokenSpan} from "../../views/AnnoDetailsView";
 import AnnoToken from "../AnnoToken/AnnoToken";
 import {v4 as uuidv4} from "uuid";
 import {getButtonStyle} from "../../util/AnnoUtil/anno_util";
+import AnnoRelationPicker from "../AnnoRelationPicker/AnnoRelationPicker";
 
 
 // Props containing everything needed for displaying the text and its labels.
@@ -41,6 +42,8 @@ type AnnoDisplayTextProps = {
     declineRecEntity: (id: string) => void;
 
     forceUpdate: () => void;
+
+    setAddRelationVisible: (b: boolean) => void;
 }
 
 // Function for displaying the text.
@@ -437,15 +440,41 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         );
     }
 
+    const getAddRelationButton = () => {
+        if (props.selectedEntities.length === 2) {
+            return (
+              <Button
+                type={'primary'}
+                onClick={() => {
+                    props.setAddRelationVisible(true);
+                }}
+              >
+                  Add Relation
+              </Button>
+            );
+        }
+
+        return(
+            <></>
+        );
+    }
+
     // Displays text and the labeling buttons.
     return (
         <div
             style={{backgroundColor: 'White'}}
         >
             <div
-                style={{'margin': '10px', 'background': '#EFF0EF'}}
+                style={{'margin': '10px', 'background': '#EFF0EF', 'height': '57px', 'overflowX': 'auto',
+                    'overflowY': 'hidden'}}
             >
-                {getEntityButtons()}
+                <span>
+                    {getEntityButtons()}
+                </span>
+
+                <span style={{'float': 'right'}}>
+                    {getAddRelationButton()}
+                </span>
             </div>
             <div
                 style={{'fontSize': 22, 'lineHeight': 2, 'userSelect': 'none'}}

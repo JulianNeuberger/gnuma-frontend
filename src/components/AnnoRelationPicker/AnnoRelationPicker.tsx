@@ -13,13 +13,15 @@ export type AnnoRelationPickerProps = {
     relationColorDict: ColorDict;
     getEntityStyle: (id: string) => React.CSSProperties;
     getEntityText: (id: string) => string;
+    visible: boolean;
+    setVisible: (b: boolean) => void;
 }
 
 export default function AnnoRelationPicker(props: AnnoRelationPickerProps) {
 
     return (
         <Modal
-            visible={props.selectedEntities.length == 2}
+            visible={props.visible}
             title={'Add a Relation'}
             width={550}
             closable={false}
@@ -29,6 +31,7 @@ export default function AnnoRelationPicker(props: AnnoRelationPickerProps) {
                     ghost={true}
                     onClick={() => {
                         props.setSelectedEntities([])
+                        props.setVisible(false);
                     }}
                 >
                     Cancel
@@ -48,8 +51,9 @@ export default function AnnoRelationPicker(props: AnnoRelationPickerProps) {
                                         'head': props.selectedEntities[0],
                                         'tail': props.selectedEntities[1],
                                         'type': relationType
-                                    }
-                                    props.addRelation([newRel])
+                                    };
+                                    props.addRelation([newRel]);
+                                    props.setVisible(false);
                                 }}
                             >
                                 {relationType}

@@ -59,6 +59,9 @@ type AnnoDisplayRelationProps = {
     setSelectedRecRelation: (id: string) => void;
 
     forceUpdate: () => void;
+
+    addRelationVisible: boolean;
+    setAddRelationVisible: (b: boolean) => void;
 }
 
 // function return true if two elements intersect
@@ -302,73 +305,7 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
 
     // Fill the Relation specific sider and draws the arrows over the text.
     return (
-        <div style={{userSelect: 'none', 'background': '#FFFFFF'}}>
-            <div style={{'margin': '10px', 'background': '#EFF0EF'}}>
-                <Button
-                    style={getButtonStyle({
-                        main: '#4D4D4D',
-                        background: '#B3B3B3'
-                    })}
-                    key={'RESET'}
-                    onClick={() => {
-                        props.removeRelation([props.selectedRelation]);
-                    }}
-                    disabled={props.selectedRelation === ''}
-                >
-                    {'REMOVE'}
-                </Button>
-                {
-                    relationSet.relationTypes.map(relation => {
-                        return (
-                            <Button
-                                style={getButtonStyle(relation.color)}
-                                key={relation.type}
-                                onClick={() => {
-                                    // updating relations or accepting relation with different type have highest prio
-                                    // only one can occur due to selection methods
-                                    if (props.selectedRecRelation !== '') {
-                                        props.acceptChangedRecRelation(props.selectedRecRelation, relation.type);
-                                    } else if (props.selectedRelation !== '') {
-                                        props.updateRelation([props.selectedRelation], relation.type);
-                                    } else {
-                                        // adding a new one has second prio
-                                        let newRel: Relation = {
-                                            'id': uuidv4(),
-                                            'head': props.selectedEntities[0],
-                                            'tail': props.selectedEntities[1],
-                                            'type': relation.type
-                                        }
-                                        props.addRelation([newRel])
-                                    }
-                                }}
-                                disabled={props.selectedEntities.length !== 2 && props.selectedRelation === '' && props.selectedRecRelation === ''}
-                            >
-                                {relation.type}
-                            </Button>
-
-                        );
-                    })
-                }
-            </div>
-
-
-            <div
-                style={{'overflowY': 'auto', 'height': '250px', 'margin': '10px', 'background': '#EFF0EF'}}
-                onScroll={props.forceUpdate}
-                id={'relationDiv'}
-            >
-                {displayRelationsSide(props.selectedEntities)}
-            </div>
-
-
-            <div
-                style={{'overflowY': 'auto', 'height': '350px', 'margin': '10px', 'background': '#EFF0EF'}}
-                onScroll={props.forceUpdate}
-                id={'recRelationDiv'}
-            >
-                {displayRecRelationsSide(props.recRelations)}
-            </div>
-
+        <div>
             <AnnoRelationPicker
                 selectedEntities={props.selectedEntities}
                 setSelectedEntities={props.setSelectedEntities}
@@ -376,6 +313,8 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                 relationColorDict={relationColorDict}
                 getEntityStyle={getEntityStyle}
                 getEntityText={props.getEntityText}
+                visible={props.addRelationVisible}
+                setVisible={props.setAddRelationVisible}
             />
 
             <AnnoRelationEditor

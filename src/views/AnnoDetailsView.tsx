@@ -78,6 +78,8 @@ export default function AnnoDetailsView(){
     const [selectedRelation, setSelectedRelation] = React.useState<string>('');
     const [selectedRecRelation, setSelectedRecRelation] = React.useState<string>('');
 
+    const [addRelationVisible, setAddRelationVisible] = React.useState<boolean>(false);
+
     // rerender relation arrows
     const [rerenderRelations, updateState] = React.useState(0);
     const forceUpdate = useForceUpdate();
@@ -788,6 +790,35 @@ export default function AnnoDetailsView(){
                         acceptRecEntity={acceptRecEntity}
                         declineRecEntity={declineRecEntity}
                         forceUpdate={forceUpdate}
+                        setAddRelationVisible={setAddRelationVisible}
+                    />
+
+                    <AnnoDisplayRelation
+                        docId={docId}
+                        relationSetId={project.relationSetId}
+                        projectId={projectId}
+                        userId={userId}
+                        relations={relations}
+                        addRelation={addRelation}
+                        updateRelation={updateRelation}
+                        removeRelation={removeRelation}
+                        selectedEntities={selectedEntities}
+                        setSelectedEntities={setSelectedEntities}
+                        selectedRelation={selectedRelation}
+                        setSelectedRelation={setSelectedRelation}
+                        entities={entities}
+                        labelSetId={project.labelSetId}
+                        getEntityText={getEntityText}
+                        recRelations={recRelations}
+                        recEntities={recEntities}
+                        acceptRecRelation={acceptRecRelation}
+                        declineRecRelation={declineRecRelation}
+                        selectedRecRelation={selectedRecRelation}
+                        setSelectedRecRelation={setSelectedRecRelation}
+                        acceptChangedRecRelation={acceptRecRelation}
+                        forceUpdate={forceUpdate}
+                        addRelationVisible={addRelationVisible}
+                        setAddRelationVisible={setAddRelationVisible}
                     />
 
                     <Layout.Sider
