@@ -142,6 +142,9 @@ export default function AnnoDetailsView(){
 
     // Updates the history and current states
     const updateHistory = (newEntities: EntityDict, newSentenceEntities: string[][], newRelations: RelationDict, newRecEntities: RecEntityDict, newRecSentenceEntities: string [][], newRecRelations: RecRelationDict, update: boolean = true) => {
+        console.log('update')
+        console.log(newEntities)
+
         //prevent undefined entities/ relations
         if (newEntities === undefined) {
             newEntities = {};
@@ -221,6 +224,7 @@ export default function AnnoDetailsView(){
         let newRecEntities = {};
         let newRecRelations = {};
 
+        console.log('halp update')
         updateHistory(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations, false);
     }
 
@@ -245,6 +249,7 @@ export default function AnnoDetailsView(){
                     newRecRelations = annoDoc.recRelations;
                 }
 
+                console.log('halp2 update')
                 updateHistory(entities, sentenceEntities, relations, newRecEntities, newRecSentenceEntities, newRecRelations, false);
             }
         }
@@ -285,6 +290,7 @@ export default function AnnoDetailsView(){
                     sendHalp2(false);
                 }
 
+                console.log('halp3 update')
                 updateHistory(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations, false);
             }
         }
@@ -332,10 +338,8 @@ export default function AnnoDetailsView(){
         }
     }
 
-    // Add a new entity to the entity dictionary
-    const addEntity = (ents: Entity[]) => {
-        //todo check for overlapping
-
+    // Update the label for an entity
+    const addAndUpdateEntities = (ents: Entity[], ids: string[], type: string) => {
         let newEntities = JSON.parse(JSON.stringify(entities));
         let newSentenceEntities = JSON.parse(JSON.stringify(sentenceEntities));
 
@@ -346,13 +350,6 @@ export default function AnnoDetailsView(){
 
             newSentenceEntities[ent.sentenceIndex].push(ent.id);
         }
-
-        updateHistory(newEntities, newSentenceEntities, relations, recEntities, recSentenceEntities, recRelations);
-    }
-
-    // Update the label for an entity
-    const updateEntity = (ids: string[], type: string) => {
-        let newEntities = JSON.parse(JSON.stringify(entities));
 
         for (let i = 0; i < ids.length; i++) {
             let ent = entities[ids[i]];
@@ -369,8 +366,11 @@ export default function AnnoDetailsView(){
             }
         }
 
-        setSelectedEntities([]);
+        console.log('updateEntity')
+        console.log(newEntities)
+
         updateHistory(newEntities, sentenceEntities, relations, recEntities, recSentenceEntities, recRelations);
+        setSelectedEntities([]);
     }
 
     // Remove an entity and all relations its in
@@ -794,8 +794,7 @@ export default function AnnoDetailsView(){
                         userId={userId}
                         entities={entities}
                         sentenceEntities={sentenceEntities}
-                        addEntity={addEntity}
-                        updateEntity={updateEntity}
+                        addAndUpdateEntities={addAndUpdateEntities}
                         removeEntity={removeEntity}
                         selectedTokens={selectedTokens}
                         setSelectedTokens={setSelectedTokens}

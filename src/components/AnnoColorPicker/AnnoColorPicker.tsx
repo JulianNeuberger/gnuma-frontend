@@ -13,8 +13,8 @@ export type AnnoColorPickerProps = {
 
 export default function AnnoColorPicker(props: AnnoColorPickerProps) {
 
-    const [main, setMain] = React.useState<string>(props.color.main);
-    const [background, setBackground] = React.useState<string>(props.color.background);
+    const [main, setMain] = React.useState<string>('');
+    const [background, setBackground] = React.useState<string>('');
 
     const setColors = (c: ColorResult) => {
         let r2 = Math.min(c.rgb.r + 100, 255)
@@ -25,6 +25,13 @@ export default function AnnoColorPicker(props: AnnoColorPickerProps) {
 
         setMain(c.hex);
         setBackground(background_col);
+    }
+
+    const getColors = () => {
+        if (main === '' || background === '') {
+            return (props.color);
+        }
+        return ({main: main, background: background});
     }
 
     return (
@@ -39,7 +46,9 @@ export default function AnnoColorPicker(props: AnnoColorPickerProps) {
                         type={'primary'}
                         ghost={true}
                         onClick={() => {
-                            props.setPickerType('')
+                            props.setPickerType('');
+                            setMain('');
+                            setBackground('');
                         }}
                     >
                         Cancel
@@ -47,8 +56,10 @@ export default function AnnoColorPicker(props: AnnoColorPickerProps) {
                     <Button
                         type={'primary'}
                         onClick={() => {
-                            props.setPickerType('')
-                            props.setAnnoColor(props.type, {main: main, background: background})
+                            props.setPickerType('');
+                            props.setAnnoColor(props.type, {main: main, background: background});
+                            setMain('');
+                            setBackground('');
                         }}
                     >
                         Accept
@@ -59,7 +70,7 @@ export default function AnnoColorPicker(props: AnnoColorPickerProps) {
 
             <Row>
                 <Col span={12}>
-                    <Button style={getButtonStyle({main: main, background: background})} key={props.type}>
+                    <Button style={getButtonStyle(getColors())} key={props.type}>
                         {props.type}
                     </Button>
                 </Col>

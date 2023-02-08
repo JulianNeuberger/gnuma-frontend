@@ -24,8 +24,7 @@ type AnnoDisplayTextProps = {
     entities: EntityDict;
     sentenceEntities: string[][];
 
-    addEntity: (ents: Entity[]) => void;
-    updateEntity: (ids: string[], type: string) => void;
+    addAndUpdateEntities: (ents: Entity[], ids: string[], type: string) => void;
     removeEntity: (ids: string[]) => void
 
     selectedEntities: string[];
@@ -386,30 +385,21 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
     // Update the label of selcted tokens/ spans.
     const updateLabels = (type: string) => {
-        // Remove entities
-        if (type == 'O') {
-            props.removeEntity(props.selectedEntities);
-        } else {
-            // Adjust old entities
-            props.updateEntity(props.selectedEntities, type);
-            // Add new entities
-            let newEnts: Entity[] = [];
-            for (let i = 0; i < props.selectedTokens.length; i++) {
-                let tok = props.selectedTokens[i];
+        let newEnts: Entity[] = [];
+        for (let i = 0; i < props.selectedTokens.length; i++) {
+            let tok = props.selectedTokens[i];
 
-                let newEnt: Entity = {
-                    'id': uuidv4(),
-                    'sentenceIndex': tok.sentenceIndex,
-                    'start': tok.start,
-                    'end': tok.end,
-                    'type': type,
-                    'relations': []
-                }
-                newEnts.push(newEnt);
+            let newEnt: Entity = {
+                'id': uuidv4(),
+                'sentenceIndex': tok.sentenceIndex,
+                'start': tok.start,
+                'end': tok.end,
+                'type': type,
+                'relations': []
             }
-
-            props.addEntity(newEnts);
+            newEnts.push(newEnt);
         }
+        props.addAndUpdateEntities(newEnts, props.selectedEntities, type);
 
         // reset selection
         props.setSelectedEntities([]);
@@ -427,7 +417,9 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                         })}
                         key={'RESET'}
                         onClick={ () => {
-                            updateLabels('O');
+                            props.removeEntity(props.selectedEntities);
+                            props.setSelectedEntities([]);
+                            props.setSelectedTokens([]);
                         }}
                     >
                         {'REMOVE'}
