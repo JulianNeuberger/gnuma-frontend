@@ -364,10 +364,7 @@ export default function AnnoDetailsView(){
             }
         }
 
-        console.log('updateEntity')
-        console.log(newEntities)
-
-        updateHistory(newEntities, sentenceEntities, relations, recEntities, recSentenceEntities, recRelations);
+        updateHistory(newEntities, newSentenceEntities, relations, recEntities, recSentenceEntities, recRelations);
         setSelectedEntities([]);
     }
 

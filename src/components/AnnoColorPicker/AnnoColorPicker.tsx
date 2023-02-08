@@ -60,6 +60,7 @@ export default function AnnoColorPicker(props: AnnoColorPickerProps) {
                         setMain('');
                         setBackground('');
                     }}
+                    disabled={main === '' && background === ''}
                 >
                     Accept
                 </Button>
