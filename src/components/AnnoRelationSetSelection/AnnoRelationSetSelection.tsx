@@ -1,6 +1,6 @@
 import React, {useContext, useEffect} from 'react';
 
-import {AnnoRelationSetContext} from '../../components/AnnoRelationSetContextProvider/AnnoRelationSetContextProvider'
+import {AnnoRelationSetContext} from '../AnnoRelationSetContextProvider/AnnoRelationSetContextProvider'
 import {AnnoRelationSet} from '../../state/anno/annoRelationSetReducer'
 
 import {Table, TableColumnProps, Button} from 'antd'
@@ -64,7 +64,6 @@ export default function AnnoRelationSetSelection(props: AnnoRelationSetSelection
             selectedRowKeys: props.selected,
             onChange: (_, selectedRows) => {
                 if (props.onSelectionChanged) {
-                    // todo: make it less hacky
                     const relationSetId = selectedRows.map(d => d.id);
                     props.onSelectionChanged(relationSetId[0]);
                 }

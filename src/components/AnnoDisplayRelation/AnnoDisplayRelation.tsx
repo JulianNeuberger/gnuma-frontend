@@ -1,9 +1,8 @@
 import React from 'react';
 
-import {Button} from 'antd';
 
-import {AnnoRelationSetContext} from '../../components/AnnoRelationSetContextProvider/AnnoRelationSetContextProvider'
-import {AnnoDocumentContext} from '../../components/AnnoDocumentContextProvider/AnnoDocumentContextProvider';
+import {AnnoRelationSetContext} from '../AnnoRelationSetContextProvider/AnnoRelationSetContextProvider'
+import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 
 import AnnoRelationArrow from '../../components/AnnoRelationArrow/AnnoRelationArrow';
 
@@ -17,9 +16,7 @@ import {
 
 import {ColorDict} from "../../views/AnnoDetailsView";
 import {AnnoLabelSetContext} from "../AnnoLabelSetContextProvider/AnnoLabelSetContextProvider";
-import AnnoRelation from "../AnnoRelation/AnnoRelation";
 import AnnoRecRelationArrow from "../AnnoRecRelationArrow/AnnoRecRelationArrow";
-import AnnoRecRelation from '../AnnoRecRelation/AnnoRecRelation';
 import AnnoRelationPicker from "../AnnoRelationPicker/AnnoRelationPicker";
 import AnnoRelationEditor from "../AnnoRelationEditor/AnnoRelationEditor";
 import AnnoRecModal from "../AnnoRecModal/AnnoRecModal";
@@ -78,7 +75,7 @@ export function elementsOverlap(id1: string, id2: string) {
             domRect1.bottom < domRect2.top
         );
     }
-    return (true);
+    return true;
 }
 
 // Displays relations.
@@ -169,91 +166,9 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
         return (style);
     }
 
-    // Returns the style for a relation arrow based on id
-    const getRelationStyle = (id: string) => {
-        let relation = props.relations[id];
-        if (relation === undefined && Object.keys(props.recRelations).includes(id)) {
-            relation = props.recRelations[id];
-        }
-
-        if (relation !== undefined) {
-            let col = relationColorDict[relation.type];
-            if (col !== undefined) {
-                return (col.main);
-            }
-        }
-
-        console.error('Style error for relation with id: ' + id);
-        return ('#FFFFFF');
-    }
-
     // Returns if the given entity belongs to a rec entity
     const isRecEntity = (id: string) => {
         return (Object.keys(props.recEntities).includes(id));
-    }
-
-    // Returns the ids of all relation that celong to a selected entity
-    // and all selected relations
-    const getRelationsToBeDisplayed = () => {
-        let relations: string[] = [];
-
-        // Add from selected entities
-        for (let i = 0; i < props.selectedEntities.length; i++) {
-            let entity = props.entities[props.selectedEntities[i]];
-
-            for (let j = 0; j < entity.relations.length; j++) {
-                if (!relations.includes(entity.relations[j])) {
-                    relations.push(entity.relations[j]);
-                }
-            }
-        }
-
-        // Add from sleceted relations
-        if (props.selectedRelation !== '' && !relations.includes(props.selectedRelation)) {
-            relations.push(props.selectedRelation);
-        }
-
-
-        return relations;
-    }
-
-    // Displays the Relations of selected entities
-    const displayRelationsSide = (sel: string[]) => {
-        return (
-            getRelationsToBeDisplayed().map((rel_id) => {
-                return (
-                    <AnnoRelation
-                        rel={props.relations[rel_id]}
-                        entities={props.entities}
-                        getEntityStyle={getEntityStyle}
-                        getRelationStyle={getRelationStyle}
-                        getEntityText={props.getEntityText}
-                        selectRelation={selectRelation}
-                        selectedRelation={props.selectedRelation}
-                    />
-                );
-            })
-        );
-    }
-
-    // Displays the Relations of selected entities
-    const displayRecRelationsSide = (rels: RecRelationDict) => {
-        return (
-            Object.values(rels).map((rel) => {
-                return (
-                    <AnnoRecRelation
-                        rel={rel}
-                        getEntityStyle={getEntityStyle}
-                        getRelationStyle={getRelationStyle}
-                        getEntityText={props.getEntityText}
-                        acceptRecRelation={props.acceptRecRelation}
-                        declineRecRelation={props.declineRecRelation}
-                        selectedRecRelation={props.selectedRecRelation}
-                        selectRecRelation={selectRecRelation}
-                    />
-                );
-            })
-        );
     }
 
     // Function that draws the relation arrows.

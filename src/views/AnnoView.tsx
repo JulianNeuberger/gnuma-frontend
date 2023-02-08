@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Button, Card, Modal, Steps, Row, Col, Divider, Form, Input, Switch, Space} from 'antd';
+import {Button, Card, Modal, Steps, Divider, Form, Input, Space} from 'antd';
 import {PlusOutlined, UserOutlined} from '@ant-design/icons';
 
 import {FieldData} from 'rc-field-form/lib/interface';
@@ -14,9 +14,6 @@ import AnnoLabelSetCreation from '../components/AnnoLabelSetCreation/AnnoLabelSe
 import AnnoRelationSetSelection from '../components/AnnoRelationSetSelection/AnnoRelationSetSelection'
 import AnnoRelationSetCreation from '../components/AnnoRelationSetCreation/AnnoRelationSetCreation'
 
-
-import {AnnoEntity} from '../state/anno/annoEntitySetReducer'
-import {AnnoRelationType} from '../state/anno/annoRelationSetReducer'
 
 // Set a cookie with the userId so it does not have to be entered every time
 export const setUserIdCookie = (uId: string) => {

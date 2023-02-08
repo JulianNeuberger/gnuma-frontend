@@ -29,63 +29,61 @@ export default function AnnoColorPicker(props: AnnoColorPickerProps) {
 
     const getColors = () => {
         if (main === '' || background === '') {
-            return (props.color);
+            return props.color;
         }
-        return ({main: main, background: background});
+        return {main: main, background: background};
     }
 
-    return (
-        <Modal
-            title={'Change Color'}
-            width={550}
-            visible={props.type !== ''}
-            closable={false}
-            footer={
-                <Space>
-                    <Button
-                        type={'primary'}
-                        ghost={true}
-                        onClick={() => {
-                            props.setPickerType('');
-                            setMain('');
-                            setBackground('');
-                        }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        type={'primary'}
-                        onClick={() => {
-                            props.setPickerType('');
-                            props.setAnnoColor(props.type, {main: main, background: background});
-                            setMain('');
-                            setBackground('');
-                        }}
-                    >
-                        Accept
-                    </Button>
-                </Space>
-            }
-        >
+    return <Modal
+        title={'Change Color'}
+        width={550}
+        visible={props.type !== ''}
+        closable={false}
+        footer={
+            <Space>
+                <Button
+                    type={'primary'}
+                    ghost={true}
+                    onClick={() => {
+                        props.setPickerType('');
+                        setMain('');
+                        setBackground('');
+                    }}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    type={'primary'}
+                    onClick={() => {
+                        props.setPickerType('');
+                        props.setAnnoColor(props.type, {main: main, background: background});
+                        setMain('');
+                        setBackground('');
+                    }}
+                >
+                    Accept
+                </Button>
+            </Space>
+        }
+    >
 
-            <Row>
-                <Col span={12}>
-                    <Button style={getButtonStyle(getColors())} key={props.type}>
-                        {props.type}
-                    </Button>
-                </Col>
+        <Row>
+            <Col span={12}>
+                <Button style={getButtonStyle(getColors())} key={props.type}>
+                    {props.type}
+                </Button>
+            </Col>
 
-                <Col span={12}>
-                    <SketchPicker
-                        color={main}
-                        onChangeComplete={(color, event) => {
-                            setColors(color)
-                        }}
-                    />
-                </Col>
-            </Row>
+            <Col span={12}>
+                <SketchPicker
+                    color={main}
+                    onChangeComplete={(color, event) => {
+                        setColors(color)
+                    }}
+                />
+            </Col>
+        </Row>
 
-        </Modal>
-    );
+    </Modal>;
 
 }

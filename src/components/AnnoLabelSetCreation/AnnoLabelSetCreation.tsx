@@ -1,9 +1,9 @@
 import React from 'react'
 
-import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
+import {AnnoLabelSetContext} from '../AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 import {UnPersistedAnnoEntitySet, AnnoEntity, AnnoColor} from '../../state/anno/annoEntitySetReducer'
 
-import {Form, Input, Divider, Button, Tag, Modal} from 'antd'
+import {Form, Input, Divider, Button, Modal} from 'antd'
 import {getButtonStyle, getRandomColor} from "../../util/AnnoUtil/anno_util";
 import AnnoColorPicker from "../AnnoColorPicker/AnnoColorPicker";
 

@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Button} from 'antd'
 
-import {AnnoRelationSetContext} from '../../components/AnnoRelationSetContextProvider/AnnoRelationSetContextProvider';
+import {AnnoRelationSetContext} from '../AnnoRelationSetContextProvider/AnnoRelationSetContextProvider';
 import {getButtonStyle} from "../../util/AnnoUtil/anno_util";
 
 // props

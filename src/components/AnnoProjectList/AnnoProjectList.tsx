@@ -2,18 +2,17 @@ import React, {useContext, useEffect} from 'react';
 
 import {Link} from 'react-router-dom';
 
-import {Button, Popconfirm, Table, Tag, TableColumnProps, Modal, Form, Input, Divider} from 'antd';
+import {Button, Popconfirm, Table, TableColumnProps, Modal, Form, Input} from 'antd';
 import {TableRowSelection} from 'antd/es/table/interface';
 import {DeleteOutlined, EditOutlined} from '@ant-design/icons';
 
 import {AnnoProject} from '../../state/anno/annoProjectReducer';
-import {AnnoEntitySet} from '../../state/anno/annoEntitySetReducer';
 
 import AnnoLabelSetTags from '../../components/AnnoLabelSetTags/AnnoLabelSetTags';
 import AnnoRelationSetTags from '../../components/AnnoRelationSetTags/AnnoRelationSetTags';
 
 
-import {AnnoProjectContext} from '../../components/AnnoProjectContextProvider/AnnoProjectContextProvider'
+import {AnnoProjectContext} from '../AnnoProjectContextProvider/AnnoProjectContextProvider'
 
 import {FieldData} from 'rc-field-form/lib/interface';
 

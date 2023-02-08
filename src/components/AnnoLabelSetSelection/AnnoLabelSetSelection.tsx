@@ -1,13 +1,11 @@
 import React, {useContext, useEffect} from 'react';
 
-import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
+import {AnnoLabelSetContext} from '../AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 import {AnnoEntitySet} from '../../state/anno/annoEntitySetReducer'
 
 import {Table, TableColumnProps, Button} from 'antd'
 import {TableRowSelection} from 'antd/es/table/interface';
 import {getButtonStyle} from "../../util/AnnoUtil/anno_util";
-
-type AnnoLabelSetColumn = 'name' | 'labels';
 
 // Props for list used for label set selection
 export type AnnoLabelSelectionProps = {
@@ -66,7 +64,6 @@ export default function AnnoLabelSetSelection(props: AnnoLabelSelectionProps){
             selectedRowKeys: props.selected,
             onChange: (_, selectedRows) => {
                 if (props.onSelectionChanged) {
-                    // todo: make it less hacky
                     const labelSetId = selectedRows.map(d => d.id);
                     props.onSelectionChanged(labelSetId[0]);
                 }

@@ -1,8 +1,8 @@
 import React from 'react'
-import {AnnoRelationSetContext} from '../../components/AnnoRelationSetContextProvider/AnnoRelationSetContextProvider'
+import {AnnoRelationSetContext} from '../AnnoRelationSetContextProvider/AnnoRelationSetContextProvider'
 import {UnPersistedAnnoRelationSet, AnnoRelationType} from '../../state/anno/annoRelationSetReducer'
 
-import {Form, Input, Divider, Button, Tag, Modal} from 'antd'
+import {Form, Input, Divider, Button, Modal} from 'antd'
 import {getButtonStyle, getRandomColor} from "../../util/AnnoUtil/anno_util";
 import AnnoColorPicker from "../AnnoColorPicker/AnnoColorPicker";
 import {AnnoColor, AnnoEntity} from "../../state/anno/annoEntitySetReducer";
@@ -72,7 +72,7 @@ export default function AnnoRelationSetCreation(props: AnnoRelationSetCreationPr
 
         console.log(out);
 
-        let relationSet = await relationSetContext.onCreate(out);
+        await relationSetContext.onCreate(out);
 
         cancelCreate();
     }

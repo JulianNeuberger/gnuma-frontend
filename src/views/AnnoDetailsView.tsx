@@ -7,8 +7,8 @@ import {AnnoDocumentContext} from '../components/AnnoDocumentContextProvider/Ann
 import AnnoDisplayText from '../components/AnnoDisplayText/AnnoDisplayText';
 import AnnoDisplayRelation from '../components/AnnoDisplayRelation/AnnoDisplayRelation';
 
-import {Button, Space, Card, Layout, Row, Col} from 'antd';
-import {UpOutlined, CheckOutlined, UndoOutlined, RedoOutlined, UserOutlined} from '@ant-design/icons';
+import {Button, Card, Col, Layout, Row, Space} from 'antd';
+import {CheckOutlined, RedoOutlined, UndoOutlined, UpOutlined, UserOutlined} from '@ant-design/icons';
 
 import {Link, useParams} from 'react-router-dom';
 import {getUserIdCookie} from "./AnnoView";
@@ -81,7 +81,6 @@ export default function AnnoDetailsView(){
     const [addRelationVisible, setAddRelationVisible] = React.useState<boolean>(false);
 
     // rerender relation arrows
-    const [rerenderRelations, updateState] = React.useState(0);
     const forceUpdate = useForceUpdate();
 
     //if this works im sad
@@ -354,7 +353,7 @@ export default function AnnoDetailsView(){
         for (let i = 0; i < ids.length; i++) {
             let ent = entities[ids[i]];
             if (ids.includes(ent.id)) {
-                let newEnt: Entity = {
+                newEntities[ent.id] = {
                     'id': ent.id,
                     'sentenceIndex': ent.sentenceIndex,
                     'start': ent.start,
@@ -362,7 +361,6 @@ export default function AnnoDetailsView(){
                     'type': type,
                     'relations': ent.relations
                 }
-                newEntities[ent.id] = newEnt
             }
         }
 
@@ -415,7 +413,6 @@ export default function AnnoDetailsView(){
 
     // Add a relation
     const addRelation = (rels: Relation[]) => {
-        // todo check for duplicates
         let newRelations = JSON.parse(JSON.stringify(relations));
         let newEntities = JSON.parse(JSON.stringify(entities));
 
@@ -604,13 +601,12 @@ export default function AnnoDetailsView(){
             }
 
             //Add the relation
-            let newRel: Relation = {
+            newRelations[recRel.id] = {
                 'id': recRel.id,
                 'head': recRel.head,
                 'tail': recRel.tail,
                 'type': type
-            }
-            newRelations[recRel.id] = newRel;
+            };
             delete newRecRelations[id];
 
             updateHistory(newEntities, newSentenceEntities, newRelations, newRecEntities, newRecSentenceEntities, newRecRelations);
@@ -656,7 +652,7 @@ export default function AnnoDetailsView(){
         // entities
         for (let i = 0; i < Object.keys(recEntities).length; i++) {
             let recEnt = recEntities[Object.keys(recEntities)[i]];
-            let ent: Entity = {
+            newEntities[recEnt.id] = {
                 'id': recEnt.id,
                 'sentenceIndex': recEnt.sentenceIndex,
                 'start': recEnt.start,
@@ -664,7 +660,6 @@ export default function AnnoDetailsView(){
                 'type': recEnt.type,
                 'relations': recEnt.relations
             };
-            newEntities[recEnt.id] = ent;
         }
 
         // sentence entities
@@ -734,7 +729,6 @@ export default function AnnoDetailsView(){
                         </Button>
                         <Button
                             onClick={() => {
-                                //todo how should this work?
                                 let newSentenceEntities: string[][] = [];
                                 for (let i = 0; i < doc.sentences.length; i++) {
                                     newSentenceEntities.push([]);

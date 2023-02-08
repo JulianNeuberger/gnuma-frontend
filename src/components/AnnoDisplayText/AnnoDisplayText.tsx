@@ -2,8 +2,8 @@ import React from 'react';
 
 import {Button} from 'antd';
 
-import {DocumentsContext} from '../../components/DocumentsContextProvider/DocumentsContextProvider'
-import {AnnoLabelSetContext} from '../../components/AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
+import {DocumentsContext} from '../DocumentsContextProvider/DocumentsContextProvider'
+import {AnnoLabelSetContext} from '../AnnoLabelSetContextProvider/AnnoLabelSetContextProvider'
 import AnnoEntity from '../AnnoEntity/AnnoEntity'
 import {AnnoDocumentContext} from '../AnnoDocumentContextProvider/AnnoDocumentContextProvider';
 import AnnoRecEntity from "../AnnoRecEntity/AnnoRecEntity";
@@ -210,7 +210,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         if (Object.keys(labelColorDict).includes(type)) {
             let col = labelColorDict[type];
 
-            if (selected === true) {
+            if (selected) {
                 return ({
                     'color': col.background,
                     'background': col.main
@@ -360,7 +360,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                             // expected to not interfere with entities or recommendations
                                             for (let i = 0; i < props.selectedTokens.length; i++) {
                                                 let span = props.selectedTokens[i];
-                                                if(span.sentenceIndex === x && span.start == y) {
+                                                if(span.sentenceIndex === x && span.start === y) {
                                                     let text = '';
                                                     for (let j = y; j < span.end; j++) {
                                                         text = text + ' ' + sentence.tokens[j].token;

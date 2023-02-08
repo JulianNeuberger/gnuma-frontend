@@ -33,7 +33,6 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
                 color = {props.color}
                 passProps={
                     {onClick: () => {
-                            // todo ctrl click impl possible?
                             props.selectRelation(props.rel.id);
                         }}
                 }
@@ -49,7 +48,6 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
                 color = {props.color}
                 passProps={
                     {onClick: () => {
-                        // todo ctrl click impl possible?
                         props.selectRelation(props.rel.id);
                     }}
                 }

@@ -3,8 +3,6 @@ import {Button, Divider, Space} from "antd";
 import {getButtonStyle} from "../../util/AnnoUtil/anno_util";
 import {AnnoLabelSetContext} from "../AnnoLabelSetContextProvider/AnnoLabelSetContextProvider";
 import {AnnoRelationSetContext} from "../AnnoRelationSetContextProvider/AnnoRelationSetContextProvider";
-import {Relation} from "../../state/anno/annoDocumentReducer";
-import {v4 as uuidv4} from "uuid";
 import {presetPalettes} from "@ant-design/colors";
 import Xarrow from "react-xarrows";
 

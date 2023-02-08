@@ -6,13 +6,13 @@ import {ColorDict} from "../../views/AnnoDetailsView";
 import Xarrow from "react-xarrows";
 
 export type AnnoRelationEditorProps = {
-    selectedRelation: string;
-    setSelectedRelation: (id: string) => void;
-    relations: RelationDict;
-    relationColorDict: ColorDict;
     getEntityStyle: (id: string) => React.CSSProperties;
     getEntityText: (id: string) => string;
+    relationColorDict: ColorDict;
+    relations: RelationDict;
     removeRelation: (ids: string[]) => void;
+    selectedRelation: string;
+    setSelectedRelation: (id: string) => void;
     updateRelation: (ids: string[], type: string) => void;
 }
 

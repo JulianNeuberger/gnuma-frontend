@@ -18,7 +18,7 @@ type AnnoTokenProps = {
 export default function AnnoToken(props: AnnoTokenProps) {
 
     const getStyle = () => {
-        if (props.selected === true) {
+        if (props.selected) {
             return ({
                 'color': presetPalettes['grey'][8],
                 'background': presetPalettes['grey'][1],
