@@ -7,11 +7,10 @@ import {RecEntity} from "../../state/anno/annoDocumentReducer";
 type AnnoEntityRecommendationProps = {
     entity: RecEntity;
     text: string;
-    style: React.CSSProperties;
+    getEntityStyle: (type: string, selected: boolean) => React.CSSProperties;
 
-    selectToken: (sentenceIndex: number, start: number, end: number) => void;
-    ctrlSelectToken: (sentenceIndex: number, start: number, end: number) => void;
-    shftSelectToken: (sentenceIndex: number, start: number, end: number) => void;
+    selectRecEntity: (id: string) => void;
+    selectedRecEntity: string;
 
     acceptRecEntity: (id: string) => void;
     declineRecEntity: (id: string) => void;
@@ -20,29 +19,19 @@ type AnnoEntityRecommendationProps = {
 //REturn token rec component
 export default function AnnoRecEntity(props: AnnoEntityRecommendationProps){
 
+    const getStyle = () => {
+        return ({...props.getEntityStyle(props.entity.type, props.entity.id === props.selectedRecEntity),
+            'border': '1px dashed black', 'padding': '0.2px'});
+    }
+
     return (
         <span
-            style={{
-                ...props.style,
-                'border': '1px dashed black',
-                'whiteSpace': 'pre'
-            }}
+            style={getStyle()}
         >
             <span
                 id = {'rec_' + props.entity.id}
-                style={{
-                    ...props.style,
-                    'padding': '0.2px'
-                }}
                 onClick={ (e) => {
-                    props.declineRecEntity(props.entity.id);
-                    if (e.ctrlKey) {
-                        props.ctrlSelectToken(props.entity.sentenceIndex, props.entity.start, props.entity.end);
-                    } else if (e.shiftKey) {
-                        props.shftSelectToken(props.entity.sentenceIndex, props.entity.start, props.entity.end);
-                    } else {
-                        props.selectToken(props.entity.sentenceIndex, props.entity.start, props.entity.end);
-                    }
+                    props.selectRecEntity(props.entity.id);
                 }}
             >
                 {props.text}

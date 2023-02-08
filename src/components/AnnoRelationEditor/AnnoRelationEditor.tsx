@@ -18,11 +18,8 @@ export type AnnoRelationEditorProps = {
 
 export default function AnnoRelationEditor(props: AnnoRelationEditorProps) {
 
-    console.log(props.selectedRelation);
-    console.log(props.relations);
-
     const getBody = () => {
-        if (props.selectedRelation !== '' || props.relations[props.selectedRelation] !== undefined){
+        if ((props.selectedRelation !== '' || props.relations[props.selectedRelation] !== undefined) && props.selectedRelation !== ''){
             return (
                 <>
                     <span
@@ -67,7 +64,7 @@ export default function AnnoRelationEditor(props: AnnoRelationEditorProps) {
         <Modal
             visible={props.selectedRelation !== ''}
             title={'Edit Relation'}
-            width={550}
+            width={750}
             closable={false}
             footer={
                 <Button

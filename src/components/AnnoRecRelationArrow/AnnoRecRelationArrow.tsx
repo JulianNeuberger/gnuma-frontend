@@ -1,15 +1,23 @@
 import Xarrow from "react-xarrows";
 import {RecRelation} from "../../state/anno/annoDocumentReducer";
+import {Button, Divider} from "antd";
+import {CheckCircleTwoTone, CloseCircleTwoTone} from "@ant-design/icons";
+import React from "react";
 
 // props needed for the arrow.
 type AnnoRecRelationArrowProps = {
     rel: RecRelation;
     color: string;
+    backgroundColor: string;
 
     isRecEntity: (id: string) => boolean;
     selectRecRelation: (id: string) => void;
 
-    selectedRecRelation: string;
+    selectedEntities: string[];
+    selectedRecEntity: string;
+
+    acceptRecRelation: (id: string) => void;
+    declineRecRelation: (id: string) => void;
 }
 
 // Return the arrow of a relation from one span to another.
@@ -24,10 +32,46 @@ export default function AnnoRecRelationArrow(props: AnnoRecRelationArrowProps) {
 
     // bigger if seleceted
     const getStrokeWidth = () => {
-        if (props.rel.id === props.selectedRecRelation) {
-            return 4;
+        if (props.selectedEntities.includes(props.rel.head) || props.selectedEntities.includes(props.rel.tail) ||
+            props.selectedRecEntity === props.rel.head || props.selectedRecEntity === props.rel.tail) {
+            return 8;
         }
         return 2;
+    }
+
+    const getLabel = () => {
+        if (props.selectedEntities.includes(props.rel.head) || props.selectedEntities.includes(props.rel.tail) ||
+            props.selectedRecEntity === props.rel.head || props.selectedRecEntity === props.rel.tail) {
+            return (
+                <span style={{background: props.backgroundColor, border: '2px solid ' + props.color}}>
+                <Button
+                    icon={
+                        <CheckCircleTwoTone
+                            twoToneColor={'green'}
+                        />
+                    }
+                    type={'text'}
+                    size={'middle'}
+                    onClick={() => {
+                        props.acceptRecRelation(props.rel.id);
+                    }}
+                />
+                <Divider type={'vertical'}/>
+                <Button
+                    icon={
+                        <CloseCircleTwoTone
+                            twoToneColor={'red'}
+                        />}
+                    type={'text'}
+                    size={'middle'}
+                    onClick={() => {
+                        props.declineRecRelation(props.rel.id);
+                    }}
+                />
+            </span>
+            );
+        }
+        return(<></>);
     }
 
     return(
@@ -58,6 +102,7 @@ export default function AnnoRecRelationArrow(props: AnnoRecRelationArrowProps) {
                 path={'straight'}
                 color = {props.color}
                 dashness={true}
+                labels={getLabel()}
                 passProps={
                     {onClick: () => {
                             props.selectRecRelation(props.rel.id);

@@ -18,12 +18,11 @@ import {
 import {ColorDict} from "../../views/AnnoDetailsView";
 import {AnnoLabelSetContext} from "../AnnoLabelSetContextProvider/AnnoLabelSetContextProvider";
 import AnnoRelation from "../AnnoRelation/AnnoRelation";
-import {v4 as uuidv4} from "uuid";
 import AnnoRecRelationArrow from "../AnnoRecRelationArrow/AnnoRecRelationArrow";
 import AnnoRecRelation from '../AnnoRecRelation/AnnoRecRelation';
-import {getButtonStyle} from "../../util/AnnoUtil/anno_util";
 import AnnoRelationPicker from "../AnnoRelationPicker/AnnoRelationPicker";
 import AnnoRelationEditor from "../AnnoRelationEditor/AnnoRelationEditor";
+import AnnoRecModal from "../AnnoRecModal/AnnoRecModal";
 
 // Props that contain all info needed for displaying relations.
 type AnnoDisplayRelationProps = {
@@ -45,6 +44,8 @@ type AnnoDisplayRelationProps = {
 
     selectedEntities: string[];
     setSelectedEntities: (x: string[]) => void;
+
+    selectedRecEntity: string;
 
     selectedRelation: string;
     setSelectedRelation: (x: string) => void;
@@ -269,7 +270,6 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                                     rel={rel}
                                     color={relationColorDict[rel.type].main}
                                     selectRelation={selectRelation}
-                                    selectedRelation={props.selectedRelation}
                                     selectedEntities={props.selectedEntities}
                                 />
                             );
@@ -291,9 +291,13 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                                 <AnnoRecRelationArrow
                                     rel={rel}
                                     color={relationColorDict[rel.type].main}
+                                    backgroundColor={relationColorDict[rel.type].background}
                                     isRecEntity={isRecEntity}
                                     selectRecRelation={selectRecRelation}
-                                    selectedRecRelation={props.selectedRecRelation}
+                                    selectedRecEntity={props.selectedRecEntity}
+                                    selectedEntities={props.selectedEntities}
+                                    acceptRecRelation={props.acceptRecRelation}
+                                    declineRecRelation={props.declineRecRelation}
                                 />
                             );
                         }
@@ -328,8 +332,18 @@ export default function AnnoDisplayRelation(props: AnnoDisplayRelationProps) {
                 updateRelation={props.updateRelation}
             />
 
-                {drawRelations(props.relations)}
-                {drawRecRelations(props.recRelations)}
+            <AnnoRecModal
+                selectedRecRelation={props.selectedRecRelation}
+                setSelectedRecRelation={props.setSelectedRecRelation}
+                relationColorDict={relationColorDict}
+                getEntityStyle={getEntityStyle}
+                getEntityText={props.getEntityText}
+                recRelations={props.recRelations}
+                acceptChangedRecRelation={props.acceptChangedRecRelation}
+            />
+
+            {drawRelations(props.relations)}
+            {drawRecRelations(props.recRelations)}
         </div>
     );
 }

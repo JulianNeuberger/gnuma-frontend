@@ -12,7 +12,6 @@ import {ColorDict, TokenSpan} from "../../views/AnnoDetailsView";
 import AnnoToken from "../AnnoToken/AnnoToken";
 import {v4 as uuidv4} from "uuid";
 import {getButtonStyle} from "../../util/AnnoUtil/anno_util";
-import AnnoRelationPicker from "../AnnoRelationPicker/AnnoRelationPicker";
 
 
 // Props containing everything needed for displaying the text and its labels.
@@ -35,10 +34,14 @@ type AnnoDisplayTextProps = {
     selectedTokens: TokenSpan[];
     setSelectedTokens: (x: TokenSpan[]) => void;
 
+    selectedRecEntity: string;
+    setSelectedRecEntity: (id: string) => void;
+
     recEntities: RecEntityDict;
     recSentenceEntities: string[][];
 
     acceptRecEntity: (id: string) => void;
+    acceptRecEntityOther: (id: string, type: string) => void;
     declineRecEntity: (id: string) => void;
 
     forceUpdate: () => void;
@@ -81,6 +84,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
     // select a token.
     const selectToken = (sentenceIndex: number, start: number, end: number) => {
+        props.setSelectedRecEntity('');
         let b = true;
 
         // select?
@@ -105,6 +109,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
     // Handles the select process while pressing ctrl for tokens.
     const ctrlSelectToken = (sentenceIndex: number, start: number, end: number) => {
+        props.setSelectedRecEntity('');
         let b = false;
         let newSelectedTokens = props.selectedTokens.slice();
 
@@ -131,6 +136,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
     // Handles select while holding shift for tokens.
     const shftSelectToken = (sentenceIndex: number, start: number, end: number) => {
+        props.setSelectedRecEntity('');
         //something is selected else normal select
         if (props.selectedTokens.length > 0) {
             //in same sentence
@@ -168,6 +174,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
     const selectEntity = (id: string) => {
         props.setSelectedTokens([])
+        props.setSelectedRecEntity('');
 
         if (props.selectedEntities.includes(id)) {
             props.setSelectedEntities([]);
@@ -178,6 +185,7 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
 
     const ctrlSelectEntity = (id: string) => {
         let newSelectedEntities = props.selectedEntities.slice();
+        props.setSelectedRecEntity('');
 
         if (props.selectedEntities.includes(id)) {
             newSelectedEntities.splice(newSelectedEntities.indexOf(id), 1);
@@ -186,6 +194,16 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
         }
 
         props.setSelectedEntities(newSelectedEntities);
+    }
+
+    const selectRecEntity = (id: string) => {
+        props.setSelectedTokens([]);
+        props.setSelectedEntities([]);
+        if (props.selectedRecEntity === id) {
+            props.setSelectedRecEntity('');
+        } else {
+            props.setSelectedRecEntity(id);
+        }
     }
 
     // Returns the style of a token based on it being selected and based on tag.
@@ -265,10 +283,9 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                 <AnnoRecEntity
                     entity={entity}
                     text={text}
-                    style={getEntityStyle(entity.type)}
-                    selectToken={selectToken}
-                    ctrlSelectToken={ctrlSelectToken}
-                    shftSelectToken={shftSelectToken}
+                    getEntityStyle={getEntityStyle}
+                    selectedRecEntity={props.selectedRecEntity}
+                    selectRecEntity={selectRecEntity}
                     acceptRecEntity={props.acceptRecEntity}
                     declineRecEntity={props.declineRecEntity}
                 />
@@ -424,6 +441,28 @@ export default function AnnoDisplayText(props: AnnoDisplayTextProps) {
                                     key={label.type}
                                     onClick={ () => {
                                         updateLabels(label.type);
+                                    }}
+                                >
+                                    {label.type}
+                                </Button>
+
+                            );
+                        })
+                    }
+                </>
+            );
+        }
+        if (props.selectedRecEntity !== '') {
+            return(
+                <>
+                    {
+                        labelSet.labels.map(label => {
+                            return (
+                                <Button
+                                    style={getButtonStyle(label.color)}
+                                    key={label.type}
+                                    onClick={ () => {
+                                        props.acceptRecEntityOther(props.selectedRecEntity, label.type);
                                     }}
                                 >
                                     {label.type}

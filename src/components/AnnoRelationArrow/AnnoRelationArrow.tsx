@@ -6,7 +6,6 @@ type AnnoRelationArrowProps = {
     rel: Relation;
     color: string;
     selectRelation: (id: string) => void;
-    selectedRelation: string;
     selectedEntities: string[];
 }
 
@@ -16,7 +15,7 @@ export default function AnnoRelationArrow(props: AnnoRelationArrowProps) {
     // bigger if seleceted
     const getStrokeWidth = () => {
         if (props.selectedEntities.includes(props.rel.head) || props.selectedEntities.includes(props.rel.tail)) {
-            return 5;
+            return 8;
         }
         return 2;
     }

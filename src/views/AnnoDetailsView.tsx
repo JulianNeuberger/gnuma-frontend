@@ -21,7 +21,6 @@ import {
     RelationDict
 } from "../state/anno/annoDocumentReducer";
 import {AnnoColor} from "../state/anno/annoEntitySetReducer";
-import AnnoRelationPicker from "../components/AnnoRelationPicker/AnnoRelationPicker";
 import AnnoSiderContent from "../components/AnnoSiderContent/AnnoSiderContent";
 
 // document params
@@ -75,6 +74,7 @@ export default function AnnoDetailsView(){
 
     const [selectedEntities, setSelectedEntities] = React.useState<string[]>([]);
     const [selectedTokens, setSelectedTokens] = React.useState<TokenSpan[]>([]);
+    const [selectedRecEntity, setSelectedRecEntity] = React.useState<string>('');
     const [selectedRelation, setSelectedRelation] = React.useState<string>('');
     const [selectedRecRelation, setSelectedRecRelation] = React.useState<string>('');
 
@@ -355,7 +355,18 @@ export default function AnnoDetailsView(){
         let newEntities = JSON.parse(JSON.stringify(entities));
 
         for (let i = 0; i < ids.length; i++) {
-            newEntities[ids[i]].type = type;
+            let ent = entities[ids[i]];
+            if (ids.includes(ent.id)) {
+                let newEnt: Entity = {
+                    'id': ent.id,
+                    'sentenceIndex': ent.sentenceIndex,
+                    'start': ent.start,
+                    'end': ent.end,
+                    'type': type,
+                    'relations': ent.relations
+                }
+                newEntities[ent.id] = newEnt
+            }
         }
 
         setSelectedEntities([]);
@@ -458,7 +469,7 @@ export default function AnnoDetailsView(){
     }
 
     // accepts a recommended entity
-    const acceptRecEntity = (id: string) => {
+    const acceptRecEntity = (id: string , type: string = '') => {
         //check is a rec entity
         if (Object.keys(recEntities).includes(id)) {
             let newEntities = JSON.parse(JSON.stringify(entities));
@@ -467,12 +478,17 @@ export default function AnnoDetailsView(){
             let newRecSentenceEntities = JSON.parse(JSON.stringify(recSentenceEntities));
 
             let recEnt = newRecEntities[id];
+
+            if (type === '') {
+                type = recEnt.type
+            }
+
             let ent: Entity = {
                 'id': id,
                 'sentenceIndex': recEnt.sentenceIndex,
                 'start': recEnt.start,
                 'end': recEnt.end,
-                'type': recEnt.type,
+                'type': type,
                 'relations': []
             };
 
@@ -791,6 +807,9 @@ export default function AnnoDetailsView(){
                         declineRecEntity={declineRecEntity}
                         forceUpdate={forceUpdate}
                         setAddRelationVisible={setAddRelationVisible}
+                        acceptRecEntityOther={acceptRecEntity}
+                        selectedRecEntity={selectedRecEntity}
+                        setSelectedRecEntity={setSelectedRecEntity}
                     />
 
                     <AnnoDisplayRelation
@@ -819,6 +838,7 @@ export default function AnnoDetailsView(){
                         forceUpdate={forceUpdate}
                         addRelationVisible={addRelationVisible}
                         setAddRelationVisible={setAddRelationVisible}
+                        selectedRecEntity={selectedRecEntity}
                     />
 
                     <Layout.Sider
@@ -826,6 +846,9 @@ export default function AnnoDetailsView(){
                         width={'350px'}
                         collapsible={true}
                         collapsedWidth={0}
+                        onCollapse={() => {
+                            forceUpdate();
+                        }}
                     >
                         <Row>
                             <Col flex={'20px'}></Col>

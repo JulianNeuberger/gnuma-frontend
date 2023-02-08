@@ -19,6 +19,50 @@ export type AnnoRelationPickerProps = {
 
 export default function AnnoRelationPicker(props: AnnoRelationPickerProps) {
 
+    const getBody = () => {
+        if (props.visible) {
+            return(
+                <>
+                    <span
+                        style={{'fontSize': 22, 'lineHeight': 1.2, 'userSelect': 'none'}}
+                    >
+                <span
+                    id={'AnnoRelationPickerHead'}
+                    style={{
+                        ...props.getEntityStyle(props.selectedEntities[0]),
+                    }}
+                >
+                {
+                    props.getEntityText(props.selectedEntities[0])
+                }
+                </span>
+                <span
+                    id={'AnnoRelationPickerTail'}
+                    style={{...props.getEntityStyle(props.selectedEntities[1]), 'float': 'right'}}
+                >
+                {
+                    props.getEntityText(props.selectedEntities[1])
+                }
+                </span>
+            </span>
+
+                    <Xarrow
+                        start={'AnnoRelationPickerHead'}
+                        end={'AnnoRelationPickerTail'}
+                        strokeWidth= {4}
+                        headSize={4}
+                        path={'straight'}
+                        showHead={true}
+                        color = {'black'}
+                    />
+                </>
+            )
+        }
+        return(
+            <></>
+        );
+    }
+
     return (
         <Modal
             visible={props.visible}
@@ -66,38 +110,7 @@ export default function AnnoRelationPicker(props: AnnoRelationPickerProps) {
 
             <Divider/>
 
-            <span
-                style={{'fontSize': 22, 'lineHeight': 1.2, 'userSelect': 'none'}}
-            >
-                <span
-                    id={'AnnoRelationPickerHead'}
-                    style={{
-                        ...props.getEntityStyle(props.selectedEntities[0]),
-                    }}
-                >
-                {
-                    props.getEntityText(props.selectedEntities[0])
-                }
-                </span>
-                <span
-                    id={'AnnoRelationPickerTail'}
-                    style={{...props.getEntityStyle(props.selectedEntities[1]), 'float': 'right'}}
-                >
-                {
-                    props.getEntityText(props.selectedEntities[1])
-                }
-                </span>
-            </span>
-
-            <Xarrow
-                start={'AnnoRelationPickerHead'}
-                end={'AnnoRelationPickerTail'}
-                strokeWidth= {4}
-                headSize={4}
-                path={'straight'}
-                showHead={true}
-                color = {'black'}
-            />
+            {getBody()}
         </Modal>
     );
 }
